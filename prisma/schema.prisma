@@ -15,41 +15,33 @@ model User {
   profileImgUrl  String?
   bio            String?
   hashedPassword String?
-  authProvider   authProvider
   themeId        String?
-  theme          DefaultTheme?      @relation(fields: [themeId], references: [id], onDelete: SetNull)
-  customization  UserCustomization?
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
-
-  links       Link[]
-  collections Collection[]
-  icons       SocialIcon[]
-}
-
-enum authProvider {
-  GOOGLE
-  GITHUB
-  CREDENTIALS
+  authProvider   authProvider
+  collections    Collection[]
+  links          Link[]
+  icons          SocialIcon[]
+  theme          DefaultTheme?      @relation(fields: [themeId], references: [id])
+  customization  UserCustomization?
 }
 
 model Link {
-  id                String   @id @default(uuid())
+  id                String      @id @default(uuid())
   userId            String
   collectionId      String?
   name              String
   url               String
-  isVisible         Boolean  @default(true)
-  isLocked          Boolean  @default(false)
-  lockToSubscribers Boolean  @default(false)
-  isSensitive       Boolean  @default(false)
-  clickCount        Int      @default(0)
+  isVisible         Boolean     @default(true)
+  isLocked          Boolean     @default(false)
+  lockToSubscribers Boolean     @default(false)
+  isSensitive       Boolean     @default(false)
+  clickCount        Int         @default(0)
   position          Int
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  collection Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  collection        Collection? @relation(fields: [collectionId], references: [id])
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Collection {
@@ -60,9 +52,8 @@ model Collection {
   position  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  links Link[]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links     Link[]
 }
 
 model SocialIcon {
@@ -75,8 +66,72 @@ model SocialIcon {
   position  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model DefaultTheme {
+  id                String             @id @default(uuid())
+  name              String
+  slug              String             @unique
+  previewImgUrl     String?
+  wallpaperStyle    WallpaperStyle
+  backgroundColor   String?
+  backgroundColor2  String?
+  gradientDirection GradientDirection?
+  patternStyle      PatternStyle?
+  blurStrength      String?
+  fontFamily        String?
+  buttonStyle       ButtonStyle
+  buttonRadius      ButtonRadius
+  buttonShadow      ButtonShadow
+  buttonColor       String?
+  buttonTextColor   String?
+  shadowColor       String?
+  patternColor      String?
+  outlineColor      String?
+  titleFontSize     String?
+  titleColor        String?
+  titleFontWeight   String?
+  profileFontSize   String?
+  profileColor      String?
+  isDefault         Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  users             User[]
+}
+
+model UserCustomization {
+  id                String             @id @default(uuid())
+  userId            String             @unique
+  wallpaperStyle    WallpaperStyle?
+  backgroundColor   String?
+  backgroundColor2  String?
+  gradientDirection GradientDirection?
+  patternStyle      PatternStyle?
+  blurStrength      String?
+  fontFamily        String?
+  buttonStyle       ButtonStyle?
+  buttonRadius      ButtonRadius?
+  buttonShadow      ButtonShadow?
+  buttonColor       String?
+  buttonTextColor   String?
+  shadowColor       String?
+  patternColor      String?
+  outlineColor      String?
+  titleFontSize     String?
+  titleColor        String?
+  titleFontWeight   String?
+  profileFontSize   String?
+  profileColor      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum authProvider {
+  GOOGLE
+  GITHUB
+  CREDENTIALS
 }
 
 enum IconType {
@@ -95,74 +150,6 @@ enum IconType {
   TELEGRAM
   THREADS
   SNAPCHAT
-}
-
-model DefaultTheme {
-  id   String @id @default(uuid())
-  name String
-  slug String @unique
-
-  wallpaperStyle    WallpaperStyle
-  backgroundColor   String?
-  gradientFrom      String?
-  gradientTo        String?
-  gradientDirection GradientDirection?
-  patternStyle      PatternStyle?
-  blurStrength      String?
-
-  fontFamily String?
-
-  buttonStyle     ButtonStyle
-  buttonRadius    ButtonRadius
-  buttonShadow    ButtonShadow
-  buttonColor     String?
-  buttonTextColor String?
-
-  titleFontSize   String?
-  titleColor      String?
-  titleFontWeight String?
-
-  profileFontSize String?
-  profileColor    String?
-
-  isDefault Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  users User[]
-}
-
-model UserCustomization {
-  id     String @id @default(uuid())
-  userId String @unique
-
-  wallpaperStyle    WallpaperStyle?
-  backgroundColor   String?
-  gradientFrom      String?
-  gradientTo        String?
-  gradientDirection GradientDirection?
-  patternStyle      PatternStyle?
-  blurStrength      String?
-
-  fontFamily String?
-
-  buttonStyle     ButtonStyle?
-  buttonRadius    ButtonRadius?
-  buttonShadow    ButtonShadow?
-  buttonColor     String?
-  buttonTextColor String?
-
-  titleFontSize   String?
-  titleColor      String?
-  titleFontWeight String?
-
-  profileFontSize String?
-  profileColor    String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 enum WallpaperStyle {
