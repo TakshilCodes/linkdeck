@@ -45,6 +45,8 @@ export const authOptions: NextAuthOptions = {
             email: true,
             username: true,
             hashedPassword: true,
+            onboardingStep: true,
+            onboardingDone: true,
           },
         });
 
@@ -57,6 +59,8 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           username: user.username ?? null,
+          onboardingStep: user.onboardingStep,
+          onboardingDone: user.onboardingDone,
         };
       },
     }),
@@ -82,6 +86,8 @@ export const authOptions: NextAuthOptions = {
             id: true,
             email: true,
             username: true,
+            onboardingStep: true,
+            onboardingDone: true,
           },
         });
 
@@ -93,36 +99,14 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           username: user.username ?? null,
+          onboardingStep: user.onboardingStep,
+          onboardingDone: user.onboardingDone,
         };
       },
     }),
   ],
+
   callbacks: {
-    async signIn({ user, account }) {
-      if (!user.email || !account?.provider) return false;
-
-      const email = user.email.toLowerCase();
-
-      if (account.provider === "google" || account.provider === "github") {
-        const existing = await prisma.user.findUnique({
-          where: { email },
-          select: { id: true },
-        });
-
-        if (!existing) {
-          await prisma.user.create({
-            data: {
-              email,
-              authProvider:
-                account.provider === "google" ? "GOOGLE" : "GITHUB",
-            },
-          });
-        }
-      }
-
-      return true;
-    },
-
     async jwt({ token, user }) {
       const sourceEmail =
         typeof user?.email === "string"
@@ -138,6 +122,8 @@ export const authOptions: NextAuthOptions = {
             id: true,
             email: true,
             username: true,
+            onboardingStep: true,
+            onboardingDone: true,
           },
         });
 
@@ -145,6 +131,8 @@ export const authOptions: NextAuthOptions = {
           token.id = dbUser.id;
           token.email = dbUser.email;
           token.username = dbUser.username ?? null;
+          token.onboardingStep = dbUser.onboardingStep;
+          token.onboardingDone = dbUser.onboardingDone;
         }
       }
 
@@ -157,6 +145,10 @@ export const authOptions: NextAuthOptions = {
         session.user.email = String(token.email ?? session.user.email ?? "");
         (session.user as any).username =
           token.username == null ? null : String(token.username);
+        (session.user as any).onboardingStep =
+          token.onboardingStep == null ? null : String(token.onboardingStep);
+        (session.user as any).onboardingDone =
+          typeof token.onboardingDone === "boolean" ? token.onboardingDone : false;
       }
 
       return session;

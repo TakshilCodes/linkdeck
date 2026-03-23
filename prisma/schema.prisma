@@ -8,22 +8,34 @@ datasource db {
 }
 
 model User {
-  id             String             @id @default(uuid())
-  email          String             @unique
-  username       String?            @unique
+  id             String        @id @default(uuid())
+  email          String        @unique
+  username       String?       @unique
   displayName    String?
   profileImgUrl  String?
   bio            String?
   hashedPassword String?
-  themeId        String?
+  defaultThemeId String?
+  defaultTheme   DefaultTheme? @relation(fields: [defaultThemeId], references: [id])
+
+  onboardingStep OnboardingStep     @default(USERNAME)
+  onboardingDone Boolean            @default(false)
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   authProvider   authProvider
   collections    Collection[]
   links          Link[]
   icons          SocialIcon[]
-  theme          DefaultTheme?      @relation(fields: [themeId], references: [id])
   customization  UserCustomization?
+}
+
+enum OnboardingStep {
+  USERNAME
+  THEME
+  PLATFORMS
+  LINKS
+  PROFILE
+  DONE
 }
 
 model Link {

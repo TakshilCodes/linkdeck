@@ -1,28 +1,30 @@
-import "next-auth";
-import "next-auth/jwt";
+import { DefaultSession } from "next-auth";
+import { JWT } from "next-auth/jwt";
+import type { OnboardingStep } from "@/app/generated/prisma/client";
 
 declare module "next-auth" {
   interface Session {
-    user: {
+    user: DefaultSession["user"] & {
       id: string;
-      email: string;
       username: string | null;
-      name?: string | null;
-      image?: string | null;
+      onboardingStep: OnboardingStep | null;
+      onboardingDone: boolean;
     };
   }
 
   interface User {
     id: string;
-    email: string;
     username: string | null;
+    onboardingStep: OnboardingStep | null;
+    onboardingDone: boolean;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
-    email?: string;
     username?: string | null;
+    onboardingStep?: OnboardingStep | null;
+    onboardingDone?: boolean;
   }
 }
