@@ -4,6 +4,7 @@ import EnterUsernameStep from "./EnterUsernameStep";
 import SelectThemeStep from "./SelectThemeStep";
 import SelectPlatformsStep from "./selectPlatformsStep";
 import AddLinksStep from "./AddLinksStep";
+import ProfileStep from "./ProfileStep";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { PlatformType } from "@/lib/social-icons";
@@ -19,6 +20,9 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
     id: string;
     onboardingDone: boolean;
     onboardingStep: string;
+    displayName: string | null;
+    bio: string | null;
+    profileImgUrl: string | null;
     icons: {
       type: PlatformType;
       url: string;
@@ -47,6 +51,9 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
         id: true,
         onboardingDone: true,
         onboardingStep: true,
+        displayName: true,
+        bio: true,
+        profileImgUrl: true,
         icons: {
           orderBy: { position: "asc" },
           select: {
@@ -80,8 +87,7 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
     }
   }
 
-  const preselectedPlatforms =
-    user?.icons.map((icon) => icon.type) ?? [];
+  const preselectedPlatforms = user?.icons.map((icon) => icon.type) ?? [];
 
   const existingLinks =
     user?.icons.map((icon) => ({
@@ -94,20 +100,24 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-8">
         {step === "username" ? <EnterUsernameStep /> : null}
 
-        {step === "theme" ? (
-          <SelectThemeStep themes={themes} />
-        ) : null}
+        {step === "theme" ? <SelectThemeStep themes={themes} /> : null}
 
         {step === "platforms" && user ? (
-          <SelectPlatformsStep
-            preselectedPlatforms={preselectedPlatforms}
-          />
+          <SelectPlatformsStep preselectedPlatforms={preselectedPlatforms} />
         ) : null}
 
         {step === "links" && user ? (
           <AddLinksStep
             selectedPlatforms={preselectedPlatforms}
             existingLinks={existingLinks}
+          />
+        ) : null}
+
+        {step === "profile" && user ? (
+          <ProfileStep
+            initialDisplayName={user.displayName ?? ""}
+            initialBio={user.bio ?? ""}
+            initialProfileImgUrl={user.profileImgUrl ?? ""}
           />
         ) : null}
       </div>

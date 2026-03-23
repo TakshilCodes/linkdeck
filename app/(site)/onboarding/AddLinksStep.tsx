@@ -135,7 +135,7 @@ export default function AddLinksStep({
           </button>
 
           <div className="h-1 w-28 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full w-[86%] rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" />
+            <div className="h-full w-[86%] rounded-full bg-linear-to-r from-violet-500 to-fuchsia-500" />
           </div>
 
           <button
@@ -150,7 +150,7 @@ export default function AddLinksStep({
 
         {/* content */}
         <div className="mx-auto w-full max-w-3xl">
-          <div className="rounded-[32px] border border-white/10 bg-white/[0.04] px-5 py-8 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-8 sm:py-10">
+          <div className="rounded-4xl border border-white/10 bg-white/4 px-5 py-8 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-xl sm:px-8 sm:py-10">
             {/* heading */}
             <div className="mb-10 text-center">
               <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -253,7 +253,7 @@ export default function AddLinksStep({
                   type="button"
                   onClick={handleContinue}
                   disabled={isPending}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-fuchsia-500 px-8 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.28)] transition hover:scale-[0.995] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-fuchsia-500 px-8 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.28)] transition hover:scale-[0.995] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isPending ? "Saving..." : "Continue"}
                 </button>
