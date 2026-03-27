@@ -10,10 +10,12 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+
   pages: {
     signIn: "/signin",
     error: "/signin",
   },
+
   providers: [
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID!,
@@ -107,6 +109,50 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (!user.email) return false;
+
+      const email = user.email.toLowerCase();
+
+      if (account?.provider === "google" || account?.provider === "github") {
+        const existingUser = await prisma.user.findUnique({
+          where: { email },
+          select: {
+            id: true,
+            displayName: true,
+            profileImgUrl: true,
+          },
+        });
+
+        const providerName =
+          account.provider === "google" ? "GOOGLE" : "GITHUB";
+
+        if (!existingUser) {
+          await prisma.user.create({
+            data: {
+              email,
+              displayName: user.name?.trim() || "",
+              profileImgUrl: user.image || null,
+              authProvider: providerName as any,
+              username: null,
+              onboardingDone: false,
+            },
+          });
+        } else {
+          await prisma.user.update({
+            where: { email },
+            data: {
+              displayName: existingUser.displayName || user.name?.trim() || "",
+              profileImgUrl: existingUser.profileImgUrl || user.image || null,
+              authProvider: providerName as any,
+            },
+          });
+        }
+      }
+
+      return true;
+    },
+
     async jwt({ token, user }) {
       const sourceEmail =
         typeof user?.email === "string"
@@ -152,6 +198,12 @@ export const authOptions: NextAuthOptions = {
       }
 
       return session;
+    },
+
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return `${baseUrl}/post-auth`;
     },
   },
 };

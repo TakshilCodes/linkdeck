@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import ThemePreviewCard from "@/components/theme/ThemePreviewCard";
+import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
 
 type PageProps = {
   params: Promise<{
@@ -19,7 +19,27 @@ export default async function PreviewPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen w-full">
-      <ThemePreviewCard theme={themeData} />
+      <ThemeProfileRenderer
+        theme={themeData}
+        profile={{
+          username: "takshil.dev",
+          displayName: "takshil.dev",
+          profileImgUrl: "/preview/profile_picture.jpg",
+          bio: null,
+        }}
+        icons={[
+          { id: "1", type: "INSTAGRAM", url: "#" },
+          { id: "2", type: "THREADS", url: "#" },
+          { id: "3", type: "X", url: "#" },
+        ]}
+        standaloneLinks={[
+          { id: "1", name: "ShopKart", url: "#" },
+          { id: "2", name: "volt.in", url: "#" },
+          { id: "3", name: "dub.sh", url: "#" },
+        ]}
+        collections={[]}
+        showBranding={true}
+      />
     </main>
   );
 }
