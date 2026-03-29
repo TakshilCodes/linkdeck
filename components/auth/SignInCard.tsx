@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+
 
 export default function SignInCard() {
   const router = useRouter();
@@ -47,7 +49,7 @@ export default function SignInCard() {
   }
 
   return (
-    <section className="relative mx-auto w-full max-w-[440px]">
+    <section className="relative mx-auto w-full max-w-110">
       <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(20,37,56,0.96),rgba(8,17,31,0.98))] p-7 shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_20px_80px_rgba(0,0,0,0.45)] backdrop-blur-xl">
         <div className="mb-6">
           <p className="mb-3 text-[11px] font-medium uppercase tracking-[0.35em] text-cyan-200/70">
@@ -104,21 +106,39 @@ export default function SignInCard() {
         </div>
 
         <div className="space-y-3">
+          {/* Google */}
           <button
             type="button"
             onClick={() => handleOAuth("google")}
             disabled={loading !== ""}
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/8 disabled:opacity-50"
+            className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/8 disabled:opacity-50"
           >
+            <Image
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google"
+              width={18}
+              height={18}
+              className="h-4.5 w-4.5"
+            />
+
             {loading === "google" ? "Continuing..." : "Continue with Google"}
           </button>
 
+          {/* GitHub */}
           <button
             type="button"
             onClick={() => handleOAuth("github")}
             disabled={loading !== ""}
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/8 disabled:opacity-50"
+            className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/8 disabled:opacity-50"
           >
+            <Image
+              src="https://www.svgrepo.com/show/512317/github-142.svg"
+              alt="GitHub"
+              width={18}
+              height={18}
+              className="h-4.5 w-4.5 invert"
+            />
+
             {loading === "github" ? "Continuing..." : "Continue with GitHub"}
           </button>
         </div>

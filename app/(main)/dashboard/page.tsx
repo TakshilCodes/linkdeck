@@ -1,4 +1,4 @@
-import LogOutButton from "@/components/LogoutButton"
+import LogOutButton from "@/components/auth/LogoutButton"
 import { authOptions } from "@/lib/auth"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
