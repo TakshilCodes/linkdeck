@@ -1,13 +1,15 @@
-// app/(main)/layout.tsx
+import Sidebar from "@/components/dashboard/Sidebar";
 
 export default function MainLayout({
-    children,
-}: Readonly<{
-    children: React.ReactNode;
-}>) {
-    return (
-        <div className="flex">
-            <main className="flex-1">{children}</main>
-        </div>
-    );
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-h-screen md:flex">
+      <Sidebar/>
+
+      <main className="min-w-0 flex-1">{children}</main>
+    </div>
+  );
 }
