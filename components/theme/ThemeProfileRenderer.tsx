@@ -60,21 +60,9 @@ export default function ThemeProfileRenderer({
     collections,
     showBranding = true,
 }: ThemeProfileRendererProps) {
-    console.log({
-        wallpaperStyle: theme.wallpaperStyle,
-        patternStyle: theme.patternStyle,
-        patternColor: theme.patternColor,
-    });
-    const bgStyle = getBackgroundStyle(theme);
-    const { patternColor, blurValue, titleColor, profileColor } =
-        getThemeTokens(theme);
 
-    const groupedSections = [
-        ...(standaloneLinks.length > 0
-            ? [{ id: "standalone", name: "Websites", links: standaloneLinks }]
-            : []),
-        ...collections.filter((collection) => collection.links.length > 0),
-    ];
+    const bgStyle = getBackgroundStyle(theme);
+    const { patternColor, blurValue, titleColor, profileColor } = getThemeTokens(theme);
 
     return (
         <div className={getOuterStageClasses()}>

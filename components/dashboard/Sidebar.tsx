@@ -115,7 +115,7 @@ export default function Sidebar() {
 
             {/* Sidebar */}
             <aside
-                className={`fixed left-0 top-0 z-50 flex h-screen w-[290px] flex-col border-r border-cyan-400/10 bg-[#07111d]/95 shadow-[0_0_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-transform duration-300 md:sticky md:z-30 md:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed left-0 top-0 z-50 flex h-screen w-72.5 flex-col border-r border-cyan-400/10 bg-[#07111d]/95 shadow-[0_0_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-transform duration-300 md:sticky md:z-30 md:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
             >
                 {/* top */}
@@ -145,7 +145,7 @@ export default function Sidebar() {
                         <button
                             type="button"
                             onClick={() => setProfileMenuOpen((prev) => !prev)}
-                            className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-3 text-left transition hover:bg-white/[0.07]"
+                            className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/4 px-3 py-3 text-left transition hover:bg-white/[0.07]"
                         >
                             <div className="flex min-w-0 items-center gap-3">
                                 <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-white/10 bg-white/10">

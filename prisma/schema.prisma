@@ -76,7 +76,7 @@ model SocialIcon {
   id        String   @id @default(uuid())
   userId    String
   type      IconType
-  url       String
+  value     String
   label     String?
   isVisible Boolean  @default(true)
   position  Int
