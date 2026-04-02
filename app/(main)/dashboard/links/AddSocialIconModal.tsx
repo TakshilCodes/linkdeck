@@ -6,6 +6,7 @@ import { ArrowLeft, ChevronRight, Plus, X } from "lucide-react";
 import { IconType } from "@/app/generated/prisma/enums";
 import { ICONS, getIconByType } from "@/lib/social-icons";
 import { addSocialIconAction } from "@/actions/dashboard/social-icon"
+import { toast } from "sonner";
 
 type Props = {
   open: boolean;
@@ -17,7 +18,6 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
   const [mounted, setMounted] = useState(false);
   const [selectedType, setSelectedType] = useState<IconType | null>(initialType ?? null);
   const [value, setValue] = useState("");
-  const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -28,7 +28,6 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
   if (open) {
     setSelectedType(initialType ?? null);
     setValue("");
-    setError("");
   }
 }, [open, initialType]);
 
@@ -52,7 +51,6 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
     if (!open) {
       setSelectedType(null);
       setValue("");
-      setError("");
     }
   }, [open]);
 
@@ -62,26 +60,25 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
   }, [selectedType]);
 
   const handleSubmit = () => {
-    if (!selectedType) return;
+  if (!selectedType) return;
 
-    setError("");
-
-    startTransition(async () => {
-      const res = await addSocialIconAction({
-        type: selectedType,
-        value,
-      });
-
-      if (!res.success) {
-        setError(res.message || "Something went wrong");
-        return;
-      }
-
-      setSelectedType(null);
-      setValue("");
-      onClose();
+  startTransition(async () => {
+    const res = await addSocialIconAction({
+      type: selectedType,
+      value,
     });
-  };
+
+    if (!res.success) {
+      toast.error(res.message || "Something went wrong");
+      return;
+    }
+
+    toast.success("Social icon added");
+    setSelectedType(null);
+    setValue("");
+    onClose();
+  });
+};
 
   if (!mounted || !open) return null;
 
@@ -148,7 +145,6 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
                   onClick={() => {
                     setSelectedType(null);
                     setValue("");
-                    setError("");
                   }}
                   className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
                 >
@@ -183,10 +179,6 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
                   <p className="mt-3 text-sm text-white/55">
                     Example: {selectedMeta.example}
                   </p>
-                )}
-
-                {error && (
-                  <p className="mt-3 text-sm text-red-400">{error}</p>
                 )}
 
                 <button

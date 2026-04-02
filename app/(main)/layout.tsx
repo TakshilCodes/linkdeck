@@ -1,4 +1,5 @@
 import Sidebar from "@/components/dashboard/Sidebar";
+import { Toaster } from "sonner";
 
 export default function MainLayout({
   children,
@@ -6,10 +7,9 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen md:flex">
-      <Sidebar/>
-
-      <main className="min-w-0 flex-1">{children}</main>
-    </div>
+      <div className="min-h-screen md:flex">
+        <Sidebar />
+        <main className="min-w-0 flex-1">{children}</main>
+      </div>
   );
 }

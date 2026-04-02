@@ -11,6 +11,9 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateSocialIconVisibilityAction, reorderSocialIconsAction, deleteSocialIconAction } from "@/actions/dashboard/social-icon";
 import ManageSocialIconsModal from "./ManageSocialIconModal";
+import AddItemModal from "@/components/dashboard/links/AddItemModal";
+import { toast } from "sonner";
+import { createCollectionAction } from "@/actions/dashboard/links";
 
 type Props = {
     username: string;
@@ -71,6 +74,7 @@ export default function ProfileHeader({
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [socialIcons, setSocialIcons] = useState<SocialIconItem[]>(icons);
+    const [addItemOpen, setAddItemOpen] = useState(false);
 
     const visibleIcons = [...socialIcons]
         .filter((icon) => icon.isVisible)
@@ -105,9 +109,11 @@ export default function ProfileHeader({
 
             if (!res.success) {
                 setSocialIcons(previousIcons);
+                toast.error(res.message || "Failed to delete social icon");
                 return;
             }
 
+            toast.success("Social icon deleted");
             router.refresh();
         });
     };
@@ -198,13 +204,9 @@ export default function ProfileHeader({
                 onDeleteIcon={handleDeleteSocialIcon}
             />
 
-            <AddSocialIconModal
-                open={socialModalOpen}
-                onClose={() => {
-                    setSocialModalOpen(false);
-                    setInitialSocialType(null);
-                }}
-                initialType={initialSocialType}
+            <AddItemModal
+                open={addItemOpen}
+                onClose={() => setAddItemOpen(false)}
             />
 
             <div className="mx-auto w-full max-w-140 py-10">
@@ -311,17 +313,36 @@ export default function ProfileHeader({
                     </div>
                 </div>
 
-                <button className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 font-medium text-[#03111f] shadow-lg transition hover:bg-cyan-400">
+                <button
+                    type="button"
+                    onClick={() => setAddItemOpen(true)}
+                    className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 font-medium text-[#03111f] shadow-lg transition hover:bg-cyan-400"
+                >
                     <Plus size={18} />
                     Add
                 </button>
 
-                <div className="mt-4 flex items-center justify-between">
-                    <button className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-gray-200">
-                        <FolderClosed size={16} />
-                        Add collection
-                    </button>
-                </div>
+                <button
+                    type="button"
+                    onClick={() => {
+                        startTransition(async () => {
+                            const res = await createCollectionAction();
+
+                            if (!res.success) {
+                                toast.error(res.message || "Failed to create collection");
+                                return;
+                            }
+
+                            toast.success("Collection created successfully");
+                            router.refresh();
+                        });
+                    }}
+                    disabled={isPending}
+                    className="mt-5 flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                    <FolderClosed size={16} />
+                    {isPending ? "Creating..." : "Add collection"}
+                </button>
             </div>
         </>
     );
