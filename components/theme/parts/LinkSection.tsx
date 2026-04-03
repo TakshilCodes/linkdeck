@@ -56,7 +56,7 @@ export default function LinkSection({
           <LinkButton
             key={link.id}
             label={link.name}
-            href={link.url}
+            href={`/api/go/${link.id}`}
             theme={theme}
             compact={compact}
           />

@@ -321,6 +321,61 @@ export async function updateLinkAction({
   }
 }
 
+export async function setLinkVisibilityAction({
+  id,
+  isVisible,
+}: {
+  id: string;
+  isVisible: boolean;
+}) {
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    await prisma.link.updateMany({
+      where: { id, userId },
+      data: { isVisible },
+    });
+
+    return { success: true, message: "Visibility updated" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to update visibility" };
+  }
+}
+
+export async function deleteLinkAction({ id }: { id: string }) {
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.boardItem.deleteMany({
+        where: {
+          userId,
+          linkId: id,
+        },
+      });
+
+      await tx.link.deleteMany({
+        where: {
+          id,
+          userId,
+        },
+      });
+    });
+
+    return { success: true, message: "Link deleted" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to delete link" };
+  }
+}
+
 export async function saveBoardStateAction(payload: {
   topLevel: {
     id: string;

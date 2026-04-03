@@ -58,9 +58,11 @@ export default function Sidebar() {
     const linkdeckItems = [
         {
             label: "Links",
-            href: "/dashboard",
+            href: "/dashboard/links",
             icon: Link2,
-            active: pathname === "/dashboard",
+            active:
+                pathname === "/dashboard/links" ||
+                pathname === "/dashboard",
         },
         {
             label: "Design",

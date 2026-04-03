@@ -3,10 +3,10 @@
 import { useEffect, useState, useTransition } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Link2, Pencil, Share, Trash2 } from "lucide-react";
+import { GripVertical, Link2, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { updateLinkAction } from "@/actions/dashboard/links";
+import { deleteLinkAction, setLinkVisibilityAction, updateLinkAction } from "@/actions/dashboard/links";
 import type { LinkItem } from "@/types/board-types";
 
 type Props = {
@@ -32,6 +32,7 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
 
   const [name, setName] = useState(link.name);
   const [url, setUrl] = useState(link.url);
+  const [isVisible, setIsVisible] = useState(link.isVisible);
   const [editingName, setEditingName] = useState(false);
   const [editingUrl, setEditingUrl] = useState(false);
   const router = useRouter();
@@ -40,7 +41,8 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
   useEffect(() => {
     setName(link.name);
     setUrl(link.url);
-  }, [link.name, link.url]);
+    setIsVisible(link.isVisible);
+  }, [link.name, link.url, link.isVisible]);
 
   const save = () => {
     const trimmedName = name.trim();
@@ -69,6 +71,37 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
       toast.success("Link updated");
       setEditingName(false);
       setEditingUrl(false);
+      router.refresh();
+    });
+  };
+
+  const toggleVisible = () => {
+    const next = !isVisible;
+    const previous = isVisible;
+    setIsVisible(next);
+
+    startTransition(async () => {
+      const res = await setLinkVisibilityAction({ id: link.id, isVisible: next });
+      if (!res.success) {
+        setIsVisible(previous);
+        toast.error(res.message || "Failed to update visibility");
+        return;
+      }
+      router.refresh();
+    });
+  };
+
+  const remove = () => {
+    const ok = window.confirm("Delete this link? This cannot be undone.");
+    if (!ok) return;
+
+    startTransition(async () => {
+      const res = await deleteLinkAction({ id: link.id });
+      if (!res.success) {
+        toast.error(res.message || "Failed to delete link");
+        return;
+      }
+      toast.success("Link deleted");
       router.refresh();
     });
   };
@@ -146,8 +179,8 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
         <label className="relative inline-flex cursor-pointer items-center">
           <input
             type="checkbox"
-            checked={link.isVisible}
-            readOnly
+            checked={isVisible}
+            onChange={toggleVisible}
             className="peer sr-only"
           />
           <div className="h-7 w-12 rounded-full bg-white/12 transition peer-checked:bg-emerald-500/90" />
@@ -156,18 +189,11 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
       </div>
 
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-white/6 pt-2.5 text-sm">
-        <button
-          type="button"
-          className="flex items-center gap-2 text-white/55 transition hover:text-white"
-        >
-          <Share className="h-4 w-4" />
-          Share
-        </button>
-
         <span className="text-white/55">{link.clickCount} clicks</span>
 
         <button
           type="button"
+          onClick={remove}
           className="flex items-center gap-2 text-red-300/75 transition hover:text-red-200"
         >
           <Trash2 className="h-4 w-4" />

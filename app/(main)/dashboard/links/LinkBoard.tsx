@@ -1054,8 +1054,10 @@ export default function LinksBoard({ boardItems }: Props) {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <BoardDropArea isDragging={!!activeId}>
-            <SortableContext items={topLevelIds} strategy={verticalListSortingStrategy}>
+          {/* Match link-in-bio editor width: contained column, not full-bleed */}
+          <div className="mx-auto w-full max-w-[640px]">
+            <BoardDropArea isDragging={!!activeId}>
+              <SortableContext items={topLevelIds} strategy={verticalListSortingStrategy}>
               {cards.length === 0 ? (
                 <div
                   className="rounded-[22px] border border-dashed border-white/12 bg-white/[0.02] px-6 py-14 text-center"
@@ -1089,8 +1091,9 @@ export default function LinksBoard({ boardItems }: Props) {
                   )}
                 </div>
               )}
-            </SortableContext>
-          </BoardDropArea>
+              </SortableContext>
+            </BoardDropArea>
+          </div>
 
           {dragOverlayContainer
             ? createPortal(
