@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Folder, Link2, Plus, X } from "lucide-react";
-import { createCollectionAction, createLinkAction } from "@/actions/dashboard/links";
+import { createCollectionAction, createLinkAction } from "@/actions/dashboard/addlinks";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 

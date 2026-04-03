@@ -13,12 +13,15 @@ type LinkButtonProps = {
   label: string;
   href: string;
   theme: ResolvedTheme;
+  /** Phone preview: shorter rows, smaller type (closer to Linktree-style density) */
+  compact?: boolean;
 };
 
 export default function LinkButton({
   label,
   href,
   theme,
+  compact = false,
 }: LinkButtonProps) {
   const {
     buttonColor,
@@ -30,6 +33,12 @@ export default function LinkButton({
 
   const { isHard, isSoft, isStrong, isNone, isOutline, isGlass, isSolid } =
     getButtonMode(theme);
+
+  const rowH = compact ? "h-11" : "h-16";
+  const rowText = compact ? "text-[13px] leading-tight" : "text-[15px]";
+  /** Match width of the ⋮ column so the label stays visually centered (Linktree-style). */
+  const sideGutter = compact ? "w-10 shrink-0" : "w-12 shrink-0";
+  const moreCls = compact ? "h-3.5 w-3.5 shrink-0" : "h-4 w-4 shrink-0";
 
   return (
     <div className="group relative">
@@ -53,7 +62,7 @@ export default function LinkButton({
               href={href}
               target="_blank"
               rel="noreferrer"
-              className={`relative flex h-16 w-full items-center justify-between overflow-hidden px-7 text-[15px] font-semibold transition-all duration-200 ease-out group-hover:-translate-y-px active:translate-y-0 ${radiusClass}`}
+              className={`relative flex ${rowH} w-full items-stretch overflow-hidden ${rowText} font-semibold transition-all duration-200 ease-out group-hover:-translate-y-px active:translate-y-0 ${radiusClass}`}
               style={{
                 background: buttonColor,
                 color: buttonTextColor,
@@ -82,11 +91,18 @@ export default function LinkButton({
                 }}
               />
 
-              <span className="relative z-10 w-6" />
-              <span className="relative z-10 text-[15px] font-semibold">
-                {label}
+              <span className={`relative z-10 ${sideGutter}`} aria-hidden />
+              <span className="relative z-10 flex min-w-0 flex-1 items-center justify-center px-1">
+                <span className="truncate text-center font-semibold">{label}</span>
               </span>
-              <MoreVertical className="relative z-10 h-4 w-4 opacity-60 transition-opacity duration-200 group-hover:opacity-75" />
+              <span
+                className={`relative z-10 flex ${sideGutter} items-center justify-center`}
+                aria-hidden
+              >
+                <MoreVertical
+                  className={`opacity-60 transition-opacity duration-200 group-hover:opacity-75 ${moreCls}`}
+                />
+              </span>
             </a>
           </div>
         ) : (
@@ -94,7 +110,7 @@ export default function LinkButton({
             href={href}
             target="_blank"
             rel="noreferrer"
-            className={`relative flex h-16 w-full items-center justify-between overflow-hidden px-7 text-[15px] font-semibold transition-all duration-200 ease-out ${radiusClass}`}
+            className={`relative flex ${rowH} w-full items-stretch overflow-hidden ${rowText} font-semibold transition-all duration-200 ease-out ${radiusClass}`}
             style={{
               background: isOutline
                 ? "transparent"
@@ -186,9 +202,18 @@ export default function LinkButton({
               }}
             />
 
-            <span className="relative z-10 w-6" />
-            <span className="relative z-10">{label}</span>
-            <MoreVertical className="relative z-10 h-4 w-4 opacity-60 transition-opacity duration-200 group-hover:opacity-75" />
+            <span className={`relative z-10 ${sideGutter}`} aria-hidden />
+            <span className="relative z-10 flex min-w-0 flex-1 items-center justify-center px-1">
+              <span className="truncate text-center font-semibold">{label}</span>
+            </span>
+            <span
+              className={`relative z-10 flex ${sideGutter} items-center justify-center`}
+              aria-hidden
+            >
+              <MoreVertical
+                className={`opacity-60 transition-opacity duration-200 group-hover:opacity-75 ${moreCls}`}
+              />
+            </span>
           </a>
         )}
       </div>

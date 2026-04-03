@@ -13,7 +13,7 @@ import { updateSocialIconVisibilityAction, reorderSocialIconsAction, deleteSocia
 import ManageSocialIconsModal from "./ManageSocialIconModal";
 import AddItemModal from "@/components/dashboard/links/AddItemModal";
 import { toast } from "sonner";
-import { createCollectionAction } from "@/actions/dashboard/links";
+import { createCollectionAction } from "@/actions/dashboard/addlinks";
 
 type Props = {
     username: string;
@@ -316,7 +316,7 @@ export default function ProfileHeader({
                 <button
                     type="button"
                     onClick={() => setAddItemOpen(true)}
-                    className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 font-medium text-[#03111f] shadow-lg transition hover:bg-cyan-400"
+                    className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-400 font-medium text-[#03111f] shadow-lg transition hover:bg-cyan-500"
                 >
                     <Plus size={18} />
                     Add

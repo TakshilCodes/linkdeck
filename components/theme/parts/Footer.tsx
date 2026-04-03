@@ -4,12 +4,14 @@ type FooterProps = {
   username?: string | null;
   titleColor: string;
   showBranding?: boolean;
+  compact?: boolean;
 };
 
 export default function Footer({
   username,
   titleColor,
   showBranding = true,
+  compact = false,
 }: FooterProps) {
   if (!showBranding) return null;
 
@@ -17,7 +19,11 @@ export default function Footer({
     <div className="flex flex-col items-center">
       <a
         href="/"
-        className="mb-8 rounded-full bg-white px-8 py-4 text-[15px] font-semibold text-black shadow-[0_10px_22px_rgba(0,0,0,0.20)] transition-all duration-200 ease-out hover:shadow-[0_16px_30px_rgba(0,0,0,0.20)] active:scale-[0.96] active:translate-y-px"
+        className={
+          compact
+            ? "mb-4 max-w-[95%] rounded-full bg-white px-4 py-2.5 text-center text-[11px] font-semibold leading-snug text-black shadow-[0_6px_16px_rgba(0,0,0,0.18)] transition-all duration-200 ease-out hover:shadow-[0_10px_22px_rgba(0,0,0,0.18)] active:scale-[0.98]"
+            : "mb-8 rounded-full bg-white px-8 py-4 text-[15px] font-semibold text-black shadow-[0_10px_22px_rgba(0,0,0,0.20)] transition-all duration-200 ease-out hover:shadow-[0_16px_30px_rgba(0,0,0,0.20)] active:scale-[0.96] active:translate-y-px"
+        }
       >
         Join {username ?? "user"} on LinkDeck
       </a>

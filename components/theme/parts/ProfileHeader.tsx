@@ -24,12 +24,14 @@ type ProfileHeaderProps = {
     bio?: string | null;
   };
   icons: RendererIcon[];
+  compact?: boolean;
 };
 
 export default function ProfileHeader({
   theme,
   profile,
   icons,
+  compact = false,
 }: ProfileHeaderProps) {
   const { titleColor, profileColor } = getThemeTokens(theme);
 
@@ -40,13 +42,17 @@ export default function ProfileHeader({
 
   return (
     <div className="flex flex-col items-center text-center">
-      <Avatar profileImgUrl={profile.profileImgUrl} displayName={displayName} />
+      <Avatar
+        profileImgUrl={profile.profileImgUrl}
+        displayName={displayName}
+        compact={compact}
+      />
 
       <h1
-        className="text-[26px] font-bold"
+        className={compact ? "max-w-full px-1 text-[17px] font-bold leading-snug" : "text-[26px] font-bold"}
         style={{
           color: titleColor,
-          fontSize: titleFontSize,
+          fontSize: compact ? "17px" : titleFontSize,
           fontWeight: titleFontWeight,
         }}
       >
@@ -55,17 +61,17 @@ export default function ProfileHeader({
 
       {profile.bio ? (
         <p
-          className="mt-2 max-w-[340px]"
+          className={`max-w-[340px] ${compact ? "mt-1.5 leading-snug" : "mt-2"}`}
           style={{
             color: profileColor,
-            fontSize: profileFontSize,
+            fontSize: compact ? "12px" : profileFontSize,
           }}
         >
           {profile.bio}
         </p>
       ) : null}
 
-      <IconRow icons={icons} color={profileColor} />
+      <IconRow icons={icons} color={profileColor} compact={compact} />
     </div>
   );
 }
