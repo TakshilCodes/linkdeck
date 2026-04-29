@@ -474,9 +474,36 @@ export async function saveBoardStateAction(payload: {
 
     return { success: true, message: "Board saved" };
   } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : "Failed to save board",
-    };
+  };
+}
+
+
+export async function deleteCollectionAction({ id }: { id: string }) {
+  try {
+    const userId = await getUserId();
+    if (!userId) {
+      return { success: false, message: "Unauthorized" };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.link.deleteMany({
+        where: {
+          collectionId: id,
+          userId,
+        },
+      });
+
+      await tx.collection.deleteMany({
+        where: {
+          id,
+          userId,
+        },
+      });
+    });
+
+    return { success: true, message: "Collection and its links deleted" };
+  } catch (error) {
+    console.error(error);
+    return { success: false, message: "Failed to delete collection" };
   }
 }

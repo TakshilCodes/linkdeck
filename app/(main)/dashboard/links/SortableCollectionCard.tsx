@@ -4,10 +4,10 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useDndContext, useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { FolderClosed, GripVertical, Pencil, Plus } from "lucide-react";
+import { FolderClosed, GripVertical, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { updateCollectionAction } from "@/actions/dashboard/links";
+import { updateCollectionAction, deleteCollectionAction } from "@/actions/dashboard/links";
 import type { CollectionItem } from "@/types/board-types";
 import SortableInnerLinkCard from "./SortableInnerLinkCard";
 import AddItemModal from "./AddItemModal";
@@ -100,6 +100,21 @@ export default function SortableCollectionCard({
     });
   };
 
+  const removeCollection = () => {
+    const ok = window.confirm("Delete this collection and all its links? This cannot be undone.");
+    if (!ok) return;
+
+    startTransition(async () => {
+      const res = await deleteCollectionAction({ id: collection.id });
+      if (!res.success) {
+        toast.error(res.message || "Failed to delete collection");
+        return;
+      }
+      toast.success("Collection deleted");
+      router.refresh();
+    });
+  };
+
   return (
     <>
       <div className="px-2 pb-2 pt-1">
@@ -181,22 +196,28 @@ export default function SortableCollectionCard({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setOpenModal(true)}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-white"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setOpenModal(true)}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-white"
+              >
+                <Plus className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={removeCollection}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-red-400/80 transition hover:bg-white/10 hover:text-red-400"
+                title="Delete Collection"
+              >
+                <Trash2 className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           <SortableContext items={innerIds} strategy={verticalListSortingStrategy}>
             {/* Full-area droppable behind rows (z-0) so gaps between cards still register; link cards stay z-10. */}
-            <div
-              className={`relative min-h-[140px] rounded-[22px] ${
-                collection.links.length > 0 ? "" : "min-h-[180px]"
-              }`}
-            >
+            <div className="relative rounded-[22px]">
               <div
                 ref={setBodyDropRef}
                 className={`absolute inset-0 z-0 rounded-[22px] transition ${

@@ -1,18 +1,41 @@
-import GlassCard from "@/components/ui/GlassCard";
+import prisma from "@/lib/prisma";
+import DesignTabContent from "@/components/dashboard/design/DesignTabContent";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export default function DashboardDesignPage() {
+export default async function DashboardDesignPage() {
+  const session = await getServerSession(authOptions);
+
+  const [themes, user] = await Promise.all([
+    prisma.defaultTheme.findMany({
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    }),
+    session?.user?.email
+      ? prisma.user.findUnique({
+          where: { email: session.user.email },
+          select: { 
+            defaultThemeId: true,
+            username: true,
+            displayName: true,
+            profileImgUrl: true,
+            customization: true,
+          },
+        })
+      : null,
+  ]);
+
   return (
-    <>
-      <div className="-mx-4 mb-6 border-b border-[#202833] bg-[#07101C] px-5 py-4 sm:-mx-6 lg:-mx-8">
-        <p className="text-2xl font-semibold text-white">Design</p>
-      </div>
-
-      <GlassCard className="rounded-[28px] px-4 py-5 sm:px-5 sm:py-6">
-        <p className="text-sm text-white/55">
-          Theme and layout tools can go here. The phone preview stays visible on the right from the
-          dashboard layout.
-        </p>
-      </GlassCard>
-    </>
+    <div className="flex h-full flex-col">
+      <DesignTabContent 
+        themes={themes} 
+        currentThemeId={user?.defaultThemeId}
+        initialProfile={{
+          username: user?.username,
+          displayName: user?.displayName,
+          profileImgUrl: user?.profileImgUrl,
+        }}
+        initialCustomization={user?.customization}
+      />
+    </div>
   );
 }

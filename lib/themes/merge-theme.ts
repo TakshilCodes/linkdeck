@@ -17,6 +17,7 @@ export function mergeTheme(
     patternStyle: customTheme.patternStyle ?? defaultTheme.patternStyle,
     blurStrength: customTheme.blurStrength ?? defaultTheme.blurStrength,
     fontFamily: customTheme.fontFamily ?? defaultTheme.fontFamily,
+    titleFontFamily: customTheme.titleFontFamily ?? defaultTheme.titleFontFamily,
     buttonStyle: customTheme.buttonStyle ?? defaultTheme.buttonStyle,
     buttonRadius: customTheme.buttonRadius ?? defaultTheme.buttonRadius,
     buttonShadow: customTheme.buttonShadow ?? defaultTheme.buttonShadow,

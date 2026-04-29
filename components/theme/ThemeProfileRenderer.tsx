@@ -125,7 +125,7 @@ export default function ThemeProfileRenderer({
 
                 {standaloneLinks.length > 0 && (
                     <LinkSection
-                        title="Websites"
+                        title={collections.some(c => c.links.length > 0) ? "Websites" : null}
                         links={standaloneLinks}
                         theme={theme}
                         titleColor={profileColor}

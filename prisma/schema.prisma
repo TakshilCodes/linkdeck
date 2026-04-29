@@ -122,6 +122,7 @@ model DefaultTheme {
   patternStyle      PatternStyle?
   blurStrength      BlurStrength?
   fontFamily        FontFamily
+  titleFontFamily   FontFamily?
   buttonStyle       ButtonStyle
   buttonRadius      ButtonRadius
   buttonShadow      ButtonShadow
@@ -151,6 +152,7 @@ model UserCustomization {
   patternStyle      PatternStyle?
   blurStrength      BlurStrength?
   fontFamily        FontFamily?
+  titleFontFamily   FontFamily?
   buttonStyle       ButtonStyle?
   buttonRadius      ButtonRadius?
   buttonShadow      ButtonShadow?

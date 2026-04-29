@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { mergeTheme } from "@/lib/themes/merge-theme";
 import type { CustomTheme, DefaultTheme } from "@/types/theme";
+import { CUSTOM_BASE_THEME } from "@/types/theme";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
 
 export default async function PublicProfilePage({
@@ -40,12 +41,14 @@ export default async function PublicProfilePage({
     },
   });
 
-  if (!user || !user.defaultTheme) {
+  if (!user) {
     notFound();
   }
 
+  const baseTheme = user.defaultTheme || CUSTOM_BASE_THEME;
+
   const resolvedTheme = mergeTheme(
-    user.defaultTheme as DefaultTheme,
+    baseTheme as DefaultTheme,
     user.customization as CustomTheme | null
   );
 

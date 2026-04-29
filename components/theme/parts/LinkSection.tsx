@@ -10,7 +10,7 @@ type SectionLink = {
 };
 
 type LinkSectionProps = {
-  title: string;
+  title?: string | null;
   links: SectionLink[];
   theme: ResolvedTheme;
   titleColor: string;
@@ -48,9 +48,11 @@ export default function LinkSection({
 
   return (
     <div className={className}>
-      <p className={`text-center ${titleClass}`} style={{ color: titleColor }}>
-        {title}
-      </p>
+      {title ? (
+        <p className={`text-center ${titleClass}`} style={{ color: titleColor }}>
+          {title}
+        </p>
+      ) : null}
       <div className={`flex flex-col ${stackClass}`}>
         {links.map((link) => (
           <LinkButton

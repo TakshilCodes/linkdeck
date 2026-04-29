@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Copy } from "lucide-react";
 import { toast } from "sonner";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
+import { useDesignStore } from "@/store/design";
 import type { ResolvedTheme } from "@/types/theme";
 import {
   getProfileUrlClipboard,
@@ -43,6 +44,14 @@ export default function DashboardLivePreview({
   standaloneLinks,
   collections,
 }: Props) {
+  const { previewTheme, previewProfile, previewCustomTheme } = useDesignStore();
+  const activeTheme = previewTheme || theme;
+  
+  const mergedTheme = activeTheme 
+    ? { ...activeTheme, ...previewCustomTheme } as ResolvedTheme 
+    : null;
+
+  const mergedProfile = { ...profile, ...previewProfile };
   const displayUrl = getProfileUrlDisplay(username);
 
   const copyProfileUrl = async () => {
@@ -76,7 +85,7 @@ export default function DashboardLivePreview({
       </div>
 
       <div className="mt-5 flex min-h-0 flex-1 items-center justify-center overflow-auto py-4">
-        {theme ? (
+        {activeTheme ? (
           <div
             className="shrink-0 overflow-hidden rounded-[40px] shadow-[0_20px_56px_rgba(0,0,0,0.48)] ring-1 ring-white/[0.12]"
             style={{
@@ -94,8 +103,8 @@ export default function DashboardLivePreview({
             >
               <ThemeProfileRenderer
                 layout="embed"
-                theme={theme}
-                profile={profile}
+                theme={mergedTheme!}
+                profile={mergedProfile}
                 icons={icons}
                 standaloneLinks={standaloneLinks}
                 collections={collections}

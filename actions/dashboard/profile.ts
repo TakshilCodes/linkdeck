@@ -68,3 +68,37 @@ export async function updateProfileAction(data: UpdateProfileInput) {
         };
     }
 }
+
+export async function updateProfileImageAction(profileImgUrl: string | null) {
+    try {
+        const session = await getServerSession(authOptions);
+
+        if (!session?.user?.id) {
+            return {
+                success: false,
+                message: "Unauthorized",
+            }
+        }
+
+        const userId = session.user.id;
+
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                profileImgUrl,
+            },
+        });
+
+        revalidatePath("/dashboard/links");
+
+        return { success: true };
+    } catch (err) {
+        console.error("Update Profile Image Error:", err);
+
+        return {
+            success: false,
+            message:
+                err instanceof Error ? err.message : "Something went wrong",
+        };
+    }
+}

@@ -54,7 +54,9 @@ export function getBackgroundStyle(theme: ResolvedTheme): CSSProperties {
     const color1 = theme.backgroundColor ?? "#f5f5f4";
     const color2 = theme.backgroundColor2 ?? color1;
 
-    if (theme.wallpaperStyle === WALLPAPER_STYLE.FILL) {
+    if (theme.wallpaperStyle === WALLPAPER_STYLE.FILL ||
+        theme.wallpaperStyle === WALLPAPER_STYLE.BLUR ||
+        theme.wallpaperStyle === WALLPAPER_STYLE.PATTERN) {
         return {
             background: color1,
         };

@@ -1,5 +1,6 @@
 import Avatar from "./Avatar";
 import IconRow from "./IconRow";
+import { getFontClass } from "@/lib/themes/font-map";
 import type { ResolvedTheme } from "@/types/theme";
 import {
   getProfileFontSizeValue,
@@ -49,7 +50,7 @@ export default function ProfileHeader({
       />
 
       <h1
-        className={compact ? "max-w-full px-1 text-[17px] font-bold leading-snug" : "text-[26px] font-bold"}
+        className={`${compact ? "max-w-full px-1 text-[17px] font-bold leading-snug" : "text-[26px] font-bold"} ${theme.titleFontFamily ? getFontClass(theme.titleFontFamily) : ""}`}
         style={{
           color: titleColor,
           fontSize: compact ? "17px" : titleFontSize,

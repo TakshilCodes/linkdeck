@@ -22,6 +22,7 @@ export type DefaultTheme = {
   blurStrength: BlurStrengthValue | null;
 
   fontFamily: string;
+  titleFontFamily: string | null;
   buttonStyle: ButtonStyleValue;
   buttonRadius: ButtonRadiusValue;
   buttonShadow: ButtonShadowValue;
@@ -52,6 +53,7 @@ export type CustomTheme = {
   blurStrength?: BlurStrengthValue | null;
 
   fontFamily?: string | null;
+  titleFontFamily?: string | null;
   buttonStyle?: ButtonStyleValue | null;
   buttonRadius?: ButtonRadiusValue | null;
   buttonShadow?: ButtonShadowValue | null;
@@ -67,6 +69,37 @@ export type CustomTheme = {
   titleFontWeight?: string | null;
   profileFontSize?: string | null;
   profileColor?: string | null;
+};
+
+export const CUSTOM_BASE_THEME: DefaultTheme = {
+  id: "custom",
+  name: "Custom",
+  slug: "custom",
+  previewImgUrl: null,
+  isDefault: false,
+  wallpaperStyle: "FILL",
+  backgroundColor: "#ffffff",
+  backgroundColor2: null,
+  gradientDirection: null,
+  patternStyle: null,
+  blurStrength: null,
+  fontFamily: "INTER",
+  titleFontFamily: null,
+  buttonStyle: "SOLID",
+  buttonRadius: "ROUND",
+  buttonShadow: "NONE",
+  buttonColor: "#000000",
+  buttonTextColor: "#ffffff",
+  shadowColor: null,
+  patternColor: null,
+  outlineColor: null,
+  titleFontSize: "MEDIUM",
+  titleColor: "#000000",
+  titleFontWeight: "MEDIUM",
+  profileFontSize: "SMALL",
+  profileColor: "#666666",
+  createdAt: new Date(),
+  updatedAt: new Date(),
 };
 
 export type ResolvedTheme = DefaultTheme;

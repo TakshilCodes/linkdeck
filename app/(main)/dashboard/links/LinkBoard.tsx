@@ -2,45 +2,15 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  closestCorners,
-  getClientRect,
-  pointerWithin,
-  useDroppable,
-  useSensor,
-  useSensors,
-  type ClientRect,
-  type Collision,
-  type CollisionDetection,
-  type DragEndEvent,
-  type DragOverEvent,
-  type DragStartEvent,
-  type Over,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import {DndContext,DragOverlay,PointerSensor,closestCorners,getClientRect,pointerWithin,useDroppable,useSensor,useSensors,type ClientRect,type Collision,type CollisionDetection,type DragEndEvent,
+  type DragOverEvent,type DragStartEvent,type Over,} from "@dnd-kit/core";
+import {SortableContext,arrayMove,verticalListSortingStrategy,} from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { saveBoardStateAction } from "@/actions/dashboard/links";
 import type { BoardItem, LinkItem, TopLevelCard } from "@/types/board-types";
-import {
-  buildPersistPayload,
-  cloneCards,
-  extractCollectionIdFromBodyDropId,
-  extractLinkIdFromCollectionSortable,
-  getBoardSignature,
-  isCollectionBodyDropId,
-  isCollectionCardSortableId,
-  isCollectionLinkSortableId,
-  isTopLevelSortableId,
-  toTopLevelCards,
-} from "@/utils/board-utils";
+import {buildPersistPayload,cloneCards,extractCollectionIdFromBodyDropId,extractLinkIdFromCollectionSortable,getBoardSignature,isCollectionBodyDropId,isCollectionCardSortableId,isCollectionLinkSortableId,
+  isTopLevelSortableId,toTopLevelCards,} from "@/utils/board-utils";
 import SortableLinkCard from "./SortableLinkCard";
 import SortableCollectionCard from "./SortableCollectionCard";
 import { CollectionCardPreview, LinkCardPreview } from "./DragPreview";
@@ -57,9 +27,7 @@ const COLLECTION_GAP_BEFORE_PREFIX = "collection-gap-before-";
 
 type CollectionDropMode = "before" | "inside";
 
-function parseCollectionZoneId(
-  id: string
-): { collectionId: string; mode: CollectionDropMode } | null {
+function parseCollectionZoneId(id: string): { collectionId: string; mode: CollectionDropMode } | null {
   if (id.startsWith(`${COLLECTION_GAP_BEFORE_PREFIX}`)) {
     return { collectionId: id.replace(COLLECTION_GAP_BEFORE_PREFIX, ""), mode: "before" };
   }

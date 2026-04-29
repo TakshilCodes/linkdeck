@@ -11,6 +11,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateSocialIconVisibilityAction, reorderSocialIconsAction, deleteSocialIconAction } from "@/actions/dashboard/social-icon";
 import ManageSocialIconsModal from "./ManageSocialIconModal";
+import ManageProfilePictureModal from "./ManageProfilePictureModal";
 import AddItemModal from "@/components/dashboard/links/AddItemModal";
 import { toast } from "sonner";
 import { createCollectionAction } from "@/actions/dashboard/addlinks";
@@ -70,6 +71,7 @@ export default function ProfileHeader({
     const [socialModalOpen, setSocialModalOpen] = useState(false);
     const [initialSocialType, setInitialSocialType] = useState<SocialType | null>(null);
     const [manageSocialOpen, setManageSocialOpen] = useState(false);
+    const [profileModalOpen, setProfileModalOpen] = useState(false);
 
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
@@ -178,6 +180,13 @@ export default function ProfileHeader({
                 onBioChange={setNewBio}
             />
 
+            <ManageProfilePictureModal
+                open={profileModalOpen}
+                currentImgUrl={profileImgUrl}
+                username={username}
+                onClose={() => setProfileModalOpen(false)}
+            />
+
             <AddSocialIconModal
                 open={socialModalOpen}
                 onClose={() => {
@@ -211,19 +220,25 @@ export default function ProfileHeader({
 
             <div className="mx-auto w-full max-w-140 py-10">
                 <div className="flex items-center gap-4">
-                    <div className="relative h-16 w-16 overflow-hidden rounded-full border border-white/20 bg-white/10">
+                    <div 
+                        onClick={() => setProfileModalOpen(true)}
+                        className="group relative h-16 w-16 cursor-pointer overflow-hidden rounded-full border border-white/20 bg-white/10"
+                    >
                         {profileImgUrl ? (
                             <Image
                                 src={profileImgUrl}
                                 alt={username}
                                 fill
-                                className="object-cover"
+                                className="object-cover transition-all duration-300 group-hover:blur-sm"
                             />
                         ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xl text-white/60">
+                            <div className="flex h-full w-full items-center justify-center text-xl text-white/60 transition-all duration-300 group-hover:blur-sm">
                                 {username?.charAt(0).toUpperCase()}
                             </div>
                         )}
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                            <Pencil className="h-5 w-5 text-white" />
+                        </div>
                     </div>
 
                     <div className="min-w-0 flex-1">

@@ -19,10 +19,10 @@ export default function PatternOverlay({
                 className="absolute inset-0"
                 style={{
                     backgroundImage: `
-            linear-gradient(${rgba(patternColor, 0.5)} 1px, transparent 1px),
-            linear-gradient(90deg, ${rgba(patternColor, 0.5)} 1px, transparent 1px)
+            linear-gradient(${rgba(patternColor, 0.85)} 2px, transparent 2px),
+            linear-gradient(90deg, ${rgba(patternColor, 0.85)} 2px, transparent 2px)
           `,
-                    backgroundSize: "35px 35px",
+                    backgroundSize: "55px 55px",
                 }}
             />
         );

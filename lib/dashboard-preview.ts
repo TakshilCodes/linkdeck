@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { mergeTheme } from "@/lib/themes/merge-theme";
 import type { CustomTheme, DefaultTheme, ResolvedTheme } from "@/types/theme";
+import { CUSTOM_BASE_THEME } from "@/types/theme";
 import type { BoardItem } from "@/types/board-types";
 import {
   buildBoardPreviewPayload,
@@ -82,9 +83,11 @@ export async function getDashboardPreviewPayload(
 
   if (!data) return null;
 
-  const resolvedTheme: ResolvedTheme | null = data.defaultTheme
-    ? mergeTheme(data.defaultTheme as DefaultTheme, data.customization as CustomTheme | null)
-    : null;
+  const baseTheme = data.defaultTheme || CUSTOM_BASE_THEME;
+  const resolvedTheme: ResolvedTheme = mergeTheme(
+    baseTheme as DefaultTheme, 
+    data.customization as CustomTheme | null
+  );
 
   const themeForClient = resolvedTheme
     ? (JSON.parse(JSON.stringify(resolvedTheme)) as ResolvedTheme)
