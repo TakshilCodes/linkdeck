@@ -28,6 +28,7 @@ model User {
   icons          SocialIcon[]
   customization  UserCustomization?
   boardItems BoardItem[]
+  analyticsEvents AnalyticsEvent[]
 }
 
 enum OnboardingStep {
@@ -55,6 +56,7 @@ model Link {
   boardItem  BoardItem?
   collection        Collection? @relation(fields: [collectionId], references: [id])
   user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analyticsEvents AnalyticsEvent[]
 
   @@index([userId, position])
 }
@@ -268,4 +270,27 @@ enum ButtonShadow {
   SOFT
   STRONG
   HARD
+}
+
+model AnalyticsEvent {
+  id        String    @id @default(cuid())
+  type      EventType
+  userId    String
+  linkId    String?
+  ipHash    String?
+  userAgent String?
+  referrer  String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  link Link? @relation(fields: [linkId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([linkId, createdAt])
+  @@index([type, createdAt])
+}
+
+enum EventType {
+  PROFILE_VIEW
+  LINK_CLICK
 }

@@ -4,6 +4,7 @@ import { mergeTheme } from "@/lib/themes/merge-theme";
 import type { CustomTheme, DefaultTheme } from "@/types/theme";
 import { CUSTOM_BASE_THEME } from "@/types/theme";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
+import { trackProfileView } from "@/actions/analytics/track-profile-view";
 
 export default async function PublicProfilePage({
   params,
@@ -44,6 +45,9 @@ export default async function PublicProfilePage({
   if (!user) {
     notFound();
   }
+
+  // Track profile view asynchronously (don't block the page render)
+  trackProfileView(user.id).catch(console.error);
 
   const baseTheme = user.defaultTheme || CUSTOM_BASE_THEME;
 
