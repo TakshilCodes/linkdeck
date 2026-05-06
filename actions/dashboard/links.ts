@@ -474,9 +474,10 @@ export async function saveBoardStateAction(payload: {
 
     return { success: true, message: "Board saved" };
   } catch (error) {
-  };
+    console.error(error);
+    return { success: false, message: "Failed to save board state" };
+  }
 }
-
 
 export async function deleteCollectionAction({ id }: { id: string }) {
   try {

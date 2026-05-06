@@ -63,7 +63,7 @@ export async function savePlatformLinksAction(input: {
                 data: cleanedPlatformLinks.map((item, index) => ({
                     userId,
                     type: item.platform as any,
-                    url: item.value,
+                    value: item.value,
                     position: index + 1,
                 })),
             });
@@ -76,7 +76,7 @@ export async function savePlatformLinksAction(input: {
                 data: parsed.data.customLinks.map((url, index) => ({
                     userId,
                     type: "PERSONAL_WEBSITE" as any,
-                    url,
+                    value: url,
                     position: basePosition + index + 1,
                 })),
             });

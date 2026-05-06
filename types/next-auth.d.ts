@@ -7,6 +7,9 @@ declare module "next-auth" {
     user: DefaultSession["user"] & {
       id: string;
       username: string | null;
+      displayName: string | null;
+      profileImgUrl: string | null;
+      bio: string | null;
       onboardingStep: OnboardingStep | null;
       onboardingDone: boolean;
     };
@@ -15,6 +18,9 @@ declare module "next-auth" {
   interface User {
     id: string;
     username: string | null;
+    displayName: string | null;
+    profileImgUrl: string | null;
+    bio: string | null;
     onboardingStep: OnboardingStep | null;
     onboardingDone: boolean;
   }
@@ -24,6 +30,9 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     username?: string | null;
+    displayName?: string | null;
+    profileImgUrl?: string | null;
+    bio?: string | null;
     onboardingStep?: OnboardingStep | null;
     onboardingDone?: boolean;
   }

@@ -4,10 +4,10 @@ import crypto from 'crypto';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { linkId: string } }
+  { params }: { params: Promise<{ linkId: string }> }
 ) {
   try {
-    const { linkId } = params;
+    const { linkId } = await params;
     
     // Get headers for tracking
     const userAgent = request.headers.get('user-agent') || null;

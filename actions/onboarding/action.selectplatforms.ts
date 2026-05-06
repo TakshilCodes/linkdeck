@@ -32,7 +32,7 @@ export async function savePlatformsAction(platforms: IconType[]) {
         data: platforms.map((platform, index) => ({
           userId: user.id,
           type: platform,
-          url: "",
+          value: "",
           position: index,
           isVisible: true,
           label: null,

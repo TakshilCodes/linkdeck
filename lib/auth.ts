@@ -61,6 +61,9 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           username: user.username ?? null,
+          displayName: null,
+          profileImgUrl: null,
+          bio: null,
           onboardingStep: user.onboardingStep,
           onboardingDone: user.onboardingDone,
         };
@@ -101,6 +104,9 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           username: user.username ?? null,
+          displayName: null,
+          profileImgUrl: null,
+          bio: null,
           onboardingStep: user.onboardingStep,
           onboardingDone: user.onboardingDone,
         };

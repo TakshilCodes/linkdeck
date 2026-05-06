@@ -219,6 +219,7 @@ export default function Sidebar() {
                             </div>
 
                             <div className="py-1.5">
+
                                 <Link
                                     href="/account"
                                     onClick={() => {

@@ -5,6 +5,7 @@ import type { CustomTheme, DefaultTheme } from "@/types/theme";
 import { CUSTOM_BASE_THEME } from "@/types/theme";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
 import { trackProfileView } from "@/actions/analytics/track-profile-view";
+import { resolveSocialUrl } from "@/lib/social-icons";
 
 export default async function PublicProfilePage({
   params,
@@ -65,7 +66,10 @@ export default async function PublicProfilePage({
         profileImgUrl: user.profileImgUrl,
         bio: user.bio,
       }}
-      icons={user.icons}
+      icons={user.icons.map((icon) => ({
+        ...icon,
+        url: resolveSocialUrl(icon.type, icon.value),
+      }))}
       standaloneLinks={user.links}
       collections={user.collections}
       showBranding={true}

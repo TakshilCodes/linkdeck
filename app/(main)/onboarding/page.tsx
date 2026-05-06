@@ -25,7 +25,7 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
     profileImgUrl: string | null;
     icons: {
       type: PlatformType;
-      url: string;
+      value: string;
       position: number;
     }[];
   } | null = null;
@@ -58,7 +58,7 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
           orderBy: { position: "asc" },
           select: {
             type: true,
-            url: true,
+            value: true,
             position: true,
           },
         },
@@ -92,7 +92,7 @@ export default async function OnBoarding(props: PageProps<"/onboarding">) {
   const existingLinks =
     user?.icons.map((icon) => ({
       platform: icon.type,
-      value: icon.url,
+      value: icon.value,
     })) ?? [];
 
   return (
