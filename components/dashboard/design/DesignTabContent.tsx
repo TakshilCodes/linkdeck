@@ -52,6 +52,7 @@ const CUSTOM_BASE_THEME: ThemeItem = {
   titleFontWeight: "MEDIUM",
   profileFontSize: "SMALL",
   profileColor: "#666666",
+  bioColor: "#ffffff",
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -520,10 +521,16 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
 
   // Check for ALL changes
   useEffect(() => {
-    // 1. Check profile changes (header title)
+    // 1. Check profile changes (header title and bio)
     const initialTitle = initialProfile?.displayName ?? initialProfile?.username ?? "";
     const currentTitle = previewProfile?.displayName ?? initialTitle;
-    const profileChanged = currentTitle !== initialTitle;
+    const titleChanged = currentTitle !== initialTitle;
+
+    const initialBio = initialProfile?.bio ?? "";
+    const currentBio = previewProfile?.bio ?? initialBio;
+    const bioChanged = currentBio !== initialBio;
+
+    const profileChanged = titleChanged || bioChanged;
 
     // 2. Check custom theme changes (all tabs)
     let customThemeChanged = false;
@@ -537,6 +544,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
         titleFontSize: "MEDIUM",
         profileFontSize: "SMALL",
         profileColor: "#666666",
+        bioColor: "#ffffff",
         fontFamily: "INTER",
         wallpaperStyle: "FILL",
         backgroundColor: "#FFFFFF",
@@ -608,8 +616,15 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
         if (hasUnsavedHeaderChanges && (previewProfile || previewCustomTheme)) {
           const headerData: any = {};
           
-          if (previewProfile?.displayName !== initialProfile?.displayName) {
-            headerData.displayName = previewProfile?.displayName;
+          if (previewProfile?.displayName !== undefined && previewProfile.displayName !== initialProfile?.displayName) {
+            headerData.displayName = previewProfile.displayName;
+          }
+
+          if (previewProfile?.bio !== undefined) {
+            const initialBio = initialProfile?.bio ?? "";
+            if (previewProfile.bio !== initialBio) {
+              headerData.bio = previewProfile.bio;
+            }
           }
           
           if (previewCustomTheme) {
@@ -630,6 +645,9 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
             }
             if (previewCustomTheme.profileColor !== initialCustomization?.profileColor) {
               headerData.profileColor = previewCustomTheme.profileColor;
+            }
+            if (previewCustomTheme.bioColor !== initialCustomization?.bioColor) {
+              headerData.bioColor = previewCustomTheme.bioColor;
             }
             if (previewCustomTheme.fontFamily !== initialCustomization?.fontFamily) {
               headerData.fontFamily = previewCustomTheme.fontFamily;

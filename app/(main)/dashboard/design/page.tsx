@@ -18,6 +18,7 @@ export default async function DashboardDesignPage() {
             username: true,
             displayName: true,
             profileImgUrl: true,
+            bio: true,
             customization: true,
           },
         })
@@ -33,6 +34,7 @@ export default async function DashboardDesignPage() {
           username: user?.username,
           displayName: user?.displayName,
           profileImgUrl: user?.profileImgUrl,
+          bio: user?.bio,
         }}
         initialCustomization={user?.customization}
       />

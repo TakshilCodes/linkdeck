@@ -63,6 +63,7 @@ type Props = {
     username?: string | null;
     displayName?: string | null;
     profileImgUrl?: string | null;
+    bio?: string | null;
   };
   initialCustomization: any;
 };
@@ -292,24 +293,25 @@ export default function HeaderTabContent({initialProfile, initialCustomization}:
       const [titleFontSize, setTitleFontSize] = useState(initialCustomization?.titleFontSize ?? "MEDIUM");
       const [profileFontSize, setProfileFontSize] = useState(initialCustomization?.profileFontSize ?? "SMALL");
       const [profileColor, setProfileColor] = useState(initialCustomization?.profileColor ?? "#ffffff");
+      const [bio, setBio] = useState(initialProfile?.bio ?? "");
+      const [bioColor, setBioColor] = useState(initialCustomization?.bioColor ?? "#ffffff");
 
   useEffect(() => {
         // Only update preview state, no auto-save
-        updatePreviewProfile({ displayName: debouncedTitle });
-  }, [debouncedTitle, updatePreviewProfile]);
+        updatePreviewProfile({ displayName: debouncedTitle, bio });
+  }, [debouncedTitle, bio, updatePreviewProfile]);
 
   // Realtime updates for color and font family
   useEffect(() => {
-    const storeFontFamily = useAltFont ? titleFontFamily : null;
-      updatePreviewCustomTheme({
-        titleFontFamily: storeFontFamily,
+    updatePreviewCustomTheme({
       titleColor,
       titleFontWeight,
       titleFontSize,
       profileFontSize,
-      profileColor
+      profileColor,
+      bioColor
     });
-  }, [useAltFont, titleFontFamily, titleColor, titleFontWeight, titleFontSize, profileFontSize, profileColor, updatePreviewCustomTheme]);
+  }, [useAltFont, titleFontFamily, titleColor, titleFontWeight, titleFontSize, profileFontSize, bioColor, updatePreviewCustomTheme]);
 
   // Hook up local change dispatch manually instead of deeply abstracting debounce right now for fonts/colors
   // Only update preview state, no auto-save
@@ -341,6 +343,10 @@ export default function HeaderTabContent({initialProfile, initialCustomization}:
   const handleProfileColorChange = (value: string) => {
         setProfileColor(value);
   };
+
+  const handleBioColorChange = (value: string) => {
+        setBioColor(value);
+      };
 
       return (
       <div className="flex flex-col gap-8 pb-20">
@@ -405,6 +411,30 @@ export default function HeaderTabContent({initialProfile, initialCustomization}:
               />
             </div>
           )}
+
+          {/* Bio Section */}
+          <section className="flex flex-col gap-3">
+            <label className="text-sm font-semibold text-white/90">Bio</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value.slice(0, 200))}
+              placeholder="Tell people about yourself..."
+              className="h-24 w-full rounded-2xl border border-white/10 bg-transparent px-4 py-3 text-[15px] text-white placeholder-white/30 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 resize-none"
+              rows={4}
+              maxLength={200}
+            />
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-xs text-white/50">{bio.length}/200</span>
+              <span className="text-xs text-white/30">Maximum 200 characters</span>
+            </div>
+            <div className="mt-3">
+              <label className="block text-sm font-medium text-white/80 mb-2">Bio Color</label>
+              <CustomColorPicker
+                value={bioColor || "#ffffff"}
+                onChange={handleBioColorChange}
+              />
+            </div>
+          </section>
 
           <div>
             <label className="block text-sm font-medium text-white/80 mb-2">Title Color</label>

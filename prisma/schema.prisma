@@ -138,6 +138,7 @@ model DefaultTheme {
   titleFontWeight   titleFontWeight?
   profileFontSize   profileFontSize?
   profileColor      String
+  bioColor         String?
   isDefault         Boolean            @default(false)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -157,7 +158,7 @@ model UserCustomization {
   titleFontFamily   FontFamily?
   buttonStyle       ButtonStyle?
   buttonRadius      ButtonRadius?
-  buttonShadow      ButtonShadow?
+  buttonShadow     ButtonShadow?
   buttonColor       String?
   buttonTextColor   String?
   shadowColor       String?
@@ -168,6 +169,7 @@ model UserCustomization {
   titleFontWeight   titleFontWeight?
   profileFontSize   profileFontSize?
   profileColor      String?
+  bioColor         String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)

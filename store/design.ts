@@ -5,9 +5,9 @@ type DesignStore = {
   previewTheme: ResolvedTheme | null;
   setPreviewTheme: (theme: ResolvedTheme | null) => void;
   
-  previewProfile: { displayName?: string } | null;
-  setPreviewProfile: (profile: { displayName?: string } | null) => void;
-  updatePreviewProfile: (updates: { displayName?: string }) => void;
+  previewProfile: { displayName?: string; bio?: string } | null;
+  setPreviewProfile: (profile: { displayName?: string; bio?: string } | null) => void;
+  updatePreviewProfile: (updates: { displayName?: string; bio?: string }) => void;
 
   previewCustomTheme: Partial<CustomTheme> | null;
   setPreviewCustomTheme: (custom: Partial<CustomTheme> | null) => void;

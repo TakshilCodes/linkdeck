@@ -174,6 +174,7 @@ export function getThemeTokens(theme: ResolvedTheme) {
         buttonTextColor: theme.buttonTextColor ?? "#ffffff",
         titleColor: theme.titleColor ?? "#ffffff",
         profileColor: theme.profileColor ?? "#ffffff",
+        bioColor: theme.bioColor ?? "#ffffff",
         shadowColor: theme.shadowColor ?? "#000000",
         patternColor: theme.patternColor ?? "#6b7280",
         outlineColor: theme.outlineColor ?? "#111111",

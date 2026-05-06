@@ -7,12 +7,14 @@ import { revalidatePath } from "next/cache";
 
 type SaveHeaderPayload = {
   displayName?: string;
+  bio?: string;
   titleFontFamily?: string | null;
   titleFontWeight?: string;
   titleFontSize?: string;
   titleColor?: string;
   profileFontSize?: string;
   profileColor?: string;
+  bioColor?: string;
   fontFamily?: string;
 };
 
@@ -39,8 +41,19 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
         data: { displayName: payload.displayName },
       });
     }
+    if (payload.bio !== undefined) {
+      // Validate bio length (max 200 characters)
+      if (payload.bio.length > 200) {
+        throw new Error("Bio cannot exceed 200 characters");
+      }
+      
+      await tx.user.update({
+        where: { id: user.id },
+        data: { bio: payload.bio },
+      });
+    }
 
-    if (payload.titleFontFamily !== undefined || payload.titleColor !== undefined || payload.titleFontWeight !== undefined || payload.titleFontSize !== undefined || payload.profileFontSize !== undefined || payload.profileColor !== undefined || payload.fontFamily !== undefined) {
+    if (payload.titleFontFamily !== undefined || payload.titleColor !== undefined || payload.titleFontWeight !== undefined || payload.titleFontSize !== undefined || payload.profileFontSize !== undefined || payload.profileColor !== undefined || payload.fontFamily !== undefined || payload.bioColor !== undefined) {
       const updateData: any = {};
       if (payload.titleFontFamily !== undefined) {
         updateData.titleFontFamily = payload.titleFontFamily;
@@ -59,6 +72,9 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
       }
       if (payload.profileColor !== undefined) {
         updateData.profileColor = payload.profileColor;
+      }
+      if (payload.bioColor !== undefined) {
+        updateData.bioColor = payload.bioColor;
       }
       if (payload.fontFamily !== undefined) {
         updateData.fontFamily = payload.fontFamily;

@@ -38,6 +38,7 @@ export type DefaultTheme = {
   titleFontWeight: string | null;
   profileFontSize: string | null;
   profileColor: string;
+  bioColor: string | null;
 
   isDefault: boolean;
   createdAt: Date;
@@ -69,6 +70,7 @@ export type CustomTheme = {
   titleFontWeight?: string | null;
   profileFontSize?: string | null;
   profileColor?: string | null;
+  bioColor?: string | null;
 };
 
 export const CUSTOM_BASE_THEME: DefaultTheme = {
@@ -98,6 +100,7 @@ export const CUSTOM_BASE_THEME: DefaultTheme = {
   titleFontWeight: "MEDIUM",
   profileFontSize: "SMALL",
   profileColor: "#666666",
+  bioColor: "#ffffff",
   createdAt: new Date(),
   updatedAt: new Date(),
 };

@@ -34,7 +34,7 @@ export default function ProfileHeader({
   icons,
   compact = false,
 }: ProfileHeaderProps) {
-  const { titleColor, profileColor } = getThemeTokens(theme);
+  const { titleColor, profileColor, bioColor } = getThemeTokens(theme);
 
   const displayName = profile.displayName || profile.username || "Your Name";
   const titleFontSize = getTitleFontSizeValue(theme);
@@ -64,7 +64,7 @@ export default function ProfileHeader({
         <p
           className={`max-w-[340px] ${compact ? "mt-1.5 leading-snug" : "mt-2"}`}
           style={{
-            color: profileColor,
+            color: bioColor,
             fontSize: compact ? "12px" : profileFontSize,
           }}
         >
