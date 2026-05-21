@@ -38,7 +38,6 @@ export default async function PreviewPage({ params }: PageProps) {
           { id: "3", name: "dub.sh", url: "#" },
         ]}
         collections={[]}
-        showBranding={true}
       />
     </main>
   );

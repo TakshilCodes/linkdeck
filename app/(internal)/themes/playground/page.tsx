@@ -769,12 +769,7 @@ export default function LinkDeckThemePlayground() {
 
                 <div className="flex-1" />
 
-                <div className="flex flex-col items-center">
-                  <Link href={'/'} className="mb-6 rounded-full bg-white px-6 py-3 font-semibold text-black shadow-[0_10px_22px_rgba(0,0,0,0.20)]">
-                    Join takshil.dev on LinkDeck
-                  </Link>
-                </div>
-              </div>
+                              </div>
             </div>
           </div>
         </section>

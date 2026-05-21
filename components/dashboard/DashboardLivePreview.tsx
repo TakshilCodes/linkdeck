@@ -108,7 +108,6 @@ export default function DashboardLivePreview({
                 icons={icons}
                 standaloneLinks={standaloneLinks}
                 collections={collections}
-                showBranding
               />
             </div>
           </div>

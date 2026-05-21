@@ -18,7 +18,6 @@ import {
     X,
     Link2,
     User,
-    CreditCard,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -212,10 +211,7 @@ export default function Sidebar() {
                                         </p>
                                     </div>
 
-                                    <div className="rounded-full border border-cyan-400/15 bg-cyan-400/10 px-2.5 py-1 text-xs font-medium text-cyan-300">
-                                        Free
-                                    </div>
-                                </div>
+                                                                    </div>
                             </div>
 
                             <div className="py-1.5">
@@ -232,18 +228,7 @@ export default function Sidebar() {
                                     Account
                                 </Link>
 
-                                <Link
-                                    href="/upgrade"
-                                    onClick={() => {
-                                        setProfileMenuOpen(false);
-                                        setMobileOpen(false);
-                                    }}
-                                    className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/5"
-                                >
-                                    <CreditCard className="h-4 w-4 text-white/60" />
-                                    Upgrade
-                                </Link>
-
+                                
                                 <Link
                                     href="/help"
                                     onClick={() => {

@@ -72,7 +72,6 @@ export default async function PublicProfilePage({
       }))}
       standaloneLinks={user.links}
       collections={user.collections}
-      showBranding={true}
     />
   );
 }

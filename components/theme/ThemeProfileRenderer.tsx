@@ -13,7 +13,6 @@ import {
 } from "@/lib/themes/theme-utils";
 
 import ProfileHeader from "./parts/ProfileHeader"
-import Footer from "./parts/Footer";
 import PatternOverlay from "./parts/PatternOverlay";
 import LinkSection from "./parts/LinkSection";
 
@@ -49,7 +48,6 @@ type ThemeProfileRendererProps = {
     icons: RendererIcon[];
     standaloneLinks: RendererLink[];
     collections: RendererCollection[];
-    showBranding?: boolean;
     /** Compact phone-style frame for dashboard preview (no full-page stage). */
     layout?: "page" | "embed";
 };
@@ -64,7 +62,6 @@ export default function ThemeProfileRenderer({
     icons,
     standaloneLinks,
     collections,
-    showBranding = true,
     layout = "page",
 }: ThemeProfileRendererProps) {
 
@@ -147,12 +144,6 @@ export default function ThemeProfileRenderer({
                 )}
 
                 <div className="flex-1" />
-
-                <Footer
-                    username={profile.username}
-                    titleColor={titleColor}
-                    showBranding={showBranding}
-                />
             </div>
         </>
     );
