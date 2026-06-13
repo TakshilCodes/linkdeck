@@ -6,6 +6,7 @@ import { Check } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
     PLATFORM_OPTIONS,
+    getIconByType,
     type PlatformType,
 } from "@/lib/social-icons";
 import {
@@ -77,6 +78,35 @@ export default function SelectPlatformsStep({
         });
     };
 
+    const renderPlatformIcon = (platform: (typeof PLATFORM_OPTIONS)[number]) => {
+        if (
+            platform.type === "X" ||
+            platform.type === "PATREON" ||
+            platform.type === "PERSONAL_WEBSITE"
+        ) {
+            const meta = getIconByType(platform.type as any);
+            if (meta) {
+                const Icon = meta.icon;
+                const iconClassName =
+                    platform.type === "PERSONAL_WEBSITE"
+                        ? "h-8 w-8 text-cyan-300"
+                        : "h-8 w-8 text-white";
+
+                return <Icon className={iconClassName} />;
+            }
+        }
+
+        return (
+            <Image
+                src={platform.icon}
+                alt={platform.label}
+                width={30}
+                height={30}
+                className="h-8 w-8 object-contain"
+            />
+        );
+    };
+
     return (
         <section className="w-full">
             <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col px-4 pb-36 sm:px-6">
@@ -85,20 +115,20 @@ export default function SelectPlatformsStep({
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="absolute left-0 text-sm font-medium text-white/55 transition hover:text-white"
+                        className="absolute left-0 cursor-pointer text-sm font-medium text-white/55 transition hover:text-white"
                     >
                         Back
                     </button>
 
                     <div className="h-1 w-28 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-[72%] rounded-full bg-linear-to-r from-cyan-400 to-fuchsia-500" />
+                        <div className="h-full w-[72%] rounded-full bg-linear-to-r from-cyan-400 to-cyan-300" />
                     </div>
 
                     <button
                         type="button"
                         onClick={handleSkip}
                         disabled={isPending}
-                        className="absolute right-0 text-sm font-medium text-white/55 transition hover:text-white disabled:opacity-50"
+                        className="absolute right-0 cursor-pointer text-sm font-medium text-white/55 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Skip
                     </button>
@@ -124,21 +154,21 @@ export default function SelectPlatformsStep({
                                 key={platform.type}
                                 type="button"
                                 onClick={() => togglePlatform(platform.type)}
-                                className={`group relative flex h-36 w-44 flex-col items-center justify-center rounded-[22px] border overflow-hidden transition-all duration-200 ${isSelected
-                                        ? "border-fuchsia-400/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))] shadow-[0_12px_30px_rgba(168,85,247,0.16)]"
+                                className={`group relative flex h-36 w-44 cursor-pointer flex-col items-center justify-center rounded-[22px] border overflow-hidden transition-all duration-200 ${isSelected
+                                        ? "border-cyan-400/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.10),rgba(255,255,255,0.04))] shadow-[0_12px_30px_rgba(34,211,238,0.16)]"
                                         : "border-white/10 bg-white/3 hover:border-white/20 hover:bg-white/5 hover:-translate-y-0.5"
                                     }`}
                             >
                                 <div
                                     className={`pointer-events-none absolute inset-0 transition-opacity duration-200 ${isSelected
-                                            ? "opacity-100 bg-[radial-gradient(circle_at_top,rgba(217,70,239,0.12),transparent_60%)]"
+                                            ? "opacity-100 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.12),transparent_60%)]"
                                             : "opacity-0 group-hover:opacity-100 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.06),transparent_60%)]"
                                         }`}
                                 />
 
                                 <div
                                     className={`absolute right-3 top-3 flex h-6 w-6 items-center justify-center rounded-full transition-all ${isSelected
-                                            ? "bg-fuchsia-500 text-white opacity-100 scale-100"
+                                            ? "bg-cyan-400 text-slate-950 opacity-100 scale-100"
                                             : "bg-white/8 text-transparent opacity-0 scale-90 group-hover:opacity-100"
                                         }`}
                                 >
@@ -149,13 +179,7 @@ export default function SelectPlatformsStep({
                                     className={`relative z-10 mb-3 flex h-14 w-14 items-center justify-center rounded-full transition-all ${isSelected ? "bg-white/10 ring-1 ring-white/10" : "bg-white/5"
                                         }`}
                                 >
-                                    <Image
-                                        src={platform.icon}
-                                        alt={platform.label}
-                                        width={30}
-                                        height={30}
-                                        className="h-8 w-8 object-contain"
-                                    />
+                                    {renderPlatformIcon(platform)}
                                 </div>
 
                                 <span className="relative z-10 text-[15px] font-semibold text-white">
@@ -193,7 +217,7 @@ export default function SelectPlatformsStep({
                                     type="button"
                                     onClick={handleContinue}
                                     disabled={isPending || selectedCount === 0}
-                                    className="inline-flex h-12 min-w-35 items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-fuchsia-500 px-6 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35"
+                                    className="inline-flex h-12 min-w-35 cursor-pointer items-center justify-center rounded-full bg-cyan-400 px-6 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/35 disabled:shadow-none"
                                 >
                                     {isPending ? "Saving..." : "Continue"}
                                 </button>

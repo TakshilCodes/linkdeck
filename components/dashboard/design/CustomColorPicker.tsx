@@ -10,28 +10,64 @@ export default function CustomColorPicker({
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value);
+  const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const pickerRef = useRef<HTMLDivElement>(null);
 
-  // Sync internal state if prop changes
   useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+    if (!isOpen) {
+      setInputValue(value);
+    }
+  }, [value, isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
+        setInputValue(value);
         setIsOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [value]);
+
+  useEffect(() => {
+    if (!isOpen || !pickerRef.current) {
+      return;
+    }
+
+    const rect = pickerRef.current.getBoundingClientRect();
+    const pickerHeight = 290;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    if (spaceBelow < pickerHeight && spaceAbove > spaceBelow) {
+      setPlacement("top");
+      return;
+    }
+
+    setPlacement("bottom");
+  }, [isOpen]);
+
+  const normalizeHex = (rawValue: string) => {
+    const sanitized = rawValue.replace(/[^0-9a-f]/gi, "").slice(0, 6).toUpperCase();
+    return sanitized ? `#${sanitized}` : "#";
+  };
+
+  const commitHex = (rawValue: string) => {
+    const normalized = normalizeHex(rawValue);
+    setInputValue(normalized);
+
+    if (/^#[0-9A-F]{6}$/.test(normalized)) {
+      onChange(normalized);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value.toUpperCase();
-    setInputValue(newValue);
-    if (/^#[0-9A-F]{6}$/i.test(newValue)) {
-      onChange(newValue);
+    const normalized = normalizeHex(e.target.value);
+    setInputValue(normalized);
+
+    if (/^#[0-9A-F]{6}$/.test(normalized)) {
+      onChange(normalized);
     }
   };
 
@@ -41,6 +77,16 @@ export default function CustomColorPicker({
     onChange(upperColor);
   };
 
+  const handleInputBlur = () => {
+    commitHex(inputValue);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      commitHex(inputValue);
+    }
+  };
+
   return (
     <div ref={pickerRef} className="relative w-full">
       <div className="flex h-14 w-full items-center overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a] px-4 transition focus-within:border-cyan-400 focus-within:ring-1 focus-within:ring-cyan-400/50 hover:border-white/20">
@@ -48,6 +94,8 @@ export default function CustomColorPicker({
           type="text"
           value={inputValue}
           onChange={handleInputChange}
+          onBlur={handleInputBlur}
+          onKeyDown={handleInputKeyDown}
           className="h-full w-full bg-transparent text-[15px] font-medium text-white uppercase outline-none placeholder:text-white/30"
           placeholder="#000000"
           maxLength={7}
@@ -62,7 +110,11 @@ export default function CustomColorPicker({
       </div>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] right-0 z-50 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-xl p-4 animate-in fade-in zoom-in-95 duration-200">
+        <div
+          className={`absolute right-0 z-50 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-xl p-4 animate-in fade-in zoom-in-95 duration-200 ${
+            placement === "top" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
+          }`}
+        >
           <style dangerouslySetInnerHTML={{__html: `
             .react-colorful { width: 200px; height: 200px; }
             .react-colorful__pointer { width: 24px; height: 24px; }
@@ -75,6 +127,8 @@ export default function CustomColorPicker({
               type="text"
               value={inputValue}
               onChange={handleInputChange}
+              onBlur={handleInputBlur}
+              onKeyDown={handleInputKeyDown}
               className="flex-1 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] font-medium text-white outline-none transition focus:border-cyan-400"
               placeholder="#000000"
               maxLength={7}

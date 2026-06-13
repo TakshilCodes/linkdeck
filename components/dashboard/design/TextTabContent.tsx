@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { mergeTheme } from "@/lib/themes/merge-theme";
 import { useDesignStore } from "@/store/design";
 import CustomColorPicker from "./CustomColorPicker";
+import type { DefaultTheme } from "@/types/theme";
 
 // Font options constants
 const FONT_FAMILY_OPTIONS = [
@@ -142,21 +144,25 @@ function CustomDropdown<T extends string>({
 
 type Props = {
   initialCustomization?: any;
+  activeTheme: DefaultTheme;
 };
 
-export default function TextTabContent({ initialCustomization }: Props) {
+export default function TextTabContent({ initialCustomization, activeTheme }: Props) {
   const { previewCustomTheme, updatePreviewCustomTheme } = useDesignStore();
+  const resolvedTheme = mergeTheme(activeTheme, initialCustomization ?? null);
 
   // Initialize state with initial customization values
-  const pageFontFamily = initialCustomization?.fontFamily ?? "INTER";
-  const [useAltFont, setUseAltFont] = useState(!!initialCustomization?.titleFontFamily);
-  const [titleFontFamily, setTitleFontFamily] = useState(initialCustomization?.titleFontFamily ?? pageFontFamily);
-  const [titleFontWeight, setTitleFontWeight] = useState(initialCustomization?.titleFontWeight ?? "MEDIUM");
-  const [titleColor, setTitleColor] = useState(initialCustomization?.titleColor ?? "#ffffff");
-  const [titleFontSize, setTitleFontSize] = useState(initialCustomization?.titleFontSize ?? "MEDIUM");
-  const [profileFontSize, setProfileFontSize] = useState(initialCustomization?.profileFontSize ?? "SMALL");
-  const [profileColor, setProfileColor] = useState(initialCustomization?.profileColor ?? "#ffffff");
-  const [fontFamily, setFontFamily] = useState(initialCustomization?.fontFamily ?? "INTER");
+  const pageFontFamily = resolvedTheme.fontFamily ?? "INTER";
+  const [useAltFont, setUseAltFont] = useState(
+    Boolean((initialCustomization?.titleFontFamily ?? resolvedTheme.titleFontFamily) != null)
+  );
+  const [titleFontFamily, setTitleFontFamily] = useState(resolvedTheme.titleFontFamily ?? pageFontFamily);
+  const [titleFontWeight, setTitleFontWeight] = useState(resolvedTheme.titleFontWeight ?? "MEDIUM");
+  const [titleColor, setTitleColor] = useState(resolvedTheme.titleColor ?? "#ffffff");
+  const [titleFontSize, setTitleFontSize] = useState(resolvedTheme.titleFontSize ?? "MEDIUM");
+  const [profileFontSize, setProfileFontSize] = useState(resolvedTheme.profileFontSize ?? "SMALL");
+  const [profileColor, setProfileColor] = useState(resolvedTheme.profileColor ?? "#ffffff");
+  const [fontFamily, setFontFamily] = useState(resolvedTheme.fontFamily ?? "INTER");
 
   // Update preview when values change
   useEffect(() => {

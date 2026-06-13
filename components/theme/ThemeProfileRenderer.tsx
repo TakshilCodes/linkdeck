@@ -81,6 +81,7 @@ export default function ThemeProfileRenderer({
                 <PatternOverlay
                     patternStyle={theme.patternStyle}
                     patternColor={patternColor}
+                    backgroundColor={theme.backgroundColor}
                 />
             )}
 

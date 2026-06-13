@@ -104,20 +104,20 @@ export default function ProfileStep({
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="absolute left-0 text-sm font-medium text-white/60 transition hover:text-white"
+                        className="absolute left-0 cursor-pointer text-sm font-medium text-white/60 transition hover:text-white"
                     >
                         Back
                     </button>
 
                     <div className="h-1 w-28 overflow-hidden rounded-full bg-white/10">
-                        <div className="h-full w-full rounded-full bg-linear-to-r from-violet-500 to-fuchsia-500" />
+                        <div className="h-full w-full rounded-full bg-linear-to-r from-cyan-400 to-cyan-300" />
                     </div>
 
                     <button
                         type="button"
                         onClick={handleSkip}
                         disabled={isPending || isUploading}
-                        className="absolute right-0 text-sm font-medium text-white/60 transition hover:text-white disabled:opacity-50"
+                        className="absolute right-0 cursor-pointer text-sm font-medium text-white/60 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         Skip
                     </button>
@@ -140,7 +140,7 @@ export default function ProfileStep({
                             <button
                                 type="button"
                                 onClick={handlePickImage}
-                                className="relative flex h-34 w-34 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-[#0c1322] shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+                                className="relative flex h-34 w-34 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/10 bg-[#0c1322] shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
                             >
                                 {profileImgUrl ? (
                                     <Image
@@ -165,7 +165,7 @@ export default function ProfileStep({
                             <button
                                 type="button"
                                 onClick={handlePickImage}
-                                className="absolute bottom-1 right-1 flex h-10 w-10 items-center justify-center rounded-full bg-black text-white shadow-lg transition hover:scale-105"
+                                className="absolute bottom-1 right-1 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-black text-white shadow-lg transition hover:scale-105"
                             >
                                 <Plus className="h-5 w-5" />
                             </button>
@@ -191,7 +191,7 @@ export default function ProfileStep({
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
                                 placeholder="Your display name"
-                                className="h-12 w-full rounded-2xl border border-white/10 bg-[#0c1322] px-4 text-sm font-medium text-white outline-none transition placeholder:text-white/30 focus:border-fuchsia-400/60 focus:bg-[#0f1729] focus:ring-4 focus:ring-fuchsia-500/10"
+                                className="h-12 w-full rounded-2xl border border-white/10 bg-[#0c1322] px-4 text-sm font-medium text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-[#0f1729] focus:ring-4 focus:ring-cyan-400/12"
                             />
                         </div>
 
@@ -199,7 +199,7 @@ export default function ProfileStep({
                             <label className="mb-2 block text-sm font-medium text-white/75">
                                 Bio
                             </label>
-                            <div className="rounded-2xl border border-white/10 bg-[#0c1322] transition focus-within:border-fuchsia-400/60 focus-within:ring-4 focus-within:ring-fuchsia-500/10">
+                            <div className="rounded-2xl border border-white/10 bg-[#0c1322] transition focus-within:border-cyan-400/60 focus-within:ring-4 focus-within:ring-cyan-400/12">
                                 <textarea
                                     value={bio}
                                     onChange={(e) => setBio(e.target.value.slice(0, 160))}
@@ -225,7 +225,7 @@ export default function ProfileStep({
                             type="button"
                             onClick={handleContinue}
                             disabled={isPending || isUploading}
-                            className="inline-flex h-14 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-fuchsia-500 px-8 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.28)] transition hover:scale-[0.995] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex h-14 w-full cursor-pointer items-center justify-center rounded-full bg-cyan-400 px-8 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(34,211,238,0.24)] transition hover:scale-[0.995] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {isUploading
                                 ? "Uploading image..."

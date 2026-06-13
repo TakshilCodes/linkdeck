@@ -1,10 +1,10 @@
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import EnterUsernameStep from "./EnterUsernameStep";
-import SelectThemeStep from "./SelectThemeStep";
-import SelectPlatformsStep from "./selectPlatformsStep";
-import AddLinksStep from "./AddLinksStep";
-import ProfileStep from "./ProfileStep";
+import EnterUsernameStep from "@/app/(main)/onboarding/EnterUsernameStep";
+import SelectThemeStep from "@/app/(main)/onboarding/SelectThemeStep";
+import SelectPlatformsStep from "@/app/(main)/onboarding/selectPlatformsStep";
+import AddLinksStep from "@/app/(main)/onboarding/AddLinksStep";
+import ProfileStep from "@/app/(main)/onboarding/ProfileStep";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { PlatformType } from "@/lib/social-icons";

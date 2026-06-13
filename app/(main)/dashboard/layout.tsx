@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import { getDashboardPreviewPayload } from "@/lib/dashboard-preview";
+import { getOnboardingRedirectPath } from "@/lib/onboarding";
 import DashboardLivePreview from "@/components/dashboard/DashboardLivePreview";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -14,6 +15,10 @@ export default async function DashboardLayout({
 
   if (!userId) {
     redirect("/signup");
+  }
+
+  if (!session.user.onboardingDone) {
+    redirect(getOnboardingRedirectPath(session.user.onboardingStep));
   }
 
   const preview = await getDashboardPreviewPayload(userId);

@@ -129,20 +129,20 @@ export default function AddLinksStep({
           <button
             type="button"
             onClick={() => router.back()}
-            className="absolute left-0 text-sm font-medium text-white/55 transition hover:text-white"
+            className="absolute left-0 cursor-pointer text-sm font-medium text-white/55 transition hover:text-white"
           >
             Back
           </button>
 
           <div className="h-1 w-28 overflow-hidden rounded-full bg-white/10">
-            <div className="h-full w-[86%] rounded-full bg-linear-to-r from-violet-500 to-fuchsia-500" />
+            <div className="h-full w-[86%] rounded-full bg-linear-to-r from-cyan-400 to-cyan-300" />
           </div>
 
           <button
             type="button"
             onClick={handleSkip}
             disabled={isPending}
-            className="absolute right-0 text-sm font-medium text-white/55 transition hover:text-white disabled:opacity-50"
+            className="absolute right-0 cursor-pointer text-sm font-medium text-white/55 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Skip
           </button>
@@ -204,7 +204,7 @@ export default function AddLinksStep({
                           }
                           placeholder={config.placeholder}
                           inputMode={config.keyboard === "url" ? "url" : "text"}
-                          className={`h-12 w-full rounded-2xl border border-white/10 bg-[#0c1322] px-4 text-sm font-medium text-white outline-none transition placeholder:text-white/30 focus:border-fuchsia-400/60 focus:bg-[#0f1729] focus:ring-4 focus:ring-fuchsia-500/10 ${
+                          className={`h-12 w-full rounded-2xl border border-white/10 bg-[#0c1322] px-4 text-sm font-medium text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-[#0f1729] focus:ring-4 focus:ring-cyan-400/12 ${
                             config.prefix ? "pl-8" : ""
                           }`}
                         />
@@ -233,7 +233,7 @@ export default function AddLinksStep({
                         onChange={(e) => handleCustomChange(index, e.target.value)}
                         placeholder="https://example.com"
                         inputMode="url"
-                        className="h-12 w-full rounded-2xl border border-white/10 bg-[#0c1322] px-4 text-sm font-medium text-white outline-none transition placeholder:text-white/30 focus:border-fuchsia-400/60 focus:bg-[#0f1729] focus:ring-4 focus:ring-fuchsia-500/10"
+                        className="h-12 w-full rounded-2xl border border-white/10 bg-[#0c1322] px-4 text-sm font-medium text-white outline-none transition placeholder:text-white/30 focus:border-cyan-400/60 focus:bg-[#0f1729] focus:ring-4 focus:ring-cyan-400/12"
                       />
                     </div>
                   ))}
@@ -253,7 +253,7 @@ export default function AddLinksStep({
                   type="button"
                   onClick={handleContinue}
                   disabled={isPending}
-                  className="inline-flex h-14 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-fuchsia-500 px-8 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(168,85,247,0.28)] transition hover:scale-[0.995] hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-14 w-full cursor-pointer items-center justify-center rounded-full bg-cyan-400 px-8 text-sm font-semibold text-slate-950 shadow-[0_16px_40px_rgba(34,211,238,0.24)] transition hover:scale-[0.995] hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isPending ? "Saving..." : "Continue"}
                 </button>

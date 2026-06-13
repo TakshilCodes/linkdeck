@@ -2,25 +2,32 @@
 
 import { PATTERN_STYLE } from "@/lib/themes/theme-constants";
 import type { ResolvedTheme } from "@/types/theme";
-import { rgba } from "@/lib/themes/theme-utils";
+import { hexToRgb, rgba } from "@/lib/themes/theme-utils";
 
 type PatternOverlayProps = {
     patternStyle: ResolvedTheme["patternStyle"];
     patternColor: string;
+    backgroundColor?: string | null;
 };
 
 export default function PatternOverlay({
     patternStyle,
     patternColor,
+    backgroundColor,
 }: PatternOverlayProps) {
     if (patternStyle === PATTERN_STYLE.GRID) {
+        const gridBase = backgroundColor ?? "#111111";
+        const { r, g, b } = hexToRgb(gridBase);
+        const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+        const lineAlpha = luminance < 0.2 ? 0.42 : luminance < 0.45 ? 0.34 : 0.24;
+
         return (
             <div
                 className="absolute inset-0"
                 style={{
                     backgroundImage: `
-            linear-gradient(${rgba(patternColor, 0.85)} 2px, transparent 2px),
-            linear-gradient(90deg, ${rgba(patternColor, 0.85)} 2px, transparent 2px)
+            linear-gradient(${rgba(patternColor, lineAlpha)} 1px, transparent 1px),
+            linear-gradient(90deg, ${rgba(patternColor, lineAlpha)} 1px, transparent 1px)
           `,
                     backgroundSize: "55px 55px",
                 }}

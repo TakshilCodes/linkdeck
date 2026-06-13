@@ -87,6 +87,8 @@ export async function POST(req: NextRequest) {
         username: pending.username,
         authProvider: "CREDENTIALS",
         hashedPassword: null,
+        onboardingStep: "THEME",
+        onboardingDone: false,
       },
       select: {
         id: true,

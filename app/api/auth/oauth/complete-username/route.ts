@@ -73,7 +73,11 @@ export async function POST(req: NextRequest) {
 
     await prisma.user.update({
       where: { email },
-      data: { username },
+      data: {
+        username,
+        onboardingStep: "THEME",
+        onboardingDone: false,
+      },
     });
 
     return NextResponse.json({

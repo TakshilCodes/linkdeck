@@ -1,4 +1,5 @@
 import { authOptions } from "@/lib/auth"
+import { getOnboardingRedirectPath } from "@/lib/onboarding"
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 
@@ -11,22 +12,7 @@ export default async function Dashboard() {
     }
 
     if (!session.user.onboardingDone) {
-        const nextStepMap = {
-            USERNAME: "theme",
-            THEME: "platforms",
-            PLATFORMS: "links",
-            LINKS: "profile",
-            PROFILE: "done",
-            DONE: "done",
-        } as const;
-
-        const nextStep = nextStepMap[session.user.onboardingStep as keyof typeof nextStepMap] ?? "username";
-
-        if (nextStep === "done") {
-            redirect("/dashboard");
-        }
-
-        redirect(`/onboarding?step=${nextStep}`);
+        redirect(getOnboardingRedirectPath(session.user.onboardingStep));
     }
 
     return redirect('/dashboard/links');

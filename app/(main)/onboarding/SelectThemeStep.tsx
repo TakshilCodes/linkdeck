@@ -62,7 +62,7 @@ const handleSkip = async () => {
           <button
             type="button"
             onClick={handleSkip}
-            className="absolute right-0 text-sm font-medium text-white/60 transition hover:text-white"
+            className="absolute right-0 cursor-pointer text-sm font-medium text-white/60 transition hover:text-white"
           >
             Skip
           </button>
@@ -94,7 +94,7 @@ const handleSkip = async () => {
                     key={theme.id}
                     type="button"
                     onClick={() => setSelectedThemeId(theme.id)}
-                    className="group text-left"
+                    className="group cursor-pointer text-left"
                   >
                     <div
                       className={`relative overflow-hidden rounded-[26px] border transition-all duration-200 ${
@@ -173,7 +173,7 @@ const handleSkip = async () => {
                   type="button"
                   onClick={handleContinue}
                   disabled={isPending || !selectedThemeId}
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-fuchsia-500 px-6 text-sm font-semibold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-60"
+                  className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-cyan-400 px-6 text-sm font-semibold text-slate-950 shadow-[0_10px_30px_rgba(34,211,238,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-60"
                 >
                   {isPending ? "Saving..." : "Start with this template"}
                 </button>

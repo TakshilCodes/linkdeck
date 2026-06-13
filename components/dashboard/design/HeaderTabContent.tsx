@@ -3,11 +3,13 @@
 import { useEffect, useState, useTransition, useRef } from "react";
 import Image from "next/image";
 import { Plus } from "lucide-react";
+import { mergeTheme } from "@/lib/themes/merge-theme";
 import { useDesignStore } from "@/store/design";
 import { saveHeaderDesignAction } from "@/actions/dashboard/header";
 import { toast } from "sonner";
 import ManageProfilePictureModal from "@/app/(main)/dashboard/links/ManageProfilePictureModal";
 import CustomColorPicker from "./CustomColorPicker";
+import type { DefaultTheme } from "@/types/theme";
 
 // A quick debounce hook
 function useDebounce<T>(value: T, delay: number): T {
@@ -66,6 +68,7 @@ type Props = {
     bio?: string | null;
   };
   initialCustomization: any;
+  activeTheme: DefaultTheme;
 };
 
 const FONT_OPTIONS = [
@@ -237,8 +240,9 @@ function CustomFontDropdown({
   );
 }
 
-export default function HeaderTabContent({initialProfile, initialCustomization}: Props) {
+export default function HeaderTabContent({initialProfile, initialCustomization, activeTheme}: Props) {
   const {previewProfile, updatePreviewProfile, previewCustomTheme, updatePreviewCustomTheme} = useDesignStore();
+  const resolvedTheme = mergeTheme(activeTheme, initialCustomization ?? null);
 
   // Inject custom styles
   useEffect(() => {
@@ -284,17 +288,17 @@ export default function HeaderTabContent({initialProfile, initialCustomization}:
       const debouncedTitle = useDebounce(localTitle, 500);
 
       // Using a local state for fonts and colors
-      const pageFontFamily = initialCustomization?.fontFamily ?? "INTER";
+      const pageFontFamily = resolvedTheme.fontFamily ?? "INTER";
 
-      const [useAltFont, setUseAltFont] = useState(!!initialCustomization?.titleFontFamily);
-      const [titleFontFamily, setTitleFontFamily] = useState(initialCustomization?.titleFontFamily ?? pageFontFamily);
-      const [titleColor, setTitleColor] = useState(initialCustomization?.titleColor ?? "#ffffff");
-      const [titleFontWeight, setTitleFontWeight] = useState(initialCustomization?.titleFontWeight ?? "MEDIUM");
-      const [titleFontSize, setTitleFontSize] = useState(initialCustomization?.titleFontSize ?? "MEDIUM");
-      const [profileFontSize, setProfileFontSize] = useState(initialCustomization?.profileFontSize ?? "SMALL");
-      const [profileColor, setProfileColor] = useState(initialCustomization?.profileColor ?? "#ffffff");
+      const [useAltFont, setUseAltFont] = useState(Boolean((initialCustomization?.titleFontFamily ?? resolvedTheme.titleFontFamily) != null));
+      const [titleFontFamily, setTitleFontFamily] = useState(resolvedTheme.titleFontFamily ?? pageFontFamily);
+      const [titleColor, setTitleColor] = useState(resolvedTheme.titleColor ?? "#ffffff");
+      const [titleFontWeight, setTitleFontWeight] = useState(resolvedTheme.titleFontWeight ?? "MEDIUM");
+      const [titleFontSize, setTitleFontSize] = useState(resolvedTheme.titleFontSize ?? "MEDIUM");
+      const [profileFontSize, setProfileFontSize] = useState(resolvedTheme.profileFontSize ?? "SMALL");
+      const [profileColor, setProfileColor] = useState(resolvedTheme.profileColor ?? "#ffffff");
       const [bio, setBio] = useState(initialProfile?.bio ?? "");
-      const [bioColor, setBioColor] = useState(initialCustomization?.bioColor ?? "#ffffff");
+      const [bioColor, setBioColor] = useState(resolvedTheme.bioColor ?? "#ffffff");
 
   useEffect(() => {
         // Only update preview state, no auto-save

@@ -23,13 +23,30 @@ export async function saveThemeAction(themeId: string) {
     }
   }
 
-  await prisma.user.update({
-    where: {
-      email: session.user.email,
-    },
-    data: {
-      defaultThemeId: themeId === "custom" ? null : themeId,
-    },
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true },
+  });
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: {
+        email: session.user.email!,
+      },
+      data: {
+        defaultThemeId: themeId === "custom" ? null : themeId,
+      },
+    });
+
+    if (themeId !== "custom") {
+      await tx.userCustomization.deleteMany({
+        where: { userId: user.id },
+      });
+    }
   });
 
   revalidatePath("/dashboard");

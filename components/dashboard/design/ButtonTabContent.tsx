@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { mergeTheme } from "@/lib/themes/merge-theme";
 import { useDesignStore } from "@/store/design";
 import CustomColorPicker from "./CustomColorPicker";
+import type { DefaultTheme } from "@/types/theme";
 
 type Props = {
   initialCustomization?: any;
+  activeTheme: DefaultTheme;
 };
 
-export default function ButtonTabContent({ initialCustomization }: Props) {
+export default function ButtonTabContent({ initialCustomization, activeTheme }: Props) {
   const { previewCustomTheme, updatePreviewCustomTheme } = useDesignStore();
+  const resolvedTheme = mergeTheme(activeTheme, initialCustomization ?? null);
 
-  const buttonStyle = previewCustomTheme?.buttonStyle ?? initialCustomization?.buttonStyle ?? "SOLID";
-  const buttonRadius = previewCustomTheme?.buttonRadius ?? initialCustomization?.buttonRadius ?? "ROUND";
-  const buttonShadow = previewCustomTheme?.buttonShadow ?? initialCustomization?.buttonShadow ?? "NONE";
-  const buttonColor = previewCustomTheme?.buttonColor ?? initialCustomization?.buttonColor ?? "#9CA3AF";
-  const buttonTextColor = previewCustomTheme?.buttonTextColor ?? initialCustomization?.buttonTextColor ?? "#ffffff";
-  const outlineColor = previewCustomTheme?.outlineColor ?? initialCustomization?.outlineColor ?? "#111111";
-  const shadowColor = previewCustomTheme?.shadowColor ?? initialCustomization?.shadowColor ?? "#000000";
+  const buttonStyle = previewCustomTheme?.buttonStyle ?? resolvedTheme.buttonStyle ?? "SOLID";
+  const buttonRadius = previewCustomTheme?.buttonRadius ?? resolvedTheme.buttonRadius ?? "ROUND";
+  const buttonShadow = previewCustomTheme?.buttonShadow ?? resolvedTheme.buttonShadow ?? "NONE";
+  const buttonColor = previewCustomTheme?.buttonColor ?? resolvedTheme.buttonColor ?? "#9CA3AF";
+  const buttonTextColor = previewCustomTheme?.buttonTextColor ?? resolvedTheme.buttonTextColor ?? "#ffffff";
+  const outlineColor = previewCustomTheme?.outlineColor ?? resolvedTheme.outlineColor ?? "#111111";
+  const shadowColor = previewCustomTheme?.shadowColor ?? resolvedTheme.shadowColor ?? "#000000";
 
   // Dispatch updates
   const handleStyleChange = (style: string) => updatePreviewCustomTheme({ buttonStyle: style as any });

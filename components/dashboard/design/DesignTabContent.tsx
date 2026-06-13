@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useMemo } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Check, Sparkles, Undo2, Redo2, Paintbrush, LayoutTemplate, Image as ImageIcon, Type, Square, Palette, MousePointerClick } from "lucide-react";
 import { toast } from "sonner";
 import CustomColorPicker from "./CustomColorPicker";
@@ -10,6 +11,7 @@ import TextTabContent from "./TextTabContent";
 import ButtonTabContent from "./ButtonTabContent";
 
 import type { DefaultTheme } from "@/types/theme";
+import { mergeTheme } from "@/lib/themes/merge-theme";
 import { useDesignStore } from "@/store/design";
 import { saveThemeAction } from "@/actions/dashboard/design";
 import { saveHeaderDesignAction } from "@/actions/dashboard/header";
@@ -67,19 +69,26 @@ const SIDEBAR_ITEMS = [
 ];
 
 // Wallpaper Tab Content Component
-function WallpaperTabContent({ initialCustomization }: { initialCustomization: any }) {
+function WallpaperTabContent({
+  initialCustomization,
+  activeTheme,
+}: {
+  initialCustomization: any;
+  activeTheme: ThemeItem;
+}) {
   const { previewCustomTheme, updatePreviewCustomTheme } = useDesignStore();
   
-  // Use store state as single source of truth, fallback to initial values only if previewCustomTheme is null
-  const wallpaperStyle = previewCustomTheme?.wallpaperStyle ?? initialCustomization?.wallpaperStyle;
-  const backgroundColor = previewCustomTheme?.backgroundColor ?? initialCustomization?.backgroundColor ?? '#FFFFFF';
-  const backgroundColor2 = previewCustomTheme?.backgroundColor2 ?? initialCustomization?.backgroundColor2 ?? '#000000';
-  const gradientDirection = previewCustomTheme?.gradientDirection ?? initialCustomization?.gradientDirection ?? 'LINEAR_UP';
-  const patternStyle = previewCustomTheme?.patternStyle ?? initialCustomization?.patternStyle ?? 'GRID';
-  const blurStrength = previewCustomTheme?.blurStrength ?? initialCustomization?.blurStrength ?? 'MEDIUM';
-  const patternColor = previewCustomTheme?.patternColor ?? initialCustomization?.patternColor ?? '#FFFFFF';
-  const shadowColor = previewCustomTheme?.shadowColor ?? initialCustomization?.shadowColor ?? '#000000';
-  const outlineColor = previewCustomTheme?.outlineColor ?? initialCustomization?.outlineColor ?? '#FFFFFF';
+  const resolvedTheme = mergeTheme(activeTheme, initialCustomization ?? null);
+
+  const wallpaperStyle = previewCustomTheme?.wallpaperStyle ?? resolvedTheme.wallpaperStyle;
+  const backgroundColor = previewCustomTheme?.backgroundColor ?? resolvedTheme.backgroundColor ?? "#FFFFFF";
+  const backgroundColor2 = previewCustomTheme?.backgroundColor2 ?? resolvedTheme.backgroundColor2 ?? "#000000";
+  const gradientDirection = previewCustomTheme?.gradientDirection ?? resolvedTheme.gradientDirection ?? "LINEAR_UP";
+  const patternStyle = previewCustomTheme?.patternStyle ?? resolvedTheme.patternStyle ?? "GRID";
+  const blurStrength = previewCustomTheme?.blurStrength ?? resolvedTheme.blurStrength ?? "MEDIUM";
+  const patternColor = previewCustomTheme?.patternColor ?? resolvedTheme.patternColor ?? "#FFFFFF";
+  const shadowColor = previewCustomTheme?.shadowColor ?? resolvedTheme.shadowColor ?? "#000000";
+  const outlineColor = previewCustomTheme?.outlineColor ?? resolvedTheme.outlineColor ?? "#FFFFFF";
 
   const wallpaperStyles = [
     { id: 'FILL', name: 'Fill', icon: '■' },
@@ -149,7 +158,7 @@ function WallpaperTabContent({ initialCustomization }: { initialCustomization: a
                 <button
                   type="button"
                   onClick={() => handleWallpaperStyleChange(style.id)}
-                  className={`h-24 w-24 rounded-2xl border-2 transition-all duration-200 overflow-hidden ${
+                  className={`relative h-24 w-24 rounded-2xl border-2 transition-all duration-200 overflow-hidden ${
                     isSelected 
                       ? 'border-violet-500 bg-gradient-to-br from-violet-900 to-purple-900 shadow-lg shadow-violet-500/25 ring-2 ring-violet-400 ring-offset-2 ring-offset-violet-900' 
                       : 'border-violet-300/50 bg-gradient-to-br from-violet-800 to-purple-800 hover:border-violet-400 hover:from-violet-700 hover:to-purple-700'
@@ -324,13 +333,13 @@ function WallpaperTabContent({ initialCustomization }: { initialCustomization: a
           <h3 className="text-lg font-semibold text-white">Pattern style</h3>
         <div className="flex flex-wrap gap-3">
           {patternStyles.map((style) => {
-            const isSelected = previewCustomTheme?.patternStyle === style.id;
+            const isSelected = patternStyle === style.id;
             return (
               <div key={style.id} className="flex flex-col items-center gap-2">
                 <button
                   type="button"
                   onClick={() => updatePreviewCustomTheme({ patternStyle: style.id as any })}
-                  className={`h-24 w-24 rounded-full border-2 transition-all duration-200 overflow-hidden ${
+                  className={`relative h-24 w-24 rounded-full border-2 transition-all duration-200 overflow-hidden ${
                     isSelected 
                       ? 'border-violet-500 bg-gradient-to-br from-violet-900 to-purple-900 shadow-lg shadow-violet-500/25 scale-105' 
                       : 'border-violet-300/50 bg-gradient-to-br from-violet-800 to-purple-800 hover:border-violet-400 hover:from-violet-700 hover:to-purple-700'
@@ -347,8 +356,13 @@ function WallpaperTabContent({ initialCustomization }: { initialCustomization: a
                     )}
                     {style.id === 'ORGANIC' && (
                       <div className="h-full w-full bg-gradient-to-br from-violet-700 to-purple-700">
-                        <div className="h-full w-full opacity-50" style={{
-                          backgroundImage: 'radial-gradient(circle at 25% 25%, rgba(255,255,255,0.3) 6px, transparent 2px, rgba(255,255,255,0.3) 8px, transparent 4px, rgba(255,255,255,0.3) 6px, transparent 8px, rgba(255,255,255,0.3) 10px, rgba(255,255,255,0.3) 5px, transparent 5px, rgba(255,255,255,0.3) 7px)',
+                        <div className="h-full w-full opacity-65" style={{
+                          backgroundImage: `
+                            radial-gradient(circle at 18% 20%, rgba(255,255,255,0.24) 0 14%, transparent 15%),
+                            radial-gradient(circle at 80% 18%, rgba(255,255,255,0.22) 0 11%, transparent 12%),
+                            radial-gradient(circle at 32% 78%, rgba(255,255,255,0.2) 0 16%, transparent 17%),
+                            radial-gradient(circle at 76% 72%, rgba(255,255,255,0.18) 0 18%, transparent 19%)
+                          `,
                         }} />
                       </div>
                     )}
@@ -405,17 +419,107 @@ function WallpaperTabContent({ initialCustomization }: { initialCustomization: a
 
 export default function DesignTabContent({ themes, currentThemeId, initialProfile, initialCustomization }: Props) {
   const [activeSidebarItem, setActiveSidebarItem] = useState("theme");
+  const router = useRouter();
 
   const [isPending, startTransition] = useTransition();
-  const { previewTheme, setPreviewTheme, previewProfile, setPreviewProfile, previewCustomTheme, updatePreviewCustomTheme } = useDesignStore();
+  const {
+    previewTheme,
+    setPreviewTheme,
+    previewProfile,
+    setPreviewProfile,
+    previewCustomTheme,
+    setPreviewCustomTheme,
+    updatePreviewCustomTheme,
+  } = useDesignStore();
 
-  // Track if there are unsaved header changes
-  const [hasUnsavedHeaderChanges, setHasUnsavedHeaderChanges] = useState(false);
-  
-  // Ensure save button starts disabled
+  // Keep design preview state scoped to this page so stale Zustand data
+  // does not make the Save button re-enable after navigation.
   useEffect(() => {
-    setHasUnsavedHeaderChanges(false);
-  }, []);
+    setPreviewTheme(null);
+    setPreviewProfile(null);
+    setPreviewCustomTheme(null);
+
+    return () => {
+      setPreviewTheme(null);
+      setPreviewProfile(null);
+      setPreviewCustomTheme(null);
+    };
+  }, [setPreviewCustomTheme, setPreviewProfile, setPreviewTheme]);
+
+  const activeTheme =
+    previewTheme ??
+    themes.find((theme) => theme.id === currentThemeId) ??
+    CUSTOM_BASE_THEME;
+
+  const savedTheme =
+    themes.find((theme) => theme.id === currentThemeId) ??
+    CUSTOM_BASE_THEME;
+
+  const savedThemeId = currentThemeId ?? "custom";
+  const selectedThemeId = previewTheme?.id ?? savedThemeId;
+  const hasThemeSelectionChange = selectedThemeId !== savedThemeId;
+
+  const savedResolvedTheme = useMemo(
+    () => mergeTheme(savedTheme, initialCustomization ?? null),
+    [savedTheme, initialCustomization]
+  );
+
+  const currentResolvedTheme = useMemo(
+    () => mergeTheme(activeTheme, previewCustomTheme ?? null),
+    [activeTheme, previewCustomTheme]
+  );
+
+  const savedProfileSnapshot = useMemo(
+    () => ({
+      displayName: initialProfile?.displayName ?? initialProfile?.username ?? "",
+      bio: initialProfile?.bio ?? "",
+    }),
+    [initialProfile]
+  );
+
+  const currentProfileSnapshot = useMemo(
+    () => ({
+      displayName: previewProfile?.displayName ?? savedProfileSnapshot.displayName,
+      bio: previewProfile?.bio ?? savedProfileSnapshot.bio,
+    }),
+    [previewProfile, savedProfileSnapshot]
+  );
+
+  const themeFieldsToCompare: (keyof ThemeItem)[] = [
+    "wallpaperStyle",
+    "backgroundColor",
+    "backgroundColor2",
+    "gradientDirection",
+    "patternStyle",
+    "blurStrength",
+    "fontFamily",
+    "titleFontFamily",
+    "buttonStyle",
+    "buttonRadius",
+    "buttonShadow",
+    "buttonColor",
+    "buttonTextColor",
+    "shadowColor",
+    "patternColor",
+    "outlineColor",
+    "titleFontSize",
+    "titleColor",
+    "titleFontWeight",
+    "profileFontSize",
+    "profileColor",
+    "bioColor",
+  ];
+
+  const hasThemeCustomizationChanges = themeFieldsToCompare.some(
+    (field) => currentResolvedTheme[field] !== savedResolvedTheme[field]
+  );
+
+  const hasProfileChanges =
+    currentProfileSnapshot.displayName !== savedProfileSnapshot.displayName ||
+    currentProfileSnapshot.bio !== savedProfileSnapshot.bio;
+
+  const shouldEnableSave =
+    hasThemeSelectionChange || hasThemeCustomizationChanges || hasProfileChanges;
 
   // Custom Dropdown Components
   const FONT_FAMILY_OPTIONS = [
@@ -519,67 +623,6 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
     );
   }
 
-  // Check for ALL changes
-  useEffect(() => {
-    // 1. Check profile changes (header title and bio)
-    const initialTitle = initialProfile?.displayName ?? initialProfile?.username ?? "";
-    const currentTitle = previewProfile?.displayName ?? initialTitle;
-    const titleChanged = currentTitle !== initialTitle;
-
-    const initialBio = initialProfile?.bio ?? "";
-    const currentBio = previewProfile?.bio ?? initialBio;
-    const bioChanged = currentBio !== initialBio;
-
-    const profileChanged = titleChanged || bioChanged;
-
-    // 2. Check custom theme changes (all tabs)
-    let customThemeChanged = false;
-    
-    if (previewCustomTheme) {
-      // These are the fallback values components inject when the DB value is missing/null
-      const defaults: any = {
-        titleColor: "#010101",
-        titleFontFamily: null,
-        titleFontWeight: "MEDIUM",
-        titleFontSize: "MEDIUM",
-        profileFontSize: "SMALL",
-        profileColor: "#666666",
-        bioColor: "#ffffff",
-        fontFamily: "INTER",
-        wallpaperStyle: "FILL",
-        backgroundColor: "#FFFFFF",
-        backgroundColor2: "#000000",
-        gradientDirection: "LINEAR_UP",
-        patternStyle: "GRID",
-        blurStrength: "MEDIUM",
-        patternColor: "#FFFFFF",
-        shadowColor: "#000000",
-        outlineColor: "#FFFFFF",
-        buttonStyle: "SOLID",
-        buttonRadius: "ROUND",
-        buttonShadow: "NONE",
-        buttonColor: "#000000",
-        buttonTextColor: "#ffffff"
-      };
-
-      for (const key of Object.keys(previewCustomTheme)) {
-        const previewVal = previewCustomTheme[key as keyof typeof previewCustomTheme];
-        const initialVal = initialCustomization?.[key];
-        
-        // Match the exact ?? logic used in components to determine what value
-        // represents the "initial" unmodified state.
-        const finalInitialVal = initialVal ?? defaults[key];
-
-        if (previewVal !== finalInitialVal) {
-          customThemeChanged = true;
-          break;
-        }
-      }
-    }
-    
-    setHasUnsavedHeaderChanges(Boolean(profileChanged || customThemeChanged));
-  }, [previewProfile, previewCustomTheme, initialProfile, initialCustomization]);
-
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "") || "theme";
@@ -592,145 +635,115 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  const selectedThemeId = previewTheme?.id ?? currentThemeId;
-  const hasThemeChanges = selectedThemeId !== currentThemeId;
-  const shouldEnableSave = hasThemeChanges || hasUnsavedHeaderChanges;
-  
-  console.log('=== SAVE BUTTON STATE DEBUG ===');
-  console.log('selectedThemeId:', selectedThemeId);
-  console.log('currentThemeId:', currentThemeId);
-  console.log('hasThemeChanges:', hasThemeChanges);
-  console.log('hasUnsavedHeaderChanges:', hasUnsavedHeaderChanges);
-  console.log('shouldEnableSave:', shouldEnableSave);
-  
-  
+  const effectiveCustomization = hasThemeSelectionChange ? null : initialCustomization;
+  const resolvedActiveTheme = mergeTheme(activeTheme, effectiveCustomization ?? null);
+
   const handleSave = async () => {
     startTransition(async () => {
       try {
-        // Save theme changes if any
-        if (selectedThemeId && hasThemeChanges) {
+        if (hasThemeSelectionChange && selectedThemeId) {
           await saveThemeAction(selectedThemeId);
         }
 
-        // Save header changes if any
-        if (hasUnsavedHeaderChanges && (previewProfile || previewCustomTheme)) {
-          const headerData: any = {};
-          
-          if (previewProfile?.displayName !== undefined && previewProfile.displayName !== initialProfile?.displayName) {
-            headerData.displayName = previewProfile.displayName;
-          }
-
-          if (previewProfile?.bio !== undefined) {
-            const initialBio = initialProfile?.bio ?? "";
-            if (previewProfile.bio !== initialBio) {
-              headerData.bio = previewProfile.bio;
-            }
-          }
-          
-          if (previewCustomTheme) {
-            if (previewCustomTheme.titleColor !== initialCustomization?.titleColor) {
-              headerData.titleColor = previewCustomTheme.titleColor;
-            }
-            if (previewCustomTheme.titleFontFamily !== initialCustomization?.titleFontFamily) {
-              headerData.titleFontFamily = previewCustomTheme.titleFontFamily;
-            }
-            if (previewCustomTheme.titleFontWeight !== initialCustomization?.titleFontWeight) {
-              headerData.titleFontWeight = previewCustomTheme.titleFontWeight;
-            }
-            if (previewCustomTheme.titleFontSize !== initialCustomization?.titleFontSize) {
-              headerData.titleFontSize = previewCustomTheme.titleFontSize;
-            }
-            if (previewCustomTheme.profileFontSize !== initialCustomization?.profileFontSize) {
-              headerData.profileFontSize = previewCustomTheme.profileFontSize;
-            }
-            if (previewCustomTheme.profileColor !== initialCustomization?.profileColor) {
-              headerData.profileColor = previewCustomTheme.profileColor;
-            }
-            if (previewCustomTheme.bioColor !== initialCustomization?.bioColor) {
-              headerData.bioColor = previewCustomTheme.bioColor;
-            }
-            if (previewCustomTheme.fontFamily !== initialCustomization?.fontFamily) {
-              headerData.fontFamily = previewCustomTheme.fontFamily;
-            }
-          }
-
-          if (Object.keys(headerData).length > 0) {
-            await saveHeaderDesignAction(headerData);
-          }
+        const headerData: any = {};
+        if (currentProfileSnapshot.displayName !== savedProfileSnapshot.displayName) {
+          headerData.displayName = currentProfileSnapshot.displayName;
+        }
+        if (currentProfileSnapshot.bio !== savedProfileSnapshot.bio) {
+          headerData.bio = currentProfileSnapshot.bio;
+        }
+        if (currentResolvedTheme.titleColor !== savedResolvedTheme.titleColor) {
+          headerData.titleColor = currentResolvedTheme.titleColor;
+        }
+        if (currentResolvedTheme.titleFontFamily !== savedResolvedTheme.titleFontFamily) {
+          headerData.titleFontFamily = currentResolvedTheme.titleFontFamily;
+        }
+        if (currentResolvedTheme.titleFontWeight !== savedResolvedTheme.titleFontWeight) {
+          headerData.titleFontWeight = currentResolvedTheme.titleFontWeight;
+        }
+        if (currentResolvedTheme.titleFontSize !== savedResolvedTheme.titleFontSize) {
+          headerData.titleFontSize = currentResolvedTheme.titleFontSize;
+        }
+        if (currentResolvedTheme.profileFontSize !== savedResolvedTheme.profileFontSize) {
+          headerData.profileFontSize = currentResolvedTheme.profileFontSize;
+        }
+        if (currentResolvedTheme.profileColor !== savedResolvedTheme.profileColor) {
+          headerData.profileColor = currentResolvedTheme.profileColor;
+        }
+        if (currentResolvedTheme.bioColor !== savedResolvedTheme.bioColor) {
+          headerData.bioColor = currentResolvedTheme.bioColor;
+        }
+        if (currentResolvedTheme.fontFamily !== savedResolvedTheme.fontFamily) {
+          headerData.fontFamily = currentResolvedTheme.fontFamily;
         }
 
-        // Save wallpaper changes if any
-        if (previewCustomTheme) {
-          const wallpaperData: any = {};
-          
-          if (previewCustomTheme.wallpaperStyle !== initialCustomization?.wallpaperStyle) {
-            wallpaperData.wallpaperStyle = previewCustomTheme.wallpaperStyle;
-          }
-          if (previewCustomTheme.backgroundColor !== initialCustomization?.backgroundColor) {
-            wallpaperData.backgroundColor = previewCustomTheme.backgroundColor;
-          }
-          if (previewCustomTheme.backgroundColor2 !== initialCustomization?.backgroundColor2) {
-            wallpaperData.backgroundColor2 = previewCustomTheme.backgroundColor2;
-          }
-          if (previewCustomTheme.gradientDirection !== initialCustomization?.gradientDirection) {
-            wallpaperData.gradientDirection = previewCustomTheme.gradientDirection;
-          }
-          if (previewCustomTheme.patternStyle !== initialCustomization?.patternStyle) {
-            wallpaperData.patternStyle = previewCustomTheme.patternStyle;
-          }
-          if (previewCustomTheme.blurStrength !== initialCustomization?.blurStrength) {
-            wallpaperData.blurStrength = previewCustomTheme.blurStrength;
-          }
-          if (previewCustomTheme.patternColor !== initialCustomization?.patternColor) {
-            wallpaperData.patternColor = previewCustomTheme.patternColor;
-          }
-
-          if (Object.keys(wallpaperData).length > 0) {
-            await saveWallpaperDesignAction(wallpaperData);
-          }
+        if (Object.keys(headerData).length > 0) {
+          await saveHeaderDesignAction(headerData);
         }
 
-        // Save button changes if any
-        if (previewCustomTheme) {
-          const buttonData: any = {};
-          
-          if (previewCustomTheme.buttonStyle !== initialCustomization?.buttonStyle) {
-            buttonData.buttonStyle = previewCustomTheme.buttonStyle;
-          }
-          if (previewCustomTheme.buttonRadius !== initialCustomization?.buttonRadius) {
-            buttonData.buttonRadius = previewCustomTheme.buttonRadius;
-          }
-          if (previewCustomTheme.buttonShadow !== initialCustomization?.buttonShadow) {
-            buttonData.buttonShadow = previewCustomTheme.buttonShadow;
-          }
-          if (previewCustomTheme.buttonColor !== initialCustomization?.buttonColor) {
-            buttonData.buttonColor = previewCustomTheme.buttonColor;
-          }
-          if (previewCustomTheme.buttonTextColor !== initialCustomization?.buttonTextColor) {
-            buttonData.buttonTextColor = previewCustomTheme.buttonTextColor;
-          }
-          if (previewCustomTheme.shadowColor !== initialCustomization?.shadowColor) {
-            buttonData.shadowColor = previewCustomTheme.shadowColor;
-          }
-          if (previewCustomTheme.outlineColor !== initialCustomization?.outlineColor) {
-            buttonData.outlineColor = previewCustomTheme.outlineColor;
-          }
+        const wallpaperData: any = {};
+        if (currentResolvedTheme.wallpaperStyle !== savedResolvedTheme.wallpaperStyle) {
+          wallpaperData.wallpaperStyle = currentResolvedTheme.wallpaperStyle;
+        }
+        if (currentResolvedTheme.backgroundColor !== savedResolvedTheme.backgroundColor) {
+          wallpaperData.backgroundColor = currentResolvedTheme.backgroundColor;
+        }
+        if (currentResolvedTheme.backgroundColor2 !== savedResolvedTheme.backgroundColor2) {
+          wallpaperData.backgroundColor2 = currentResolvedTheme.backgroundColor2;
+        }
+        if (currentResolvedTheme.gradientDirection !== savedResolvedTheme.gradientDirection) {
+          wallpaperData.gradientDirection = currentResolvedTheme.gradientDirection;
+        }
+        if (currentResolvedTheme.patternStyle !== savedResolvedTheme.patternStyle) {
+          wallpaperData.patternStyle = currentResolvedTheme.patternStyle;
+        }
+        if (currentResolvedTheme.blurStrength !== savedResolvedTheme.blurStrength) {
+          wallpaperData.blurStrength = currentResolvedTheme.blurStrength;
+        }
+        if (currentResolvedTheme.patternColor !== savedResolvedTheme.patternColor) {
+          wallpaperData.patternColor = currentResolvedTheme.patternColor;
+        }
 
-          if (Object.keys(buttonData).length > 0) {
-            await saveButtonsDesignAction(buttonData);
-          }
+        if (Object.keys(wallpaperData).length > 0) {
+          await saveWallpaperDesignAction(wallpaperData);
+        }
+
+        const buttonData: any = {};
+        if (currentResolvedTheme.buttonStyle !== savedResolvedTheme.buttonStyle) {
+          buttonData.buttonStyle = currentResolvedTheme.buttonStyle;
+        }
+        if (currentResolvedTheme.buttonRadius !== savedResolvedTheme.buttonRadius) {
+          buttonData.buttonRadius = currentResolvedTheme.buttonRadius;
+        }
+        if (currentResolvedTheme.buttonShadow !== savedResolvedTheme.buttonShadow) {
+          buttonData.buttonShadow = currentResolvedTheme.buttonShadow;
+        }
+        if (currentResolvedTheme.buttonColor !== savedResolvedTheme.buttonColor) {
+          buttonData.buttonColor = currentResolvedTheme.buttonColor;
+        }
+        if (currentResolvedTheme.buttonTextColor !== savedResolvedTheme.buttonTextColor) {
+          buttonData.buttonTextColor = currentResolvedTheme.buttonTextColor;
+        }
+        if (currentResolvedTheme.shadowColor !== savedResolvedTheme.shadowColor) {
+          buttonData.shadowColor = currentResolvedTheme.shadowColor;
+        }
+        if (currentResolvedTheme.outlineColor !== savedResolvedTheme.outlineColor) {
+          buttonData.outlineColor = currentResolvedTheme.outlineColor;
+        }
+
+        if (Object.keys(buttonData).length > 0) {
+          await saveButtonsDesignAction(buttonData);
         }
 
         toast.success("Changes saved successfully!");
-        setHasUnsavedHeaderChanges(false);
+        setPreviewTheme(null);
+        setPreviewProfile(null);
+        setPreviewCustomTheme(null);
+        router.refresh();
       } catch (error) {
         toast.error("Failed to save changes");
       }
     });
-  };
-
-  const handleHeaderChangesSaved = () => {
-    // No longer needed since we're not using auto-save
   };
 
   return (
@@ -742,7 +755,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
         <div className="flex items-center gap-2 sm:gap-4">
           <button
             onClick={handleSave}
-            disabled={isPending || !selectedThemeId || !shouldEnableSave}
+            disabled={isPending || !shouldEnableSave}
             className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending ? "Saving..." : "Save"}
@@ -783,7 +796,10 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
               {/* Custom Card */}
               <button 
                 type="button" 
-                onClick={() => setPreviewTheme(CUSTOM_BASE_THEME)}
+                onClick={() => {
+                  setPreviewTheme(CUSTOM_BASE_THEME);
+                  setPreviewCustomTheme(null);
+                }}
                 className="group text-left"
               >
                 <div
@@ -813,7 +829,10 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <button
                     key={theme.id}
                     type="button"
-                    onClick={() => setPreviewTheme(theme as any)}
+                    onClick={() => {
+                      setPreviewTheme(theme as any);
+                      setPreviewCustomTheme(null);
+                    }}
                     className="group text-left"
                   >
                     <div
@@ -859,20 +878,25 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
 
           {activeSidebarItem === "header" && (
             <HeaderTabContent 
+               key={`header-${selectedThemeId ?? "current"}`}
                initialProfile={initialProfile || {}}
-               initialCustomization={initialCustomization || {}}
+               initialCustomization={effectiveCustomization || {}}
+               activeTheme={activeTheme}
             />
           )}
 
           {activeSidebarItem === "text" && (
             <TextTabContent 
-               initialCustomization={initialCustomization || {}}
+               key={`text-${selectedThemeId ?? "current"}`}
+               initialCustomization={effectiveCustomization || {}}
+               activeTheme={activeTheme}
             />
           )}
 
           {activeSidebarItem === "wallpaper" && (
             <WallpaperTabContent 
-               initialCustomization={initialCustomization || {}}
+               initialCustomization={effectiveCustomization || {}}
+               activeTheme={activeTheme}
             />
           )}
 
@@ -885,7 +909,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Primary Background</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.backgroundColor ?? initialCustomization?.backgroundColor ?? '#FFFFFF'}
+                      value={previewCustomTheme?.backgroundColor ?? resolvedActiveTheme.backgroundColor ?? '#FFFFFF'}
                       onChange={(color) => updatePreviewCustomTheme({ backgroundColor: color })}
                     />
                   </div>
@@ -893,7 +917,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Secondary Background</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.backgroundColor2 ?? initialCustomization?.backgroundColor2 ?? '#000000'}
+                      value={previewCustomTheme?.backgroundColor2 ?? resolvedActiveTheme.backgroundColor2 ?? '#000000'}
                       onChange={(color) => updatePreviewCustomTheme({ backgroundColor2: color })}
                     />
                   </div>
@@ -907,7 +931,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Title Color</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.titleColor ?? initialCustomization?.titleColor ?? '#000000'}
+                      value={previewCustomTheme?.titleColor ?? resolvedActiveTheme.titleColor ?? '#000000'}
                       onChange={(color) => updatePreviewCustomTheme({ titleColor: color })}
                     />
                   </div>
@@ -915,7 +939,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Profile Text Color</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.profileColor ?? initialCustomization?.profileColor ?? '#666666'}
+                      value={previewCustomTheme?.profileColor ?? resolvedActiveTheme.profileColor ?? '#666666'}
                       onChange={(color) => updatePreviewCustomTheme({ profileColor: color })}
                     />
                   </div>
@@ -929,7 +953,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Button Background</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.buttonColor ?? initialCustomization?.buttonColor ?? '#000000'}
+                      value={previewCustomTheme?.buttonColor ?? resolvedActiveTheme.buttonColor ?? '#000000'}
                       onChange={(color) => updatePreviewCustomTheme({ buttonColor: color })}
                     />
                   </div>
@@ -937,7 +961,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Button Text Color</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.buttonTextColor ?? initialCustomization?.buttonTextColor ?? '#FFFFFF'}
+                      value={previewCustomTheme?.buttonTextColor ?? resolvedActiveTheme.buttonTextColor ?? '#FFFFFF'}
                       onChange={(color) => updatePreviewCustomTheme({ buttonTextColor: color })}
                     />
                   </div>
@@ -951,7 +975,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Shadow Color</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.shadowColor ?? initialCustomization?.shadowColor ?? '#000000'}
+                      value={previewCustomTheme?.shadowColor ?? resolvedActiveTheme.shadowColor ?? '#000000'}
                       onChange={(color) => updatePreviewCustomTheme({ shadowColor: color })}
                     />
                   </div>
@@ -959,7 +983,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Pattern Color</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.patternColor ?? initialCustomization?.patternColor ?? '#FFFFFF'}
+                      value={previewCustomTheme?.patternColor ?? resolvedActiveTheme.patternColor ?? '#FFFFFF'}
                       onChange={(color) => updatePreviewCustomTheme({ patternColor: color })}
                     />
                   </div>
@@ -973,7 +997,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                   <div>
                     <label className="block text-sm font-medium text-white/80 mb-2">Outline Color</label>
                     <CustomColorPicker
-                      value={previewCustomTheme?.outlineColor ?? initialCustomization?.outlineColor ?? '#FFFFFF'}
+                      value={previewCustomTheme?.outlineColor ?? resolvedActiveTheme.outlineColor ?? '#FFFFFF'}
                       onChange={(color) => updatePreviewCustomTheme({ outlineColor: color })}
                     />
                   </div>
@@ -984,7 +1008,9 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
 
           {activeSidebarItem === "buttons" && (
             <ButtonTabContent 
-               initialCustomization={initialCustomization || {}}
+               key={`buttons-${selectedThemeId ?? "current"}`}
+               initialCustomization={effectiveCustomization || {}}
+               activeTheme={activeTheme}
             />
           )}
 
