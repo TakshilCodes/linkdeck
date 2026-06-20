@@ -1023,12 +1023,12 @@ export default function LinksBoard({ boardItems }: Props) {
           onDragEnd={handleDragEnd}
         >
           {/* Match link-in-bio editor width: contained column, not full-bleed */}
-          <div className="mx-auto w-full max-w-[640px]">
+          <div className="mx-auto w-full max-w-160">
             <BoardDropArea isDragging={!!activeId}>
               <SortableContext items={topLevelIds} strategy={verticalListSortingStrategy}>
               {cards.length === 0 ? (
                 <div
-                  className="rounded-[22px] border border-dashed border-white/12 bg-white/[0.02] px-6 py-14 text-center"
+                  className="rounded-[22px] border border-dashed border-white/12 bg-white/2 px-6 py-14 text-center"
                   role="status"
                 >
                   <p className="text-base font-medium text-white/85">

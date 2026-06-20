@@ -298,7 +298,7 @@ export default function HeaderTabContent({initialProfile, initialCustomization, 
       const [profileFontSize, setProfileFontSize] = useState(resolvedTheme.profileFontSize ?? "SMALL");
       const [profileColor, setProfileColor] = useState(resolvedTheme.profileColor ?? "#ffffff");
       const [bio, setBio] = useState(initialProfile?.bio ?? "");
-      const [bioColor, setBioColor] = useState(resolvedTheme.bioColor ?? "#ffffff");
+      const [bioColor, setBioColor] = useState<string | null>(resolvedTheme.bioColor ?? null);
 
   useEffect(() => {
         // Only update preview state, no auto-save
@@ -308,14 +308,15 @@ export default function HeaderTabContent({initialProfile, initialCustomization, 
   // Realtime updates for color and font family
   useEffect(() => {
     updatePreviewCustomTheme({
+      titleFontFamily: useAltFont ? titleFontFamily : null,
       titleColor,
       titleFontWeight,
       titleFontSize,
       profileFontSize,
       profileColor,
-      bioColor
+      bioColor,
     });
-  }, [useAltFont, titleFontFamily, titleColor, titleFontWeight, titleFontSize, profileFontSize, bioColor, updatePreviewCustomTheme]);
+  }, [useAltFont, titleFontFamily, titleColor, titleFontWeight, titleFontSize, profileFontSize, profileColor, bioColor, updatePreviewCustomTheme]);
 
   // Hook up local change dispatch manually instead of deeply abstracting debounce right now for fonts/colors
   // Only update preview state, no auto-save
@@ -434,7 +435,7 @@ export default function HeaderTabContent({initialProfile, initialCustomization, 
             <div className="mt-3">
               <label className="block text-sm font-medium text-white/80 mb-2">Bio Color</label>
               <CustomColorPicker
-                value={bioColor || "#ffffff"}
+                value={bioColor ?? "#ffffff"}
                 onChange={handleBioColorChange}
               />
             </div>

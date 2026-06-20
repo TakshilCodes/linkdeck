@@ -17,7 +17,7 @@ export default function Navbar() {
     { id: 1, href: "#", label: "Features" },
     { id: 2, href: "#", label: "Explore" },
     { id: 3, href: "#", label: "Learn" },
-    { id: 4, href: "#", label: "Help" },
+    { id: 4, href: "/help", label: "Help" },
   ];
 
   return (

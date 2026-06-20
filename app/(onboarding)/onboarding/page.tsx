@@ -9,7 +9,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { PlatformType } from "@/lib/social-icons";
 
-export default async function OnBoarding(props: PageProps<"/onboarding">) {
+export default async function OnBoarding(props: { searchParams: Promise<{ step?: string; mode?: string }> }) {
   const searchParams = await props.searchParams;
   const step = searchParams.step;
   const mode = searchParams.mode;

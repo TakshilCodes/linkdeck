@@ -464,10 +464,13 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
     [savedTheme, initialCustomization]
   );
 
-  const currentResolvedTheme = useMemo(
-    () => mergeTheme(activeTheme, previewCustomTheme ?? null),
-    [activeTheme, previewCustomTheme]
-  );
+  const currentResolvedTheme = useMemo(() => {
+    const effectiveCurrentCustomization = hasThemeSelectionChange
+      ? (previewCustomTheme ?? null)
+      : { ...(initialCustomization ?? {}), ...(previewCustomTheme ?? {}) };
+
+    return mergeTheme(activeTheme, effectiveCurrentCustomization);
+  }, [activeTheme, hasThemeSelectionChange, initialCustomization, previewCustomTheme]);
 
   const savedProfileSnapshot = useMemo(
     () => ({

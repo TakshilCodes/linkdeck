@@ -109,8 +109,8 @@ export default function AddItemModal({
       />
 
       <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-full max-w-[720px] overflow-hidden rounded-[30px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,32,55,0.96)_0%,rgba(8,20,39,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
-          <div className="relative border-b border-white/10 px-6 py-5">
+        <div className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,32,55,0.96)_0%,rgba(8,20,39,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
+          <div className="relative border-b border-white/10 px-5 py-3.5">
             {mode === "link" && (
               <button
                 type="button"
@@ -121,7 +121,7 @@ export default function AddItemModal({
               </button>
             )}
 
-            <h2 className="text-center text-[24px] font-semibold text-white">
+            <h2 className="text-center text-[22px] font-semibold text-white">
               Add
             </h2>
 
@@ -134,14 +134,14 @@ export default function AddItemModal({
             </button>
           </div>
 
-          <div className="px-6 py-6">
-            <div className="rounded-[22px] border border-white/10 bg-white/5 px-5 py-4">
+          <div className="px-5 py-5">
+            <div className="rounded-[20px] border border-white/10 bg-white/5 px-5 py-3.5">
               <input
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Paste or search a link"
-                className="w-full bg-transparent text-[17px] text-white outline-none placeholder:text-white/35"
+                className="w-full bg-transparent text-[16px] text-white outline-none placeholder:text-white/35"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -153,17 +153,17 @@ export default function AddItemModal({
 
             {mode === "root" ? (
               <>
-                <div className="mt-6 grid grid-cols-2 gap-4">
+                <div className="mt-5 grid grid-cols-2 gap-3">
                   <button
                     type="button"
                     onClick={() => setMode("link")}
-                    className="rounded-3xl border border-white/10 bg-white/4 p-5 text-left transition hover:bg-white/[0.07]"
+                    className="rounded-[26px] border border-white/10 bg-white/4 p-4 text-left transition hover:bg-white/[0.07]"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300">
-                      <Link2 className="h-6 w-6" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300">
+                      <Link2 className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold text-white">Link</h3>
-                    <p className="mt-1 text-sm text-white/55">
+                    <h3 className="mt-3.5 text-[17px] font-semibold text-white">Link</h3>
+                    <p className="mt-1 text-sm leading-6 text-white/55">
                       Add a normal link from any website.
                     </p>
                   </button>
@@ -172,13 +172,13 @@ export default function AddItemModal({
                     type="button"
                     onClick={handleCreateCollection}
                     disabled={disableCollection || isPending}
-                    className="rounded-3xl border border-white/10 bg-white/4 p-5 text-left transition hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded-[26px] border border-white/10 bg-white/4 p-4 text-left transition hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-40"
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-300">
-                      <Folder className="h-6 w-6" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-300">
+                      <Folder className="h-5 w-5" />
                     </div>
-                    <h3 className="mt-4 text-lg font-semibold text-white">Collection</h3>
-                    <p className="mt-1 text-sm text-white/55">
+                    <h3 className="mt-3.5 text-[17px] font-semibold text-white">Collection</h3>
+                    <p className="mt-1 text-sm leading-6 text-white/55">
                       Create a collection first and edit it later.
                     </p>
                   </button>
@@ -188,7 +188,7 @@ export default function AddItemModal({
                   type="button"
                   onClick={handleAddLink}
                   disabled={!url.trim() || isPending}
-                  className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[17px] font-semibold text-[#03111f] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[16px] font-semibold text-[#03111f] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Plus className="h-4 w-4" />
                   {isPending ? "Adding..." : "Add link"}
@@ -199,7 +199,7 @@ export default function AddItemModal({
                 type="button"
                 onClick={handleAddLink}
                 disabled={!url.trim() || isPending}
-                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[17px] font-semibold text-[#03111f] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[16px] font-semibold text-[#03111f] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
                 {isPending ? "Adding..." : "Add link"}
