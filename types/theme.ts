@@ -39,6 +39,7 @@ export type DefaultTheme = {
   profileFontSize: string | null;
   profileColor: string;
   bioColor: string | null;
+  iconColor: string | null;
 
   isDefault: boolean;
   createdAt: Date;
@@ -71,6 +72,7 @@ export type CustomTheme = {
   profileFontSize?: string | null;
   profileColor?: string | null;
   bioColor?: string | null;
+  iconColor?: string | null;
 };
 
 export const CUSTOM_BASE_THEME: DefaultTheme = {
@@ -101,6 +103,7 @@ export const CUSTOM_BASE_THEME: DefaultTheme = {
   profileFontSize: "SMALL",
   profileColor: "#666666",
   bioColor: "#ffffff",
+  iconColor: "#666666",
   createdAt: new Date(),
   updatedAt: new Date(),
 };

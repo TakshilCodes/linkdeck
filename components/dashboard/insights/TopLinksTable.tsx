@@ -1,6 +1,7 @@
 'use client';
 
-import { TopLink } from '@/lib/analytics';
+import type { TopLink } from '@/lib/analytics';
+import { displayDomainFromUrl } from '@/lib/links';
 import { ExternalLink, TrendingUp } from 'lucide-react';
 
 interface TopLinksTableProps {
@@ -22,11 +23,10 @@ export default function TopLinksTable({ links }: TopLinksTableProps) {
 
   // Get the maximum clicks for progress bar calculation
   const maxClicks = Math.max(...links.map(link => link.clickCount));
-
   return (
     <div className="space-y-4">
       {links.map((link, index) => {
-        const domain = new URL(link.url).hostname.replace('www.', '');
+        const domain = displayDomainFromUrl(link.url) || 'Unknown';
         const progressPercentage = maxClicks > 0 ? (link.clickCount / maxClicks) * 100 : 0;
 
         return (

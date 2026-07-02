@@ -71,7 +71,7 @@ export default function ThemeProfileRenderer({
     const innerScrollClass =
         layout === "embed"
             ? "relative z-10 flex h-full min-h-0 flex-col overflow-y-auto overflow-x-hidden px-7 pb-8 pt-11"
-            : `relative z-10 flex h-full flex-col px-7 pb-8 pt-11`;
+            : "relative z-10 flex min-h-screen flex-col px-7 pb-8 pt-11 sm:min-h-[815px]";
 
     const cardBody = (
         <>

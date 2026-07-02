@@ -70,6 +70,7 @@ export default function ProfileHeader({
     const [newBio, setNewBio] = useState(bio ?? "");
     const [socialModalOpen, setSocialModalOpen] = useState(false);
     const [initialSocialType, setInitialSocialType] = useState<SocialType | null>(null);
+    const [editingSocialIcon, setEditingSocialIcon] = useState<SocialIconItem | null>(null);
     const [manageSocialOpen, setManageSocialOpen] = useState(false);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
 
@@ -92,12 +93,20 @@ export default function ProfileHeader({
 
 
     const openSocialPicker = () => {
+        setEditingSocialIcon(null);
         setInitialSocialType(null);
         setSocialModalOpen(true);
     };
 
     const openDirectSocialInput = (type: SocialType) => {
+        setEditingSocialIcon(null);
         setInitialSocialType(type);
+        setSocialModalOpen(true);
+    };
+
+    const openEditSocialInput = (icon: SocialIconItem) => {
+        setInitialSocialType(null);
+        setEditingSocialIcon(icon);
         setSocialModalOpen(true);
     };
 
@@ -192,8 +201,23 @@ export default function ProfileHeader({
                 onClose={() => {
                     setSocialModalOpen(false);
                     setInitialSocialType(null);
+                    setEditingSocialIcon(null);
                 }}
                 initialType={initialSocialType}
+                editingIcon={editingSocialIcon}
+                onSaved={(savedIcon) => {
+                    const nextIcon = savedIcon as SocialIconItem;
+                    setSocialIcons((prev) => {
+                        const existingIndex = prev.findIndex((icon) => icon.id === nextIcon.id);
+
+                        if (existingIndex === -1) {
+                            return [...prev, nextIcon].sort((a, b) => a.position - b.position);
+                        }
+
+                        return prev.map((icon) => icon.id === nextIcon.id ? nextIcon : icon);
+                    });
+                    router.refresh();
+                }}
             />
 
             <ManageSocialIconsModal
@@ -204,9 +228,9 @@ export default function ProfileHeader({
                     setManageSocialOpen(false);
                     openSocialPicker();
                 }}
-                onEditIcon={(type) => {
+                onEditIcon={(icon) => {
                     setManageSocialOpen(false);
-                    openDirectSocialInput(type);
+                    openEditSocialInput(icon);
                 }}
                 onToggleIcon={handleToggleSocialIcon}
                 onReorder={handleReorderSocialIcons}

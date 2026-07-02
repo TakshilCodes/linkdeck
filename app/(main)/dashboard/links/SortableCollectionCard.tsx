@@ -83,6 +83,10 @@ export default function SortableCollectionCard({
       return;
     }
 
+    const previousName = collection.name;
+    setName(trimmed);
+    setIsEditing(false);
+
     startTransition(async () => {
       const res = await updateCollectionAction({
         id: collection.id,
@@ -90,12 +94,12 @@ export default function SortableCollectionCard({
       });
 
       if (!res.success) {
+        setName(previousName);
         toast.error(res.message || "Failed to update collection");
         return;
       }
 
       toast.success("Collection updated");
-      setIsEditing(false);
       router.refresh();
     });
   };
@@ -184,7 +188,7 @@ export default function SortableCollectionCard({
                     className="flex items-center gap-2 text-left"
                   >
                     <span className="truncate text-[1.05rem] font-semibold text-white">
-                      {collection.name}
+                      {name}
                     </span>
                     <Pencil className="h-4 w-4 text-white/30" />
                   </button>

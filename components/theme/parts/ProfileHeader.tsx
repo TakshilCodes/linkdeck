@@ -34,7 +34,7 @@ export default function ProfileHeader({
   icons,
   compact = false,
 }: ProfileHeaderProps) {
-  const { titleColor, profileColor, bioColor } = getThemeTokens(theme);
+  const { titleColor, bioColor, iconColor } = getThemeTokens(theme);
 
   const displayName = profile.displayName || profile.username || "Your Name";
   const titleFontSize = getTitleFontSizeValue(theme);
@@ -72,7 +72,7 @@ export default function ProfileHeader({
         </p>
       ) : null}
 
-      <IconRow icons={icons} color={profileColor} compact={compact} />
+      <IconRow icons={icons} color={iconColor} compact={compact} />
     </div>
   );
 }

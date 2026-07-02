@@ -4,11 +4,11 @@ import React, { useMemo, useState } from "react";
 import {
   Instagram,
   MessageCircle,
-  Twitter,
   MoreVertical,
   Share2,
   Sparkles,
 } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import profilePic from '@/public/preview/profile_picture.jpg'
 import Link from "next/link";
 
@@ -572,7 +572,7 @@ export default function LinkDeckThemePlayground() {
                   >
                     <Instagram className="h-6 w-6" />
                     <MessageCircle className="h-6 w-6" />
-                    <Twitter className="h-6 w-6" />
+                    <FaXTwitter className="h-6 w-6" />
                   </div>
 
                   <p className={`mt-6 font-semibold`} style={{ color: dynamic.profileColor }}>Websites</p>

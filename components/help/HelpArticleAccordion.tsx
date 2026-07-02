@@ -25,8 +25,8 @@ export default function HelpArticleAccordion({ articles, selectedCategory }: Pro
 
   if (!articles.length) {
     return (
-      <div className="flex flex-col items-center rounded-2xl border border-dashed border-white/12 bg-white/[0.02] px-6 py-16 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] text-white/55">
+      <div className="flex flex-col items-center rounded-2xl border border-dashed border-white/12 bg-white/2 px-6 py-16 text-center">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/3 text-white/55">
           <FileSearch className="h-6 w-6" />
         </div>
         <h3 className="mt-5 text-lg font-semibold text-white">No help articles found</h3>
@@ -38,7 +38,7 @@ export default function HelpArticleAccordion({ articles, selectedCategory }: Pro
   }
 
   return (
-    <section>
+    <section id="help-articles" className="scroll-mt-24">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-white">Help articles</h2>
@@ -54,7 +54,7 @@ export default function HelpArticleAccordion({ articles, selectedCategory }: Pro
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/3">
         {articles.map((article, index) => {
           const isOpen = openArticleId === article.id;
 
@@ -64,7 +64,7 @@ export default function HelpArticleAccordion({ articles, selectedCategory }: Pro
                 type="button"
                 aria-expanded={isOpen}
                 onClick={() => setOpenArticleId((current) => (current === article.id ? null : article.id))}
-                className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left transition hover:bg-white/[0.03] sm:px-6"
+                className="flex w-full items-start justify-between gap-4 px-5 py-5 text-left transition hover:bg-white/3 sm:px-6"
               >
                 <div className="min-w-0">
                   <div className="text-base font-medium text-white sm:text-lg">{article.title}</div>

@@ -54,10 +54,21 @@ export async function fetchPageTitle(url: string) {
 }
 
 export function fallbackTitleFromUrl(url: string) {
+  return displayDomainFromUrl(url) || "Untitled Link";
+}
+
+export function displayDomainFromUrl(raw: string | null | undefined) {
+  const value = raw?.trim();
+  if (!value) return "";
+
+  const withProtocol =
+    value.startsWith("http://") || value.startsWith("https://")
+      ? value
+      : `https://${value}`;
+
   try {
-    const parsed = new URL(url);
-    return parsed.hostname.replace(/^www\./, "");
+    return new URL(withProtocol).hostname.replace(/^www\./, "");
   } catch {
-    return "Untitled Link";
+    return value;
   }
 }

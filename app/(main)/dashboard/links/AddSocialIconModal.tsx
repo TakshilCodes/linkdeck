@@ -5,31 +5,55 @@ import { createPortal } from "react-dom";
 import { ArrowLeft, ChevronRight, Plus, X } from "lucide-react";
 import { IconType } from "@/app/generated/prisma/enums";
 import { ICONS, getIconByType } from "@/lib/social-icons";
-import { addSocialIconAction } from "@/actions/dashboard/social-icon"
+import {
+  addSocialIconAction,
+  updateSocialIconAction,
+} from "@/actions/dashboard/social-icon";
 import { toast } from "sonner";
+
+type SocialIconItem = {
+  id: string;
+  type: IconType;
+  value: string;
+  label?: string | null;
+  isVisible: boolean;
+  position: number;
+};
 
 type Props = {
   open: boolean;
   onClose: () => void;
   initialType?: IconType | null;
+  editingIcon?: SocialIconItem | null;
+  onSaved?: (icon: SocialIconItem) => void;
 };
 
-export default function AddSocialIconModal({ open, onClose, initialType }: Props) {
+export default function AddSocialIconModal({
+  open,
+  onClose,
+  initialType,
+  editingIcon,
+  onSaved,
+}: Props) {
   const [mounted, setMounted] = useState(false);
-  const [selectedType, setSelectedType] = useState<IconType | null>(initialType ?? null);
-  const [value, setValue] = useState("");
+  const [selectedType, setSelectedType] = useState<IconType | null>(
+    editingIcon?.type ?? initialType ?? null
+  );
+  const [value, setValue] = useState(editingIcon?.value ?? "");
   const [isPending, startTransition] = useTransition();
+
+  const isEditing = Boolean(editingIcon);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-  if (open) {
-    setSelectedType(initialType ?? null);
-    setValue("");
-  }
-}, [open, initialType]);
+    if (open) {
+      setSelectedType(editingIcon?.type ?? initialType ?? null);
+      setValue(editingIcon?.value ?? "");
+    }
+  }, [open, initialType, editingIcon]);
 
   useEffect(() => {
     if (!open) return;
@@ -60,25 +84,34 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
   }, [selectedType]);
 
   const handleSubmit = () => {
-  if (!selectedType) return;
+    if (!selectedType) return;
 
-  startTransition(async () => {
-    const res = await addSocialIconAction({
-      type: selectedType,
-      value,
+    startTransition(async () => {
+      const res = editingIcon
+        ? await updateSocialIconAction({
+            id: editingIcon.id,
+            value,
+          })
+        : await addSocialIconAction({
+            type: selectedType,
+            value,
+          });
+
+      if (!res.success) {
+        toast.error(res.message || "Something went wrong");
+        return;
+      }
+
+      if (res.icon) {
+        onSaved?.(res.icon as SocialIconItem);
+      }
+
+      toast.success(isEditing ? "Social icon updated" : "Social icon added");
+      setSelectedType(null);
+      setValue("");
+      onClose();
     });
-
-    if (!res.success) {
-      toast.error(res.message || "Something went wrong");
-      return;
-    }
-
-    toast.success("Social icon added");
-    setSelectedType(null);
-    setValue("");
-    onClose();
-  });
-};
+  };
 
   if (!mounted || !open) return null;
 
@@ -140,19 +173,21 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
           ) : (
             <>
               <div className="relative border-b border-white/10 px-6 py-5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedType(null);
-                    setValue("");
-                  }}
-                  className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </button>
+                {!isEditing && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedType(null);
+                      setValue("");
+                    }}
+                    className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </button>
+                )}
 
                 <h2 className="text-center text-[22px] font-semibold text-white">
-                  Add {selectedMeta?.label} icon
+                  {isEditing ? "Edit" : "Add"} {selectedMeta?.label} icon
                 </h2>
 
                 <button
@@ -187,7 +222,13 @@ export default function AddSocialIconModal({ open, onClose, initialType }: Props
                   disabled={!value.trim() || isPending}
                   className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-cyan-500 text-[17px] font-semibold text-[#03111f] shadow-[0_10px_30px_rgba(6,182,212,0.35)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {isPending ? "Adding..." : "Add"}
+                  {isPending
+                    ? isEditing
+                      ? "Saving..."
+                      : "Adding..."
+                    : isEditing
+                      ? "Save"
+                      : "Add"}
                 </button>
               </div>
             </>

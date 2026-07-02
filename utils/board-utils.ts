@@ -38,10 +38,15 @@ export function getBoardSignature(items: BoardItem[] = []) {
       type: item.type,
       position: item.position,
       linkId: item.link?.id ?? null,
+      linkName: item.link?.name ?? null,
+      linkUrl: item.link?.url ?? null,
       collectionId: item.collection?.id ?? null,
+      collectionName: item.collection?.name ?? null,
       nestedLinks:
         item.collection?.links.map((link) => ({
           id: link.id,
+          name: link.name,
+          url: link.url,
           position: link.position,
         })) ?? [],
     }))

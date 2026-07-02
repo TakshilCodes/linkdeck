@@ -8,6 +8,18 @@ type Props = {
 };
 
 export default function PopularTopics({ topics, selectedCategory, onSelectCategory }: Props) {
+  const handleSelect = (category: HelpCategoryFilter) => {
+    onSelectCategory(category);
+
+    requestAnimationFrame(() => {
+      const articlesSection = document.getElementById("help-articles");
+      if (!articlesSection) return;
+
+      const y = articlesSection.getBoundingClientRect().top + window.scrollY - 96;
+      window.scrollTo({ top: Math.max(y, 0), behavior: "smooth" });
+    });
+  };
+
   return (
     <section>
       <div className="mb-6">
@@ -20,7 +32,7 @@ export default function PopularTopics({ topics, selectedCategory, onSelectCatego
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <button
           type="button"
-          onClick={() => onSelectCategory("All")}
+          onClick={() => handleSelect("All")}
           className={`group flex h-full flex-col rounded-2xl border p-6 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition duration-200 ${
             selectedCategory === "All"
               ? "border-cyan-400/40 bg-cyan-400/8"
@@ -45,7 +57,7 @@ export default function PopularTopics({ topics, selectedCategory, onSelectCatego
             <button
               key={topic.title}
               type="button"
-              onClick={() => onSelectCategory(topic.title)}
+              onClick={() => handleSelect(topic.title)}
               className={`group flex h-full flex-col rounded-2xl border p-6 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition duration-200 ${
                 isActive
                   ? "border-cyan-400/40 bg-cyan-400/8"

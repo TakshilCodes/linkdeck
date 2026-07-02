@@ -139,6 +139,7 @@ model DefaultTheme {
   profileFontSize   profileFontSize?
   profileColor      String
   bioColor         String?
+  iconColor        String?
   isDefault         Boolean            @default(false)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
@@ -170,6 +171,7 @@ model UserCustomization {
   profileFontSize   profileFontSize?
   profileColor      String?
   bioColor         String?
+  iconColor        String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)

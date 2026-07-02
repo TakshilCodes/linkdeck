@@ -1,7 +1,6 @@
 import {
   Instagram,
   MessageCircle,
-  Twitter,
   Linkedin,
   Youtube,
   Github,
@@ -9,6 +8,7 @@ import {
   Twitch,
   Send,
 } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 
 type RendererIcon = {
   id: string;
@@ -23,7 +23,7 @@ function getIcon(type: string, compact: boolean) {
     case "INSTAGRAM":
       return <Instagram className={sz} />;
     case "X":
-      return <Twitter className={sz} />;
+      return <FaXTwitter className={sz} />;
     case "LINKEDIN":
       return <Linkedin className={sz} />;
     case "YOUTUBE":

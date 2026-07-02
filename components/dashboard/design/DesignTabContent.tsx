@@ -55,6 +55,7 @@ const CUSTOM_BASE_THEME: ThemeItem = {
   profileFontSize: "SMALL",
   profileColor: "#666666",
   bioColor: "#ffffff",
+  iconColor: "#666666",
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -511,6 +512,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
     "profileFontSize",
     "profileColor",
     "bioColor",
+    "iconColor",
   ];
 
   const hasThemeCustomizationChanges = themeFieldsToCompare.some(
@@ -675,6 +677,9 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
         }
         if (currentResolvedTheme.bioColor !== savedResolvedTheme.bioColor) {
           headerData.bioColor = currentResolvedTheme.bioColor;
+        }
+        if (currentResolvedTheme.iconColor !== savedResolvedTheme.iconColor) {
+          headerData.iconColor = currentResolvedTheme.iconColor;
         }
         if (currentResolvedTheme.fontFamily !== savedResolvedTheme.fontFamily) {
           headerData.fontFamily = currentResolvedTheme.fontFamily;
@@ -944,6 +949,14 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
                     <CustomColorPicker
                       value={previewCustomTheme?.profileColor ?? resolvedActiveTheme.profileColor ?? '#666666'}
                       onChange={(color) => updatePreviewCustomTheme({ profileColor: color })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-2">Icon Color</label>
+                    <CustomColorPicker
+                      value={previewCustomTheme?.iconColor ?? resolvedActiveTheme.iconColor ?? resolvedActiveTheme.profileColor ?? '#666666'}
+                      onChange={(color) => updatePreviewCustomTheme({ iconColor: color })}
                     />
                   </div>
                 </div>

@@ -34,5 +34,6 @@ export function mergeTheme(
       customTheme.profileFontSize ?? defaultTheme.profileFontSize,
     profileColor: customTheme.profileColor ?? defaultTheme.profileColor,
     bioColor: customTheme.bioColor ?? defaultTheme.bioColor,
+    iconColor: customTheme.iconColor ?? defaultTheme.iconColor,
   };
 }

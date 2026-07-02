@@ -81,6 +81,10 @@ export default function CustomColorPicker({
     commitHex(inputValue);
   };
 
+  const handleInputPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    commitHex(e.clipboardData.getData("text"));
+  };
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       commitHex(inputValue);
@@ -96,6 +100,8 @@ export default function CustomColorPicker({
           onChange={handleInputChange}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
+          onPaste={handleInputPaste}
+          onFocus={(e) => e.currentTarget.select()}
           className="h-full w-full bg-transparent text-[15px] font-medium text-white uppercase outline-none placeholder:text-white/30"
           placeholder="#000000"
           maxLength={7}
@@ -129,6 +135,8 @@ export default function CustomColorPicker({
               onChange={handleInputChange}
               onBlur={handleInputBlur}
               onKeyDown={handleInputKeyDown}
+              onPaste={handleInputPaste}
+              onFocus={(e) => e.currentTarget.select()}
               className="flex-1 rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-[13px] font-medium text-white outline-none transition focus:border-cyan-400"
               placeholder="#000000"
               maxLength={7}

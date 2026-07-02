@@ -16,6 +16,7 @@ export default function ColorsTabContent({ initialCustomization }: Props) {
   const buttonTextColor = previewCustomTheme?.buttonTextColor ?? initialCustomization?.buttonTextColor ?? "#FFFFFF";
   const titleColor = previewCustomTheme?.titleColor ?? initialCustomization?.titleColor ?? "#FFFFFF";
   const profileColor = previewCustomTheme?.profileColor ?? initialCustomization?.profileColor ?? "#FFFFFF";
+  const iconColor = previewCustomTheme?.iconColor ?? initialCustomization?.iconColor ?? profileColor;
   const shadowColor = previewCustomTheme?.shadowColor ?? initialCustomization?.shadowColor ?? "#000000";
   const outlineColor = previewCustomTheme?.outlineColor ?? initialCustomization?.outlineColor ?? "#111111";
   const patternColor = previewCustomTheme?.patternColor ?? initialCustomization?.patternColor ?? "#6B7280";
@@ -68,6 +69,14 @@ export default function ColorsTabContent({ initialCustomization }: Props) {
         <CustomColorPicker
           value={profileColor}
           onChange={(color) => updatePreviewCustomTheme({ profileColor: color })}
+        />
+      </section>
+
+      <section className="space-y-3">
+        <label className="text-[15px] font-medium text-white/90">Icon color</label>
+        <CustomColorPicker
+          value={iconColor}
+          onChange={(color) => updatePreviewCustomTheme({ iconColor: color })}
         />
       </section>
 

@@ -1,7 +1,8 @@
 'use client';
 
-import { RecentActivity } from '@/lib/analytics';
-import { Eye, MousePointer, ExternalLink, Clock } from 'lucide-react';
+import type { RecentActivity } from '@/lib/analytics';
+import { displayDomainFromUrl } from '@/lib/links';
+import { Eye, MousePointer, Clock } from 'lucide-react';
 
 interface RecentActivityProps {
   activities: RecentActivity[];
@@ -33,14 +34,6 @@ export default function RecentActivityComponent({ activities }: RecentActivityPr
     return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
   };
 
-  const getDomainFromUrl = (url: string) => {
-    try {
-      return new URL(url).hostname.replace('www.', '');
-    } catch {
-      return 'Unknown';
-    }
-  };
-
   return (
     <div className="space-y-4">
       {activities.map((activity) => {
@@ -63,7 +56,7 @@ export default function RecentActivityComponent({ activities }: RecentActivityPr
                     <span>{activity.linkName} link clicked</span>
                     {activity.linkUrl && (
                       <span className="text-white/60 text-xs">
-                        ({getDomainFromUrl(activity.linkUrl)})
+                        ({displayDomainFromUrl(activity.linkUrl) || 'Unknown'})
                       </span>
                     )}
                   </span>

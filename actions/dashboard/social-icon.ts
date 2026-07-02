@@ -12,6 +12,54 @@ type AddSocialIconInput = {
   value: string;
 };
 
+type UpdateSocialIconInput = {
+  id: string;
+  value: string;
+};
+
+const socialIconSelect = {
+  id: true,
+  type: true,
+  value: true,
+  label: true,
+  isVisible: true,
+  position: true,
+} as const;
+
+function validateSocialIconValue(type: IconType, value: string) {
+  const meta = getIconByType(type);
+
+  if (!meta) {
+    throw new Error("Invalid platform");
+  }
+
+  const normalizedValue = normalizeSocialValue(type, value);
+
+  if (meta.inputMode === "url") {
+    const isValidUrl = /^https?:\/\/.+/i.test(normalizedValue);
+    if (!isValidUrl) {
+      throw new Error("Please enter a valid full URL");
+    }
+  }
+
+  if (meta.inputMode === "email") {
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedValue);
+    if (!isValidEmail) {
+      throw new Error("Please enter a valid email address");
+    }
+  }
+
+  return normalizedValue;
+}
+
+function revalidateSocialIconPaths(username?: string | null) {
+  revalidatePath("/dashboard/links");
+
+  if (username) {
+    revalidatePath(`/${username}`);
+  }
+}
+
 export async function deleteSocialIconAction(id: string) {
   try {
     const session = await getServerSession(authOptions);
@@ -45,6 +93,8 @@ export async function deleteSocialIconAction(id: string) {
         id,
       },
     });
+
+    revalidateSocialIconPaths(session.user.username);
 
     return {
       success: true,
@@ -95,6 +145,8 @@ export async function reorderSocialIconsAction(
       )
     );
 
+    revalidateSocialIconPaths(session.user.username);
+
     return { success: true, message: "Order updated" };
   } catch (error) {
     console.error("reorderSocialIconsAction error:", error);
@@ -133,18 +185,22 @@ export async function updateSocialIconVisibilityAction({
       };
     }
 
-    await prisma.socialIcon.update({
+    const icon = await prisma.socialIcon.update({
       where: {
         id,
       },
       data: {
         isVisible,
       },
+      select: socialIconSelect,
     });
+
+    revalidateSocialIconPaths(session.user.username);
 
     return {
       success: true,
       message: "Visibility updated",
+      icon,
     };
   } catch (error) {
     console.error("updateSocialIconVisibilityAction error:", error);
@@ -152,6 +208,56 @@ export async function updateSocialIconVisibilityAction({
     return {
       success: false,
       message: "Failed to update visibility",
+    };
+  }
+}
+
+export async function updateSocialIconAction(input: UpdateSocialIconInput) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const existingIcon = await prisma.socialIcon.findFirst({
+      where: {
+        id: input.id,
+        userId: session.user.id,
+      },
+      select: {
+        id: true,
+        type: true,
+      },
+    });
+
+    if (!existingIcon) {
+      throw new Error("Social icon not found");
+    }
+
+    const normalizedValue = validateSocialIconValue(
+      existingIcon.type,
+      input.value
+    );
+
+    const icon = await prisma.socialIcon.update({
+      where: {
+        id: input.id,
+      },
+      data: {
+        value: normalizedValue,
+      },
+      select: socialIconSelect,
+    });
+
+    revalidateSocialIconPaths(session.user.username);
+
+    return { success: true, icon };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error ? error.message : "Failed to update social icon",
     };
   }
 }
@@ -165,27 +271,7 @@ export async function addSocialIconAction(input: AddSocialIconInput) {
     }
 
     const userId = session.user.id;
-    const meta = getIconByType(input.type);
-
-    if (!meta) {
-      throw new Error("Invalid platform");
-    }
-
-    const normalizedValue = normalizeSocialValue(input.type, input.value);
-
-    if (meta.inputMode === "url") {
-      const isValidUrl = /^https?:\/\/.+/i.test(normalizedValue);
-      if (!isValidUrl) {
-        throw new Error("Please enter a valid full URL");
-      }
-    }
-
-    if (meta.inputMode === "email") {
-      const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedValue);
-      if (!isValidEmail) {
-        throw new Error("Please enter a valid email address");
-      }
-    }
+    const normalizedValue = validateSocialIconValue(input.type, input.value);
 
     const lastItem = await prisma.socialIcon.findFirst({
       where: { userId },
@@ -195,18 +281,19 @@ export async function addSocialIconAction(input: AddSocialIconInput) {
 
     const nextPosition = lastItem ? lastItem.position + 1 : 0;
 
-    await prisma.socialIcon.create({
+    const icon = await prisma.socialIcon.create({
       data: {
         userId,
         type: input.type,
         value: normalizedValue,
         position: nextPosition,
       },
+      select: socialIconSelect,
     });
 
-    revalidatePath("/dashboard/links");
+    revalidateSocialIconPaths(session.user.username);
 
-    return { success: true };
+    return { success: true, icon };
   } catch (error) {
     return {
       success: false,

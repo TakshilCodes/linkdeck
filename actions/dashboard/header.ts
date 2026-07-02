@@ -15,6 +15,7 @@ type SaveHeaderPayload = {
   profileFontSize?: string;
   profileColor?: string;
   bioColor?: string;
+  iconColor?: string;
   fontFamily?: string;
 };
 
@@ -53,7 +54,7 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
       });
     }
 
-    if (payload.titleFontFamily !== undefined || payload.titleColor !== undefined || payload.titleFontWeight !== undefined || payload.titleFontSize !== undefined || payload.profileFontSize !== undefined || payload.profileColor !== undefined || payload.fontFamily !== undefined || payload.bioColor !== undefined) {
+    if (payload.titleFontFamily !== undefined || payload.titleColor !== undefined || payload.titleFontWeight !== undefined || payload.titleFontSize !== undefined || payload.profileFontSize !== undefined || payload.profileColor !== undefined || payload.fontFamily !== undefined || payload.bioColor !== undefined || payload.iconColor !== undefined) {
       const updateData: any = {};
       if (payload.titleFontFamily !== undefined) {
         updateData.titleFontFamily = payload.titleFontFamily;
@@ -78,6 +79,9 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
       }
       if (payload.fontFamily !== undefined) {
         updateData.fontFamily = payload.fontFamily;
+      }
+      if (payload.iconColor !== undefined) {
+        updateData.iconColor = payload.iconColor;
       }
 
       await tx.userCustomization.upsert({

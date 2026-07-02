@@ -51,7 +51,7 @@ type Props = {
   icons: SocialIconItem[];
   onClose: () => void;
   onAddIcon: () => void;
-  onEditIcon: (type: SocialType) => void;
+  onEditIcon: (icon: SocialIconItem) => void;
   onToggleIcon?: (id: string, nextVisible: boolean) => void;
   onReorder?: (items: SocialIconItem[]) => void;
   onDeleteIcon?: (id: string) => void;
@@ -59,7 +59,7 @@ type Props = {
 
 type SortableRowProps = {
   item: SocialIconItem;
-  onEditIcon: (type: SocialType) => void;
+  onEditIcon: (icon: SocialIconItem) => void;
   onToggleIcon?: (id: string, nextVisible: boolean) => void;
   onDeleteIcon?: (id: string) => void;
 };
@@ -119,7 +119,7 @@ function SortableSocialIconRow({
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => onEditIcon(item.type)}
+          onClick={() => onEditIcon(item)}
           className="flex h-8 w-8 items-center justify-center rounded-full text-white/70 transition hover:bg-white/5 hover:text-white"
         >
           <Pencil className="h-4 w-4" />

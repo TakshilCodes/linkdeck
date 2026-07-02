@@ -173,6 +173,7 @@ export function getThemeTokens(theme: ResolvedTheme) {
         titleColor: theme.titleColor ?? "#ffffff",
         profileColor: theme.profileColor ?? "#ffffff",
         bioColor: theme.bioColor ?? "#ffffff",
+        iconColor: theme.iconColor ?? theme.profileColor ?? "#ffffff",
         shadowColor: theme.shadowColor ?? "#000000",
         patternColor: theme.patternColor ?? "#6b7280",
         outlineColor: theme.outlineColor ?? "#111111",
@@ -205,7 +206,7 @@ export function getButtonMode(theme: ResolvedTheme) {
 export function getCardFrameClasses() {
     return `
     relative w-full
-    h-screen sm:h-[815px]
+    min-h-screen sm:min-h-[815px]
     max-w-none sm:max-w-[542px]
     overflow-hidden
     rounded-none sm:rounded-[30px]
@@ -215,7 +216,7 @@ export function getCardFrameClasses() {
 }
 
 export function getOuterStageClasses() {
-    return "relative flex min-h-screen w-full items-center justify-center overflow-hidden p-0 sm:p-10";
+    return "relative flex min-h-screen w-full items-center justify-center overflow-x-hidden p-0 sm:p-10";
 }
 
 export function getOuterBackdropClasses() {
