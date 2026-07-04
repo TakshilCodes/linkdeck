@@ -1,5 +1,4 @@
 import { DefaultSession } from "next-auth";
-import { JWT } from "next-auth/jwt";
 import type { OnboardingStep } from "@/app/generated/prisma/client";
 
 declare module "next-auth" {

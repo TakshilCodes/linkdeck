@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { Check } from "lucide-react";
 import { selectThemeAction, skipThemeAction } from "@/actions/onboarding/action.selecttheme";
@@ -19,7 +18,6 @@ type SelectThemeStepProps = {
 };
 
 export default function SelectThemeStep({ themes }: SelectThemeStepProps) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
@@ -32,26 +30,30 @@ export default function SelectThemeStep({ themes }: SelectThemeStepProps) {
     return themes.find((theme) => theme.id === selectedThemeId) ?? null;
   }, [themes, selectedThemeId]);
 
-  const handleContinue = async () => {
-  if (!selectedThemeId) {
-    setError("Please select a theme.");
-    return;
-  }
+  const handleContinue = () => {
+    if (!selectedThemeId) {
+      setError("Please select a theme.");
+      return;
+    }
 
-  try {
-    await selectThemeAction(selectedThemeId);
-  } catch (e) {
-    setError("Something went wrong");
-  }
-};
+    startTransition(async () => {
+      try {
+        await selectThemeAction(selectedThemeId);
+      } catch {
+        setError("Something went wrong");
+      }
+    });
+  };
 
-const handleSkip = async () => {
-  try {
-    await skipThemeAction();
-  } catch {
-    setError("Something went wrong");
-  }
-};
+  const handleSkip = () => {
+    startTransition(async () => {
+      try {
+        await skipThemeAction();
+      } catch {
+        setError("Something went wrong");
+      }
+    });
+  };
 
   return (
     <section className="w-full max-w-6xl">

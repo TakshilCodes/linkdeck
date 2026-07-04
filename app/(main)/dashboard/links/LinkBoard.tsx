@@ -1,9 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
-import {DndContext,DragOverlay,PointerSensor,closestCorners,getClientRect,pointerWithin,useDroppable,useSensor,useSensors,type ClientRect,type Collision,type CollisionDetection,type DragEndEvent,
-  type DragOverEvent,type DragStartEvent,type Over,} from "@dnd-kit/core";
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  getClientRect,
+  useDroppable,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragOverEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
 import {SortableContext,arrayMove,verticalListSortingStrategy,} from "@dnd-kit/sortable";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -11,250 +21,26 @@ import { saveBoardStateAction } from "@/actions/dashboard/links";
 import type { BoardItem, LinkItem, TopLevelCard } from "@/types/board-types";
 import {buildPersistPayload,cloneCards,extractCollectionIdFromBodyDropId,extractLinkIdFromCollectionSortable,getBoardSignature,isCollectionBodyDropId,isCollectionCardSortableId,isCollectionLinkSortableId,
   isTopLevelSortableId,toTopLevelCards,} from "@/utils/board-utils";
+import {
+  BOARD_ROOT_ID,
+  getInnerCollectionInsertIndexFromPointer,
+  getTopLevelInsertIndexFromPointer,
+  insertSlotFromBodyRect,
+  linkBoardCollisionDetection,
+  parseCollectionZoneId,
+  type CollectionDropMode,
+} from "@/utils/board-dnd";
 import SortableLinkCard from "./SortableLinkCard";
 import SortableCollectionCard from "./SortableCollectionCard";
 import { CollectionCardPreview, LinkCardPreview } from "./DragPreview";
-import AddItemModal from "./AddItemModal";
+import AddItemModal from "@/components/dashboard/links/AddItemModal";
+import { useIsClient } from "@/hooks/useIsClient";
 
 type Props = {
   boardItems?: BoardItem[];
 };
 
 const EMPTY_BOARD_ITEMS: BoardItem[] = [];
-const BOARD_ROOT_ID = "board-root";
-const COLLECTION_ZONE_PREFIX = "collection-zone-";
-const COLLECTION_GAP_BEFORE_PREFIX = "collection-gap-before-";
-
-type CollectionDropMode = "before" | "inside";
-
-function parseCollectionZoneId(id: string): { collectionId: string; mode: CollectionDropMode } | null {
-  if (id.startsWith(`${COLLECTION_GAP_BEFORE_PREFIX}`)) {
-    return { collectionId: id.replace(COLLECTION_GAP_BEFORE_PREFIX, ""), mode: "before" };
-  }
-  if (id.startsWith(`${COLLECTION_ZONE_PREFIX}before-`)) {
-    return { collectionId: id.replace(`${COLLECTION_ZONE_PREFIX}before-`, ""), mode: "before" };
-  }
-  if (id.startsWith(`${COLLECTION_ZONE_PREFIX}inside-`)) {
-    return { collectionId: id.replace(`${COLLECTION_ZONE_PREFIX}inside-`, ""), mode: "inside" };
-  }
-  return null;
-}
-
-/** Prefer the droppable under the pointer; ignore board root if another target also contains the pointer. */
-const boardCollisionDetection: CollisionDetection = (args) => {
-  const pointerHits = pointerWithin(args);
-  if (pointerHits.length > 0) {
-    const withoutBoard = pointerHits.filter((c) => c.id !== BOARD_ROOT_ID);
-    if (withoutBoard.length > 0) return withoutBoard;
-    const boardHit = pointerHits.find((c) => c.id === BOARD_ROOT_ID);
-    if (boardHit) return [boardHit];
-  }
-  return closestCorners(args);
-};
-
-/**
- * Pointer-first collision so inner collection targets win over the collection card hull.
- * - Nested link: link row > body layer > zones > top-level.
- * - Top-level link: body > inner link > zone-inside (so drops into collection register reliably).
- */
-const linkBoardCollisionDetection: CollisionDetection = (args) => {
-  const activeId = String(args.active.id);
-  const pointer = args.pointerCoordinates;
-
-  if (!pointer) return boardCollisionDetection(args);
-
-  const pointerHits = pointerWithin(args);
-  if (pointerHits.length === 0) return boardCollisionDetection(args);
-
-  if (activeId.startsWith("collection-link-")) {
-    const linkHit = pointerHits.find((c) => String(c.id).startsWith("collection-link-"));
-    if (linkHit) return [linkHit];
-    const gapBefore = pointerHits.find((c) => String(c.id).startsWith(COLLECTION_GAP_BEFORE_PREFIX));
-    if (gapBefore) return [gapBefore];
-    const bodyHit = pointerHits.find((c) => String(c.id).startsWith("collection-body-drop-"));
-    if (bodyHit) return [bodyHit];
-    const zoneHit = pointerHits.find(
-      (c) => String(c.id).startsWith("collection-zone-") || String(c.id) === BOARD_ROOT_ID
-    );
-    if (zoneHit) return [zoneHit];
-    const topLevelHit = pointerHits.find((c) => isTopLevelSortableId(String(c.id)));
-    if (topLevelHit) return [topLevelHit];
-    return pointerHits;
-  }
-
-  if (activeId.startsWith("link-")) {
-    const gapBefore = pointerHits.find((c) => String(c.id).startsWith(COLLECTION_GAP_BEFORE_PREFIX));
-    if (gapBefore) return [gapBefore];
-    const bodyHit = pointerHits.find((c) => String(c.id).startsWith("collection-body-drop-"));
-    if (bodyHit) return [bodyHit];
-    const innerLinkHit = pointerHits.find((c) => String(c.id).startsWith("collection-link-"));
-    if (innerLinkHit) return [innerLinkHit];
-    const zoneInside = pointerHits.find((c) => String(c.id).startsWith("collection-zone-inside-"));
-    if (zoneInside) return [zoneInside];
-    const zoneBefore = pointerHits.find((c) => String(c.id).startsWith("collection-zone-before-"));
-    if (zoneBefore) return [zoneBefore];
-  }
-
-  return boardCollisionDetection(args);
-};
-
-/** Map pointer Y within collection body rect to insert slot 0..linkCount (inclusive). */
-function insertSlotFromBodyRect(pointerY: number, bodyRect: ClientRect, linkCount: number): number {
-  const relY = pointerY - bodyRect.top;
-  const h = Math.max(bodyRect.height, 1);
-  if (linkCount === 0) return 0;
-  return Math.max(0, Math.min(linkCount, Math.floor((relY / h) * (linkCount + 1))));
-}
-
-function collisionRectFromCollision(c: Collision): ClientRect | null {
-  const data = c.data as { droppableContainer?: { rect: { current: ClientRect | null } }; value?: number } | undefined;
-  return data?.droppableContainer?.rect?.current ?? null;
-}
-
-/** Insert index in [0, length] for top-level list: pointer above mid of target = before, below = after. */
-function getTopLevelInsertIndexFromPointer(
-  cards: TopLevelCard[],
-  pointerY: number,
-  over: Over | null,
-  collisions: Collision[] | null
-): number {
-  const n = cards.length;
-  const topLevelIds = new Set(cards.map((c) => c.sortableId));
-
-  function nearestTopLevelFromCollisions(): { id: string; rect: ClientRect; value: number } | null {
-    if (!collisions?.length) return null;
-    let best: { id: string; rect: ClientRect; value: number } | null = null;
-    for (const c of collisions) {
-      const id = String(c.id);
-      if (!topLevelIds.has(id)) continue;
-      const rect = collisionRectFromCollision(c);
-      if (!rect) continue;
-      const data = c.data as { value?: number } | undefined;
-      const value = data?.value ?? Infinity;
-      if (!best || value < best.value) best = { id, rect, value };
-    }
-    return best;
-  }
-
-  function insertBeforeOrAfterRect(rect: ClientRect, cardIndex: number): number {
-    const mid = rect.top + rect.height / 2;
-    return pointerY >= mid ? cardIndex + 1 : cardIndex;
-  }
-
-  if (!over) {
-    const nearest = nearestTopLevelFromCollisions();
-    if (nearest) {
-      const idx = cards.findIndex((c) => c.sortableId === nearest.id);
-      if (idx !== -1) return insertBeforeOrAfterRect(nearest.rect, idx);
-    }
-    return n;
-  }
-
-  const overId = String(over.id);
-  if (overId === BOARD_ROOT_ID) {
-    const nearest = nearestTopLevelFromCollisions();
-    if (nearest) {
-      const idx = cards.findIndex((c) => c.sortableId === nearest.id);
-      if (idx !== -1) return insertBeforeOrAfterRect(nearest.rect, idx);
-    }
-    return n;
-  }
-
-  if (isTopLevelSortableId(overId)) {
-    const idx = cards.findIndex((c) => c.sortableId === overId);
-    if (idx === -1) {
-      const nearest = nearestTopLevelFromCollisions();
-      if (nearest) {
-        const j = cards.findIndex((c) => c.sortableId === nearest.id);
-        if (j !== -1) return insertBeforeOrAfterRect(nearest.rect, j);
-      }
-      return n;
-    }
-    return insertBeforeOrAfterRect(over.rect, idx);
-  }
-
-  const nearest = nearestTopLevelFromCollisions();
-  if (nearest) {
-    const idx = cards.findIndex((c) => c.sortableId === nearest.id);
-    if (idx !== -1) return insertBeforeOrAfterRect(nearest.rect, idx);
-  }
-  return n;
-}
-
-/** Insert index in [0, links.length] inside a collection's link list. */
-function getInnerCollectionInsertIndexFromPointer(
-  collectionId: string,
-  cards: TopLevelCard[],
-  pointerY: number,
-  over: Over | null,
-  collisions: Collision[] | null
-): number {
-  const collCard = cards.find(
-    (c) => c.type === "COLLECTION" && c.collection.id === collectionId
-  );
-  if (!collCard || collCard.type !== "COLLECTION") return 0;
-
-  const innerSortableIds = new Set(
-    collCard.collection.links.map((l) => `collection-link-${l.id}`)
-  );
-
-  function nearestInnerFromCollisions(): { linkId: string; rect: ClientRect; value: number } | null {
-    if (!collisions?.length) return null;
-    let best: { linkId: string; rect: ClientRect; value: number } | null = null;
-    for (const c of collisions) {
-      const id = String(c.id);
-      if (!innerSortableIds.has(id)) continue;
-      const rect = collisionRectFromCollision(c);
-      if (!rect) continue;
-      const data = c.data as { value?: number } | undefined;
-      const value = data?.value ?? Infinity;
-      const linkId = extractLinkIdFromCollectionSortable(id);
-      if (!best || value < best.value) best = { linkId, rect, value };
-    }
-    return best;
-  }
-
-  function insertBeforeOrAfterRect(rect: ClientRect, linkIndex: number, len: number): number {
-    const mid = rect.top + rect.height / 2;
-    return pointerY >= mid ? Math.min(linkIndex + 1, len) : linkIndex;
-  }
-
-  const links = collCard.collection.links;
-  const len = links.length;
-
-  if (!over) {
-    const nearest = nearestInnerFromCollisions();
-    if (nearest) {
-      const idx = links.findIndex((l) => l.id === nearest.linkId);
-      if (idx !== -1) return insertBeforeOrAfterRect(nearest.rect, idx, len);
-    }
-    return len;
-  }
-
-  const overId = String(over.id);
-  if (overId.startsWith("collection-link-")) {
-    if (!innerSortableIds.has(overId)) {
-      const nearest = nearestInnerFromCollisions();
-      if (nearest) {
-        const idx = links.findIndex((l) => l.id === nearest.linkId);
-        if (idx !== -1) return insertBeforeOrAfterRect(nearest.rect, idx, len);
-      }
-      return len;
-    }
-    const linkId = extractLinkIdFromCollectionSortable(overId);
-    const idx = links.findIndex((l) => l.id === linkId);
-    if (idx === -1) return len;
-    return insertBeforeOrAfterRect(over.rect, idx, len);
-  }
-
-  const nearest = nearestInnerFromCollisions();
-  if (nearest) {
-    const idx = links.findIndex((l) => l.id === nearest.linkId);
-    if (idx !== -1) return insertBeforeOrAfterRect(nearest.rect, idx, len);
-  }
-  return len;
-}
-
 function BoardDropArea({
   children,
   isDragging,
@@ -278,6 +64,33 @@ function BoardDropArea({
   );
 }
 
+function getActiveCard(activeId: string | null, cards: TopLevelCard[]) {
+  if (!activeId) return null;
+
+  const topLevel = cards.find((item) => item.sortableId === activeId);
+  if (topLevel) return topLevel;
+
+  if (isCollectionLinkSortableId(activeId)) {
+    const linkId = extractLinkIdFromCollectionSortable(activeId);
+
+    for (const card of cards) {
+      if (card.type !== "COLLECTION") continue;
+
+      const found = card.collection.links.find((link) => link.id === linkId);
+      if (found) {
+        return {
+          id: found.id,
+          sortableId: activeId,
+          type: "LINK" as const,
+          position: found.position,
+          link: found,
+        };
+      }
+    }
+  }
+
+  return null;
+}
 export default function LinksBoard({ boardItems }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -285,32 +98,28 @@ export default function LinksBoard({ boardItems }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [openModal, setOpenModal] = useState(false);
 
-  const [collectionDropMode, setCollectionDropMode] = useState<{
-    collectionId: string;
-    mode: CollectionDropMode;
-  } | null>(null);
-
   const safeBoardItems = boardItems ?? EMPTY_BOARD_ITEMS;
 
   const serverCards = useMemo(() => toTopLevelCards(safeBoardItems), [safeBoardItems]);
   const serverSignature = useMemo(() => getBoardSignature(safeBoardItems), [safeBoardItems]);
 
-  const [cards, setCards] = useState<TopLevelCard[]>(() => serverCards);
-  const [lastSyncedSignature, setLastSyncedSignature] = useState(serverSignature);
+  const [boardState, setBoardState] = useState(() => ({
+    cards: serverCards,
+    signature: serverSignature,
+  }));
 
-  const pointerClientRef = useRef({ x: 0, y: 0 });
+  if (boardState.signature !== serverSignature) {
+    setBoardState({ cards: serverCards, signature: serverSignature });
+  }
 
-  const [dragOverlayContainer, setDragOverlayContainer] = useState<HTMLElement | null>(null);
-  useEffect(() => {
-    setDragOverlayContainer(document.body);
+  const cards = boardState.signature === serverSignature ? boardState.cards : serverCards;
+  const setCards = useCallback((nextCards: TopLevelCard[]) => {
+    setBoardState((current) => ({ ...current, cards: nextCards }));
   }, []);
 
-  useEffect(() => {
-    if (serverSignature !== lastSyncedSignature) {
-      setCards(serverCards);
-      setLastSyncedSignature(serverSignature);
-    }
-  }, [serverCards, serverSignature, lastSyncedSignature]);
+  const pointerClientRef = useRef({ x: 0, y: 0 });
+  const isClient = useIsClient();
+  const dragOverlayContainer = isClient ? document.body : null;
 
   useEffect(() => {
     if (!activeId) return;
@@ -325,33 +134,7 @@ export default function LinksBoard({ boardItems }: Props) {
 
   const topLevelIds = useMemo(() => cards.map((item) => item.sortableId), [cards]);
 
-  const activeCard = useMemo(() => {
-    if (!activeId) return null;
-
-    const topLevel = cards.find((item) => item.sortableId === activeId);
-    if (topLevel) return topLevel;
-
-    if (isCollectionLinkSortableId(activeId)) {
-      const linkId = extractLinkIdFromCollectionSortable(activeId);
-
-      for (const card of cards) {
-        if (card.type !== "COLLECTION") continue;
-
-        const found = card.collection.links.find((link) => link.id === linkId);
-        if (found) {
-          return {
-            id: found.id,
-            sortableId: activeId,
-            type: "LINK" as const,
-            position: found.position,
-            link: found,
-          };
-        }
-      }
-    }
-
-    return null;
-  }, [activeId, cards]);
+  const activeCard = getActiveCard(activeId, cards);
 
   function getCollectionCard(
     list: TopLevelCard[],
@@ -444,21 +227,16 @@ export default function LinksBoard({ boardItems }: Props) {
     const { over } = event;
 
     if (!over) {
-      setCollectionDropMode(null);
       return;
     }
 
     const overId = String(over.id);
-
-    const parsed = parseCollectionZoneId(overId);
-    if (parsed) {
-      setCollectionDropMode(parsed);
+    if (parseCollectionZoneId(overId)) {
       return;
     }
 
     // If we're not over an explicit zone, clear the hint.
     // (We still handle `collection-*` / `collection-link-*` in onDragEnd for safety.)
-    setCollectionDropMode(null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -504,15 +282,12 @@ export default function LinksBoard({ boardItems }: Props) {
           }
         }
       }
-
-      setCollectionDropMode(null);
       return;
     }
 
     const overSortableId = String(over.id);
 
     if (activeSortableId === overSortableId) {
-      setCollectionDropMode(null);
       return;
     }
 
@@ -554,13 +329,11 @@ export default function LinksBoard({ boardItems }: Props) {
     if (activeSortableId.startsWith("link-") && isCollectionBodyDropId(overSortableId)) {
       const activeTopLevelIndex = findTopLevelIndexBySortableId(nextCards, activeSortableId);
       if (activeTopLevelIndex === -1) {
-        setCollectionDropMode(null);
         return;
       }
 
       const activeCard = nextCards[activeTopLevelIndex];
       if (!activeCard || activeCard.type !== "LINK") {
-        setCollectionDropMode(null);
         return;
       }
 
@@ -570,7 +343,6 @@ export default function LinksBoard({ boardItems }: Props) {
       );
       const targetCollectionCard = getCollectionCard(nextCards, targetCollectionIndex);
       if (!targetCollectionCard) {
-        setCollectionDropMode(null);
         return;
       }
 
@@ -584,7 +356,6 @@ export default function LinksBoard({ boardItems }: Props) {
       );
       const freshTargetCollectionCard = getCollectionCard(nextCards, freshTargetIndex);
       if (!freshTargetCollectionCard) {
-        setCollectionDropMode(null);
         return;
       }
 
@@ -599,7 +370,6 @@ export default function LinksBoard({ boardItems }: Props) {
       });
 
       nextCards = normalizeCards(nextCards);
-      setCollectionDropMode(null);
       persistCards(nextCards, previousCards);
       return;
     }
@@ -619,7 +389,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetCollectionIndex = findTopLevelIndexBySortableId(nextCards, resolvedOverSortableId);
 
         if (activeTopLevelIndex === -1 || targetCollectionIndex === -1) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -627,7 +396,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetCollectionCard = getCollectionCard(nextCards, targetCollectionIndex);
 
         if (!activeCard || activeCard.type !== "LINK" || !targetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -640,7 +408,6 @@ export default function LinksBoard({ boardItems }: Props) {
         if (dropMode === "before") {
           nextCards = arrayMove(nextCards, activeTopLevelIndex, targetCollectionIndex);
           nextCards = normalizeCards(nextCards);
-          setCollectionDropMode(null);
           persistCards(nextCards, previousCards);
           return;
         }
@@ -656,7 +423,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const freshTargetCollectionCard = getCollectionCard(nextCards, freshTargetIndex);
 
         if (!freshTargetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -675,7 +441,6 @@ export default function LinksBoard({ boardItems }: Props) {
         });
 
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
         return;
       }
@@ -686,7 +451,6 @@ export default function LinksBoard({ boardItems }: Props) {
       if (oldIndex !== -1 && newIndex !== -1) {
         nextCards = arrayMove(nextCards, oldIndex, newIndex);
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
       }
 
@@ -697,20 +461,17 @@ export default function LinksBoard({ boardItems }: Props) {
     if (activeSortableId.startsWith("link-") && isCollectionLinkSortableId(resolvedOverSortableId)) {
       const activeTopLevelIndex = findTopLevelIndexBySortableId(nextCards, activeSortableId);
       if (activeTopLevelIndex === -1) {
-        setCollectionDropMode(null);
         return;
       }
 
       const activeCard = nextCards[activeTopLevelIndex];
       if (!activeCard || activeCard.type !== "LINK") {
-        setCollectionDropMode(null);
         return;
       }
 
       const overLinkId = extractLinkIdFromCollectionSortable(resolvedOverSortableId);
       const targetLocation = findCollectionLinkLocation(nextCards, overLinkId);
       if (!targetLocation) {
-        setCollectionDropMode(null);
         return;
       }
 
@@ -719,7 +480,6 @@ export default function LinksBoard({ boardItems }: Props) {
 
       const targetCollectionCard = getCollectionCard(nextCards, targetLocation.collectionIndex);
       if (!targetCollectionCard) {
-        setCollectionDropMode(null);
         return;
       }
 
@@ -730,11 +490,8 @@ export default function LinksBoard({ boardItems }: Props) {
       );
 
       if (!ok) {
-        setCollectionDropMode(null);
         return;
       }
-
-      setCollectionDropMode(null);
       persistCards(nextCards, previousCards);
       return;
     }
@@ -745,7 +502,6 @@ export default function LinksBoard({ boardItems }: Props) {
       const sourceLocation = findCollectionLinkLocation(nextCards, activeLinkId);
 
       if (!sourceLocation) {
-        setCollectionDropMode(null);
         return;
       }
 
@@ -759,7 +515,6 @@ export default function LinksBoard({ boardItems }: Props) {
       if (overSortableId === BOARD_ROOT_ID) {
         const sourceCollectionCard = getCollectionCard(nextCards, sourceCollectionIndex);
         if (!sourceCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -785,7 +540,6 @@ export default function LinksBoard({ boardItems }: Props) {
         });
 
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
         return;
       }
@@ -795,7 +549,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const sourceCollectionCard = getCollectionCard(nextCards, sourceCollectionIndex);
 
         if (!sourceCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -821,7 +574,6 @@ export default function LinksBoard({ boardItems }: Props) {
         });
 
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
         return;
       }
@@ -836,7 +588,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetCollectionCard = getCollectionCard(nextCards, targetCollectionIndex);
 
         if (!sourceCollectionCard || !targetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -858,7 +609,6 @@ export default function LinksBoard({ boardItems }: Props) {
         });
 
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
         return;
       }
@@ -868,7 +618,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetCollectionIndex = findTopLevelIndexBySortableId(nextCards, resolvedOverSortableId);
 
         if (targetCollectionIndex === -1) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -876,7 +625,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetCollectionCard = getCollectionCard(nextCards, targetCollectionIndex);
 
         if (!sourceCollectionCard || !targetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -907,7 +655,6 @@ export default function LinksBoard({ boardItems }: Props) {
           });
 
           nextCards = normalizeCards(nextCards);
-          setCollectionDropMode(null);
           persistCards(nextCards, previousCards);
           return;
         }
@@ -921,7 +668,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const freshTargetCollectionCard = getCollectionCard(nextCards, freshTargetIndex);
 
         if (!freshTargetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -944,7 +690,6 @@ export default function LinksBoard({ boardItems }: Props) {
         });
 
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
         return;
       }
@@ -955,7 +700,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetLocation = findCollectionLinkLocation(nextCards, overLinkId);
 
         if (!targetLocation) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -968,7 +712,6 @@ export default function LinksBoard({ boardItems }: Props) {
         const targetCollectionCard = getCollectionCard(nextCards, targetCollectionIndex);
 
         if (!sourceCollectionCard || !targetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -981,7 +724,6 @@ export default function LinksBoard({ boardItems }: Props) {
           );
 
           nextCards = normalizeCards(nextCards);
-          setCollectionDropMode(null);
           persistCards(nextCards, previousCards);
           return;
         }
@@ -991,7 +733,6 @@ export default function LinksBoard({ boardItems }: Props) {
 
         const freshTargetCollectionCard = getCollectionCard(nextCards, targetCollectionIndex);
         if (!freshTargetCollectionCard) {
-          setCollectionDropMode(null);
           return;
         }
 
@@ -1002,13 +743,10 @@ export default function LinksBoard({ boardItems }: Props) {
         });
 
         nextCards = normalizeCards(nextCards);
-        setCollectionDropMode(null);
         persistCards(nextCards, previousCards);
         return;
       }
     }
-
-    setCollectionDropMode(null);
   };
 
   return (

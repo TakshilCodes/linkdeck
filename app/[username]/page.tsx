@@ -1,4 +1,3 @@
-import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { mergeTheme } from "@/lib/themes/merge-theme";
 import type { CustomTheme, DefaultTheme } from "@/types/theme";
@@ -7,12 +6,15 @@ import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
 import { trackProfileView } from "@/actions/analytics/track-profile-view";
 import { resolveSocialUrl } from "@/lib/social-icons";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicProfilePage({
   params,
 }: {
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
+  const { default: prisma } = await import("@/lib/prisma");
 
   const user = await prisma.user.findUnique({
     where: { username },
@@ -47,11 +49,9 @@ export default async function PublicProfilePage({
     notFound();
   }
 
-  // Track profile view asynchronously (don't block the page render)
   trackProfileView(user.id).catch(console.error);
 
   const baseTheme = user.defaultTheme || CUSTOM_BASE_THEME;
-
   const resolvedTheme = mergeTheme(
     baseTheme as DefaultTheme,
     user.customization as CustomTheme | null

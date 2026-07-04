@@ -2,11 +2,12 @@
 
 import { useEffect, useState, useRef, useTransition } from "react";
 import { createPortal } from "react-dom";
-import { X, Upload, Trash2, Camera } from "lucide-react";
+import { X, Upload, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { updateProfileImageAction } from "@/actions/dashboard/profile";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import WarningModal from "@/components/ui/WarningModal";
 
 type Props = {
     open: boolean;
@@ -23,6 +24,7 @@ export default function ManageProfilePictureModal({
 }: Props) {
     const [mounted, setMounted] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(currentImgUrl ?? null);
+    const [removeWarningOpen, setRemoveWarningOpen] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [isPending, startTransition] = useTransition();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,7 +44,7 @@ export default function ManageProfilePictureModal({
         if (!open) return;
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && !isUploading && !isPending) onClose();
+            if (e.key === "Escape" && !isUploading && !isPending && !removeWarningOpen) onClose();
         };
 
         document.addEventListener("keydown", onKeyDown);
@@ -52,7 +54,7 @@ export default function ManageProfilePictureModal({
             document.removeEventListener("keydown", onKeyDown);
             document.body.style.overflow = "";
         };
-    }, [open, onClose, isUploading, isPending]);
+    }, [open, onClose, isUploading, isPending, removeWarningOpen]);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -84,7 +86,7 @@ export default function ManageProfilePictureModal({
                 setPreviewUrl(data.imageUrl); // Use remote URL
                 saveProfileImage(data.imageUrl); // Auto-save
             }
-        } catch (error) {
+        } catch {
             toast.error("An error occurred during upload");
             setPreviewUrl(currentImgUrl ?? null);
         } finally {
@@ -96,7 +98,12 @@ export default function ManageProfilePictureModal({
     };
 
     const handleRemove = () => {
+        setRemoveWarningOpen(true);
+    };
+
+    const confirmRemove = () => {
         setPreviewUrl(null);
+        setRemoveWarningOpen(false);
         saveProfileImage(null);
     };
 
@@ -120,7 +127,8 @@ export default function ManageProfilePictureModal({
     if (!mounted || !open) return null;
 
     return createPortal(
-        <div className="fixed inset-0 z-[99999]">
+        <>
+            <div className="fixed inset-0 z-[99999]">
             <button
                 type="button"
                 aria-label="Close modal backdrop"
@@ -205,7 +213,19 @@ export default function ManageProfilePictureModal({
                     </div>
                 </div>
             </div>
-        </div>,
+            </div>
+
+            <WarningModal
+                open={removeWarningOpen}
+                title="Remove profile picture?"
+                description="Your current profile picture will be removed from your dashboard and public page. You can upload a new one anytime."
+                confirmLabel="Remove image"
+                variant="danger"
+                lockScroll={false}
+                onClose={() => setRemoveWarningOpen(false)}
+                onConfirm={confirmRemove}
+            />
+        </>,
         document.body
     );
 }

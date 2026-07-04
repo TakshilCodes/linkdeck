@@ -2,9 +2,19 @@ import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma";
-import { redis } from "@/lib/redis";
+
+async function getPrisma() {
+  return (await import("@/lib/prisma")).default;
+}
+
+async function getRedis() {
+  return (await import("@/lib/redis")).redis;
+}
+
+async function verifyPassword(password: string, hashedPassword: string) {
+  const bcrypt = await import("bcryptjs");
+  return bcrypt.compare(password, hashedPassword);
+}
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -12,8 +22,8 @@ export const authOptions: NextAuthOptions = {
   },
 
   pages: {
-    signIn: "/signin",
-    error: "/signin",
+    signIn: "/login",
+    error: "/login",
   },
 
   providers: [
@@ -40,6 +50,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!email || !password) return null;
 
+        const prisma = await getPrisma();
         const user = await prisma.user.findUnique({
           where: { email },
           select: {
@@ -54,7 +65,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!user || !user.hashedPassword) return null;
 
-        const isValid = await bcrypt.compare(password, user.hashedPassword);
+        const isValid = await verifyPassword(password, user.hashedPassword);
         if (!isValid) return null;
 
         return {
@@ -80,11 +91,12 @@ export const authOptions: NextAuthOptions = {
         const token = String(credentials?.token ?? "").trim();
         if (!token) return null;
 
+        const redis = await getRedis();
         const raw = await redis.get(`auth:bootstrap:${token}`);
         if (!raw || typeof raw !== "string") return null;
 
         const parsed = JSON.parse(raw) as { userId: string };
-
+        const prisma = await getPrisma();
         const user = await prisma.user.findUnique({
           where: { id: parsed.userId },
           select: {
@@ -115,12 +127,13 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async signIn({ user, account, profile }) {
+    async signIn({ user, account }) {
       if (!user.email) return false;
 
       const email = user.email.toLowerCase();
 
       if (account?.provider === "google" || account?.provider === "github") {
+        const prisma = await getPrisma();
         const existingUser = await prisma.user.findUnique({
           where: { email },
           select: {
@@ -130,8 +143,7 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        const providerName =
-          account.provider === "google" ? "GOOGLE" : "GITHUB";
+        const providerName = account.provider === "google" ? "GOOGLE" : "GITHUB";
 
         if (!existingUser) {
           await prisma.user.create({
@@ -139,7 +151,7 @@ export const authOptions: NextAuthOptions = {
               email,
               displayName: user.name?.trim() || "",
               profileImgUrl: user.image || null,
-              authProvider: providerName as any,
+              authProvider: providerName,
               username: null,
               onboardingDone: false,
             },
@@ -150,7 +162,7 @@ export const authOptions: NextAuthOptions = {
             data: {
               displayName: existingUser.displayName || user.name?.trim() || "",
               profileImgUrl: existingUser.profileImgUrl || user.image || null,
-              authProvider: providerName as any,
+              authProvider: providerName,
             },
           });
         }
@@ -168,6 +180,7 @@ export const authOptions: NextAuthOptions = {
             : "";
 
       if (sourceEmail) {
+        const prisma = await getPrisma();
         const dbUser = await prisma.user.findUnique({
           where: { email: sourceEmail },
           select: {
@@ -193,13 +206,11 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).id = String(token.id ?? "");
+        session.user.id = String(token.id ?? "");
         session.user.email = String(token.email ?? session.user.email ?? "");
-        (session.user as any).username =
-          token.username == null ? null : String(token.username);
-        (session.user as any).onboardingStep =
-          token.onboardingStep == null ? null : String(token.onboardingStep);
-        (session.user as any).onboardingDone =
+        session.user.username = token.username ?? null;
+        session.user.onboardingStep = token.onboardingStep ?? null;
+        session.user.onboardingDone =
           typeof token.onboardingDone === "boolean" ? token.onboardingDone : false;
       }
 

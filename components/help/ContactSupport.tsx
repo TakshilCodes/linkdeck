@@ -10,7 +10,7 @@ export default function ContactSupport() {
         </div>
         <h2 className="mt-6 text-2xl font-semibold text-white">Still need help?</h2>
         <p className="mt-3 text-sm leading-7 text-white/58 sm:text-base">
-          If you couldn't find an answer, feel free to reach out.
+          If you couldn&apos;t find an answer, feel free to reach out.
         </p>
         <div className="mt-8">
           <Link

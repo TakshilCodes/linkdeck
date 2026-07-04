@@ -1,4 +1,3 @@
-import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import EnterUsernameStep from "@/app/(main)/onboarding/EnterUsernameStep";
 import SelectThemeStep from "@/app/(main)/onboarding/SelectThemeStep";
@@ -8,6 +7,8 @@ import ProfileStep from "@/app/(main)/onboarding/ProfileStep";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { PlatformType } from "@/lib/social-icons";
+
+export const dynamic = "force-dynamic";
 
 export default async function OnBoarding(props: { searchParams: Promise<{ step?: string; mode?: string }> }) {
   const searchParams = await props.searchParams;
@@ -42,9 +43,10 @@ export default async function OnBoarding(props: { searchParams: Promise<{ step?:
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
-      redirect("/signin");
+      redirect("/login");
     }
 
+    const { default: prisma } = await import("@/lib/prisma");
     user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
@@ -66,7 +68,7 @@ export default async function OnBoarding(props: { searchParams: Promise<{ step?:
     });
 
     if (!user) {
-      redirect("/signin");
+      redirect("/login");
     }
 
     if (user.onboardingDone) {

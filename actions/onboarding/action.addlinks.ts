@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
+import { IconType } from "@/app/generated/prisma/enums";
 
 const platformLinkSchema = z.object({
     platform: z.string().min(1),
@@ -62,7 +63,7 @@ export async function savePlatformLinksAction(input: {
             await tx.socialIcon.createMany({
                 data: cleanedPlatformLinks.map((item, index) => ({
                     userId,
-                    type: item.platform as any,
+                    type: item.platform as IconType,
                     value: item.value,
                     position: index + 1,
                 })),
@@ -75,7 +76,7 @@ export async function savePlatformLinksAction(input: {
             await tx.socialIcon.createMany({
                 data: parsed.data.customLinks.map((url, index) => ({
                     userId,
-                    type: "PERSONAL_WEBSITE" as any,
+                    type: IconType.PERSONAL_WEBSITE,
                     value: url,
                     position: basePosition + index + 1,
                 })),

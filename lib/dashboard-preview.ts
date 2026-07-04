@@ -1,4 +1,3 @@
-import prisma from "@/lib/prisma";
 import { mergeTheme } from "@/lib/themes/merge-theme";
 import type { CustomTheme, DefaultTheme, ResolvedTheme } from "@/types/theme";
 import { CUSTOM_BASE_THEME } from "@/types/theme";
@@ -8,7 +7,7 @@ import {
   mapIconsForThemePreview,
 } from "@/utils/dashboard-theme-preview";
 
-const previewUserSelect={
+const previewUserSelect = {
   username: true,
   displayName: true,
   bio: true,
@@ -76,6 +75,7 @@ export type DashboardPreviewPayload = {
 export async function getDashboardPreviewPayload(
   userId: string
 ): Promise<DashboardPreviewPayload | null> {
+  const { default: prisma } = await import("@/lib/prisma");
   const data = await prisma.user.findUnique({
     where: { id: userId },
     select: previewUserSelect,
@@ -85,7 +85,7 @@ export async function getDashboardPreviewPayload(
 
   const baseTheme = data.defaultTheme || CUSTOM_BASE_THEME;
   const resolvedTheme: ResolvedTheme = mergeTheme(
-    baseTheme as DefaultTheme, 
+    baseTheme as DefaultTheme,
     data.customization as CustomTheme | null
   );
 

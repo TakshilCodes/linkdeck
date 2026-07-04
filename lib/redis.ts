@@ -1,12 +1,28 @@
-let client: any;
+type RedisSetOptions = { ex: number };
 
-// Initialize Redis client only on server side
+type RedisClient = {
+  get(key: string): Promise<unknown> | unknown;
+  del(key: string): Promise<unknown> | unknown;
+  incr(key: string): Promise<number> | number;
+  expire(key: string, seconds: number): Promise<unknown> | unknown;
+  set(key: string, value: string): Promise<unknown> | unknown;
+  set(key: string, value: string, options: RedisSetOptions): Promise<unknown> | unknown;
+  set(key: string, value: string, mode: "EX", seconds: number): Promise<unknown> | unknown;
+};
+
+let client: RedisClient | null = null;
+
 async function initRedis() {
-  if (typeof window === 'undefined' && !client) {
+  if (typeof window === "undefined" && !client) {
     client = process.env.NODE_ENV === "production"
-      ? (await import("@upstash/redis")).Redis.fromEnv()
-      : new (await import("ioredis")).default(process.env.REDIS_URL!);
+      ? (await import("@upstash/redis")).Redis.fromEnv() as unknown as RedisClient
+      : new (await import("ioredis")).default(process.env.REDIS_URL!) as unknown as RedisClient;
   }
+
+  if (!client) {
+    throw new Error("Redis is only available on the server");
+  }
+
   return client;
 }
 
@@ -33,15 +49,15 @@ export const redis = {
 
   async set(key: string, value: string, ttlSeconds?: number) {
     const client = await initRedis();
-    
+
     if (!ttlSeconds) {
       return client.set(key, value);
     }
 
     if (process.env.NODE_ENV === "production") {
-      return (client as any).set(key, value, { ex: ttlSeconds });
+      return client.set(key, value, { ex: ttlSeconds });
     }
 
-    return (client as any).set(key, value, "EX", ttlSeconds);
+    return client.set(key, value, "EX", ttlSeconds);
   },
 };

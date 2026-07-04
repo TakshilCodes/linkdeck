@@ -1,52 +1,32 @@
-import { useState, useEffect, useRef } from "react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 
-export default function CustomColorPicker({ 
-  value, 
-  onChange 
-}: { 
-  value: string; 
-  onChange: (color: string) => void; 
+export default function CustomColorPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (color: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [inputValue, setInputValue] = useState(value);
+  const [draftValue, setDraftValue] = useState<string | null>(null);
   const [placement, setPlacement] = useState<"top" | "bottom">("bottom");
   const pickerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!isOpen) {
-      setInputValue(value);
-    }
-  }, [value, isOpen]);
+  const inputValue = draftValue ?? value;
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setInputValue(value);
+        setDraftValue(null);
         setIsOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [value]);
 
-  useEffect(() => {
-    if (!isOpen || !pickerRef.current) {
-      return;
-    }
-
-    const rect = pickerRef.current.getBoundingClientRect();
-    const pickerHeight = 290;
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-
-    if (spaceBelow < pickerHeight && spaceAbove > spaceBelow) {
-      setPlacement("top");
-      return;
-    }
-
-    setPlacement("bottom");
-  }, [isOpen]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const normalizeHex = (rawValue: string) => {
     const sanitized = rawValue.replace(/[^0-9a-f]/gi, "").slice(0, 6).toUpperCase();
@@ -55,7 +35,7 @@ export default function CustomColorPicker({
 
   const commitHex = (rawValue: string) => {
     const normalized = normalizeHex(rawValue);
-    setInputValue(normalized);
+    setDraftValue(normalized);
 
     if (/^#[0-9A-F]{6}$/.test(normalized)) {
       onChange(normalized);
@@ -64,7 +44,7 @@ export default function CustomColorPicker({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const normalized = normalizeHex(e.target.value);
-    setInputValue(normalized);
+    setDraftValue(normalized);
 
     if (/^#[0-9A-F]{6}$/.test(normalized)) {
       onChange(normalized);
@@ -73,7 +53,7 @@ export default function CustomColorPicker({
 
   const handleColorChange = (newColor: string) => {
     const upperColor = newColor.toUpperCase();
-    setInputValue(upperColor);
+    setDraftValue(upperColor);
     onChange(upperColor);
   };
 
@@ -85,10 +65,23 @@ export default function CustomColorPicker({
     e.preventDefault();
     commitHex(e.clipboardData.getData("text"));
   };
+
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       commitHex(inputValue);
     }
+  };
+
+  const togglePicker = () => {
+    if (!isOpen && pickerRef.current) {
+      const rect = pickerRef.current.getBoundingClientRect();
+      const pickerHeight = 290;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setPlacement(spaceBelow < pickerHeight && spaceAbove > spaceBelow ? "top" : "bottom");
+    }
+
+    setIsOpen((current) => !current);
   };
 
   return (
@@ -108,7 +101,7 @@ export default function CustomColorPicker({
         />
         <button
           type="button"
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={togglePicker}
           className="relative ml-3 flex shrink-0 items-center justify-center h-8 w-8 rounded-full border border-white/20 shadow-lg transition-transform hover:scale-105 overflow-hidden focus:outline-none focus:ring-2 focus:ring-cyan-400"
         >
           <div className="absolute inset-0" style={{ backgroundColor: value }} />
@@ -121,12 +114,12 @@ export default function CustomColorPicker({
             placement === "top" ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
           }`}
         >
-          <style dangerouslySetInnerHTML={{__html: `
+          <style dangerouslySetInnerHTML={{ __html: `
             .react-colorful { width: 200px; height: 200px; }
             .react-colorful__pointer { width: 24px; height: 24px; }
-          `}} />
+          ` }} />
           <HexColorPicker color={value} onChange={handleColorChange} />
-          
+
           <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-4">
             <span className="text-[13px] font-medium text-white/50">Hex</span>
             <input

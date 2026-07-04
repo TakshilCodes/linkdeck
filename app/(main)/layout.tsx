@@ -1,5 +1,4 @@
 import Sidebar from "@/components/dashboard/Sidebar";
-import { Toaster } from "sonner";
 
 export default function MainLayout({
   children,

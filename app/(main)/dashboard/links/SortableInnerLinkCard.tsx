@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useDndContext } from "@dnd-kit/core";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { deleteLinkAction, setLinkVisibilityAction, updateLinkAction } from "@/actions/dashboard/links";
 import type { LinkItem } from "@/types/board-types";
+import WarningModal from "@/components/ui/WarningModal";
 
 type Props = {
   sortableId: string;
@@ -46,14 +47,9 @@ export default function SortableInnerLinkCard({ sortableId, link }: Props) {
   const [isVisible, setIsVisible] = useState(link.isVisible);
   const [editingName, setEditingName] = useState(false);
   const [editingUrl, setEditingUrl] = useState(false);
+  const [deleteWarningOpen, setDeleteWarningOpen] = useState(false);
   const router = useRouter();
-  const [, startTransition] = useTransition();
-
-  useEffect(() => {
-    setName(link.name);
-    setUrl(link.url);
-    setIsVisible(link.isVisible);
-  }, [link.name, link.url, link.isVisible]);
+  const [isPending, startTransition] = useTransition();
 
   const save = () => {
     const trimmedName = name.trim();
@@ -103,22 +99,25 @@ export default function SortableInnerLinkCard({ sortableId, link }: Props) {
   };
 
   const remove = () => {
-    const ok = window.confirm("Delete this link? This cannot be undone.");
-    if (!ok) return;
+    setDeleteWarningOpen(true);
+  };
 
+  const confirmRemove = () => {
     startTransition(async () => {
       const res = await deleteLinkAction({ id: link.id });
       if (!res.success) {
         toast.error(res.message || "Failed to delete link");
         return;
       }
+      setDeleteWarningOpen(false);
       toast.success("Link deleted");
       router.refresh();
     });
   };
 
   return (
-    <div
+    <>
+      <div
       ref={setNodeRef}
       style={style}
       className={`rounded-[22px] border px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.14)] transition-all duration-200 ${
@@ -213,6 +212,18 @@ export default function SortableInnerLinkCard({ sortableId, link }: Props) {
           Delete
         </button>
       </div>
-    </div>
+      </div>
+
+      <WarningModal
+        open={deleteWarningOpen}
+        title="Delete this link?"
+        description="This link will be permanently removed from this collection and your public page. This cannot be undone."
+        confirmLabel="Delete link"
+        variant="danger"
+        isLoading={isPending}
+        onClose={() => setDeleteWarningOpen(false)}
+        onConfirm={confirmRemove}
+      />
+    </>
   );
 }

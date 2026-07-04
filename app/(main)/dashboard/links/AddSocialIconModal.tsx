@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
-import { ArrowLeft, ChevronRight, Plus, X } from "lucide-react";
-import { IconType } from "@/app/generated/prisma/enums";
+import { ArrowLeft, ChevronRight, X } from "lucide-react";
+import type { IconType } from "@/app/generated/prisma/enums";
 import { ICONS, getIconByType } from "@/lib/social-icons";
 import {
   addSocialIconAction,
   updateSocialIconAction,
 } from "@/actions/dashboard/social-icon";
 import { toast } from "sonner";
+import { useIsClient } from "@/hooks/useIsClient";
 
 type SocialIconItem = {
   id: string;
@@ -35,31 +36,32 @@ export default function AddSocialIconModal({
   editingIcon,
   onSaved,
 }: Props) {
-  const [mounted, setMounted] = useState(false);
-  const [selectedType, setSelectedType] = useState<IconType | null>(
-    editingIcon?.type ?? initialType ?? null
-  );
-  const [value, setValue] = useState(editingIcon?.value ?? "");
+  const isClient = useIsClient();
+  const [draftSelectedType, setDraftSelectedType] = useState<IconType | null | undefined>();
+  const [draftValue, setDraftValue] = useState<string | undefined>();
   const [isPending, startTransition] = useTransition();
 
   const isEditing = Boolean(editingIcon);
+  const selectedType = draftSelectedType === undefined
+    ? editingIcon?.type ?? initialType ?? null
+    : draftSelectedType;
+  const value = draftValue ?? editingIcon?.value ?? "";
 
-  useEffect(() => {
-    setMounted(true);
+  const resetDraft = useCallback(() => {
+    setDraftSelectedType(undefined);
+    setDraftValue(undefined);
   }, []);
 
-  useEffect(() => {
-    if (open) {
-      setSelectedType(editingIcon?.type ?? initialType ?? null);
-      setValue(editingIcon?.value ?? "");
-    }
-  }, [open, initialType, editingIcon]);
+  const handleClose = useCallback(() => {
+    resetDraft();
+    onClose();
+  }, [onClose, resetDraft]);
 
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
     };
 
     document.addEventListener("keydown", onKeyDown);
@@ -69,14 +71,7 @@ export default function AddSocialIconModal({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open) {
-      setSelectedType(null);
-      setValue("");
-    }
-  }, [open]);
+  }, [open, handleClose]);
 
   const selectedMeta = useMemo(() => {
     if (!selectedType) return null;
@@ -107,20 +102,18 @@ export default function AddSocialIconModal({
       }
 
       toast.success(isEditing ? "Social icon updated" : "Social icon added");
-      setSelectedType(null);
-      setValue("");
-      onClose();
+      handleClose();
     });
   };
 
-  if (!mounted || !open) return null;
+  if (!isClient || !open) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-99999 ">
       <button
         type="button"
         aria-label="Close modal backdrop"
-        onClick={onClose}
+        onClick={handleClose}
         className="absolute inset-0 bg-[#020817]/70 backdrop-blur-md"
       />
 
@@ -135,7 +128,7 @@ export default function AddSocialIconModal({
 
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
                 >
                   <X className="h-5 w-5" />
@@ -151,7 +144,7 @@ export default function AddSocialIconModal({
                       <button
                         key={item.type}
                         type="button"
-                        onClick={() => setSelectedType(item.type)}
+                        onClick={() => setDraftSelectedType(item.type)}
                         className="flex w-full items-center justify-between rounded-2xl px-4 py-4 text-left transition hover:bg-white/5"
                       >
                         <div className="flex items-center gap-4">
@@ -177,8 +170,8 @@ export default function AddSocialIconModal({
                   <button
                     type="button"
                     onClick={() => {
-                      setSelectedType(null);
-                      setValue("");
+                      setDraftSelectedType(null);
+                      setDraftValue(undefined);
                     }}
                     className="absolute left-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
                   >
@@ -192,7 +185,7 @@ export default function AddSocialIconModal({
 
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
                 >
                   <X className="h-5 w-5" />
@@ -204,7 +197,7 @@ export default function AddSocialIconModal({
                   <input
                     type="text"
                     value={value}
-                    onChange={(e) => setValue(e.target.value)}
+                    onChange={(e) => setDraftValue(e.target.value)}
                     placeholder={selectedMeta?.placeholder}
                     className="w-full bg-transparent text-[17px] text-white outline-none placeholder:text-white/30"
                   />

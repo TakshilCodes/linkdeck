@@ -14,7 +14,7 @@ import ManageSocialIconsModal from "./ManageSocialIconModal";
 import ManageProfilePictureModal from "./ManageProfilePictureModal";
 import AddItemModal from "@/components/dashboard/links/AddItemModal";
 import { toast } from "sonner";
-import { createCollectionAction } from "@/actions/dashboard/addlinks";
+import { createCollectionAction } from "@/actions/dashboard/links";
 
 type Props = {
     username: string;

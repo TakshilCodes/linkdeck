@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, FileSearch } from "lucide-react";
 import type { HelpArticle, HelpCategoryFilter } from "@/lib/help/help-data";
 
@@ -12,16 +12,13 @@ type Props = {
 export default function HelpArticleAccordion({ articles, selectedCategory }: Props) {
   const [openArticleId, setOpenArticleId] = useState<string | null>(articles[0]?.id ?? null);
 
-  useEffect(() => {
-    if (!articles.length) {
-      setOpenArticleId(null);
-      return;
-    }
+  if (!articles.length && openArticleId !== null) {
+    setOpenArticleId(null);
+  }
 
-    setOpenArticleId((current) =>
-      current && articles.some((article) => article.id === current) ? current : articles[0].id
-    );
-  }, [articles]);
+  if (articles.length && !articles.some((article) => article.id === openArticleId)) {
+    setOpenArticleId(articles[0].id);
+  }
 
   if (!articles.length) {
     return (

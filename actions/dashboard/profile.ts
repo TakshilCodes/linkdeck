@@ -10,6 +10,15 @@ type UpdateProfileInput = {
     bio?: string;
 };
 
+function revalidateProfilePaths(username?: string | null) {
+    revalidatePath("/dashboard/links");
+    revalidatePath("/dashboard/design");
+
+    if (username) {
+        revalidatePath(`/${username}`);
+    }
+}
+
 export async function updateProfileAction(data: UpdateProfileInput) {
     try {
         const session = await getServerSession(authOptions);
@@ -55,7 +64,7 @@ export async function updateProfileAction(data: UpdateProfileInput) {
             },
         });
 
-        revalidatePath("/dashboard/links");
+        revalidateProfilePaths(session.user.username);
 
         return { success: true };
     } catch (err) {
@@ -89,7 +98,7 @@ export async function updateProfileImageAction(profileImgUrl: string | null) {
             },
         });
 
-        revalidatePath("/dashboard/links");
+        revalidateProfilePaths(session.user.username);
 
         return { success: true };
     } catch (err) {

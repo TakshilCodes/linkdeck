@@ -1,10 +1,19 @@
-export default [
+import coreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
+
+const eslintConfig = [
+  ...coreWebVitals,
+  ...nextTypescript,
   {
-    rules: {
-      "no-unused-vars": "warn",
-      "@typescript-eslint/no-unused-vars": "warn",
-      "react-hooks/exhaustive-deps": "off",
-      "@next/next/no-img-element": "off"
-    }
-  }
+    ignores: [
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+      "app/generated/**",
+      "load-tests/**",
+    ],
+  },
 ];
+
+export default eslintConfig;

@@ -1,287 +1,112 @@
-# 🚀 LinkDeck.in
+# LinkDeck.in
 
-> A modern Linktree-style SaaS for creators to manage, customize, and share their links with a production-ready full-stack architecture.
+LinkDeck.in is a creator-focused Linktree-style SaaS. It lets users build one polished public page for links, socials, projects, resources, and collections, then manage that page from a dashboard with live preview, customization, and basic insights.
 
----
+## Stack
 
-# 🧠 Overview
-
-**LinkDeck.in** is a creator-focused link management platform where users can:
-
-- Create a public profile → `linkdeck.in/username`
-- Add, edit, and organize links
-- Create collections/groups for links
-- Drag and reorder links & collections
-- Toggle visibility of links
-- Customize profile themes
-- See a real-time phone preview
-- Track profile analytics and link clicks
-- Manage account/security settings
-
----
-
-# ⚙️ Tech Stack
-
-## Frontend
-
-- Next.js (App Router)
+- Next.js App Router
 - TypeScript
 - Tailwind CSS
+- Prisma 7
+- PostgreSQL
+- NextAuth
+- Redis / Upstash Redis
 - Zustand
 - dnd-kit
 - Sonner
 
-## Backend
+## Current Product Scope
 
-- Next.js Server Actions
-- Next.js API Routes
+Implemented:
 
-## Database
-
-- PostgreSQL
-- Prisma ORM v7
-
-## Caching / Infra
-
-- Redis
-- ioredis
-- Docker
-
-## Authentication
-
-- NextAuth
-- Google OAuth
-- GitHub OAuth
-- Credentials Auth
-- Email OTP Verification
-
----
-
-# ✨ Features
-
-## 🔐 Authentication
-
-- Email OTP authentication
-- Google login
-- GitHub login
-- Secure session handling
-
----
-
-## 👤 Public Profiles
-
-- Public profile pages → `/username`
-- User bio & profile image
+- Email, Google, GitHub, and credentials authentication
+- OTP verification and password reset flows
+- Dashboard link and collection management
+- Drag and drop board ordering
+- Public profile pages at `/[username]`
+- Theme and design customization
 - Social icons
-- Custom themes
-- Responsive mobile-first design
+- Profile image uploads
+- Basic analytics for profile views and link clicks
+- Account and security settings
+- Learn/help content surfaces
+- Landing page work in progress
 
----
+Not currently advertised as product-ready:
 
-## 🔗 Link Management
-
-- Add / edit / delete links
-- Drag & drop link reordering
-- Toggle visibility
-- Collections/groups support
-- Move links between collections
-- Optimistic UI updates
-
----
-
-## 🎨 Theme System
-
-- Multiple default themes
-- User customization support
-- Glassmorphism UI
-- Real-time preview system
-- Phone-style preview rendering
-
----
-
-## 📊 Insights & Analytics
-
-- Profile view tracking
-- Link click tracking
-- CTR calculation
-- Activity charts
-- Top performing links
-- Recent activity feed
-
----
-
-## ⚙️ Account Settings
-
-- Account overview
-- Public profile URL management
-- Password change system
-- OTP-based password reset
-- Account security section
-
----
-
-# 🏗️ Current Project Status
-
-## ✅ Completed
-
-### Core Infrastructure
-
-- Docker setup (Postgres + Redis)
-- Prisma ORM setup
-- PostgreSQL database integration
-- Redis integration
-- Environment configuration
-
-### Authentication System
-
-- NextAuth integration
-- Google OAuth
-- GitHub OAuth
-- Email OTP flow
-- Session management
-
-### Dashboard System
-
-- Full dashboard UI completed
-- Link management system
-- Collection management system
-- Drag & drop functionality
-- Real-time preview system
-- Theme customization system
-- Account settings page
-- Insights/analytics dashboard
-
-### Public Profile System
-
-- Dynamic `/[username]` profile pages
-- Responsive rendering
-- Theme rendering system
-- Social icons support
-- Collections rendering
-
-### Analytics System
-
-- Profile view tracking
-- Link click tracking
-- CTR analytics
-- Activity charts
-- Recent activity tracking
-
----
-
-## 🚧 Remaining Pages
-
-- Landing page
-- Features page
-- Explore page
-- Learn page
-- Help page
-
----
-
-## ⏳ Planned Features
-
-- Deployment (Vercel + Neon + Upstash)
-- Rate limiting
-- Redis caching optimizations
-- CI/CD pipeline
-- SEO improvements
-- Advanced analytics
+- Pricing
+- Payments
+- Public explore/discovery
 - Custom domains
+- Advanced analytics
 
----
+## Local Setup
 
-# ⚙️ Local Setup
-
-## 1. Clone the repository
+1. Install dependencies:
 
 ```bash
-git clone https://github.com/TakshilCodes/linkdeck.git
-cd linkdeck
+npm install
 ```
 
----
-
-## 2. Setup environment variables
-
-Create a `.env` file:
+2. Create `.env` from `.env.example` and fill in the required values:
 
 ```env
-DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5433/linkdeck"
-
-REDIS_URL="redis://127.0.0.1:6379"
-
+DATABASE_URL=
+REDIS_URL=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NEXT_PUBLIC_APP_ENV=dev
 
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+AUTH_GITHUB_ID=
+AUTH_GITHUB_SECRET=
 
-GITHUB_CLIENT_ID=
-GITHUB_CLIENT_SECRET=
+Emailjs_ServiceId=
+Emailjs_TemplateId=
+Emailjs_PublicId=
+Emailjs_PrivateId=
+
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
 ```
 
----
-
-## 3. Start Docker services
-
-```bash
-docker-compose up -d
-```
-
----
-
-## 4. Run Prisma migrations
+3. Run database migrations and generate Prisma output:
 
 ```bash
 npx prisma migrate dev
-```
-
----
-
-## 5. Generate Prisma client
-
-```bash
 npx prisma generate
 ```
 
----
-
-## 6. Start development server
+4. Start the development server:
 
 ```bash
 npm run dev
 ```
 
----
+5. Before shipping changes, run:
 
-# 🧪 Development Status
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+```
 
-LinkDeck.in is currently under active development.
+## Production Notes
 
-The core product architecture, dashboard system, authentication flow, analytics system, and public profile rendering are already completed.
+- Keep `.env` files private. Only `.env.example` should be committed.
+- Use strong `NEXTAUTH_SECRET` values in every deployed environment.
+- Configure production Redis/Upstash before relying on rate limits.
+- Configure Cloudinary upload credentials before enabling profile image uploads.
+- OTPs are hashed before storage and expire after 10 minutes.
+- Server-side title fetching validates URLs, blocks private/local targets, uses a timeout, and limits response size.
+- Uploads validate size, MIME type, extension, and image signatures.
+- Profile views and link clicks are intentionally basic analytics, not advanced attribution.
 
-Current focus is on:
-- marketing pages
-- polishing UX
-- optimization
-- deployment preparation
+## Local-Only Load Tests
 
----
-
-# 📌 Author
-
-## Takshil Pandya
-
-Full-stack developer focused on building scalable SaaS products, modern web applications, and production-ready systems.
-
-GitHub:
-`https://github.com/TakshilCodes`
-
----
-
-# ⚠️ Note
-
-This project is actively evolving.
-
-Features, architecture, and implementation details may continue to improve over time.
+The `load-tests/` folder is intentionally ignored by Git. Keep private test scripts, auth cookies, tokens, API keys, trip/profile IDs, and real user data out of commits.

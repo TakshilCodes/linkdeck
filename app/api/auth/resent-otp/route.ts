@@ -1,48 +1,102 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { redis } from "@/lib/redis";
+import { sendOtpEmail } from "@/lib/email/otp-email";
+import { SignupEmailStepZod } from "@/lib/validators/auth";
+import { checkFixedWindowRateLimit, isCooldownActive, setCooldown } from "@/lib/security/rate-limit";
+import { generateOtp, hashOtp, OTP_EXPIRE_SECONDS, OTP_RESEND_COOLDOWN_SECONDS } from "@/lib/security/otp";
 
-function generateOTP() {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+const OTP_RATE_LIMIT_SECONDS = 10 * 60;
+const OTP_RATE_LIMIT_MAX = 3;
+
+type PendingSignup = {
+  email: string;
+  otpHash: string;
+  username: string | null;
+  createdAt: number;
+};
+
+async function canResendOtp(email: string) {
+  const cooldownKey = `cooldown:otp:signup:${email}`;
+  if (await isCooldownActive(cooldownKey)) {
+    return false;
+  }
+
+  const { allowed } = await checkFixedWindowRateLimit({
+    key: `ratelimit:otp:signup:${email}`,
+    limit: OTP_RATE_LIMIT_MAX,
+    windowSeconds: OTP_RATE_LIMIT_SECONDS,
+  });
+
+  if (allowed) {
+    await setCooldown(cooldownKey, OTP_RESEND_COOLDOWN_SECONDS);
+  }
+
+  return allowed;
 }
 
-export async function POST(req: Request) {
-    try {
-        const { email } = await req.json();
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const parsed = SignupEmailStepZod.safeParse(body);
 
-        if (!email) {
-            return NextResponse.json(
-                { ok: false, error: "Email is required" },
-                { status: 400 }
-            );
-        }
-
-        const normalizedEmail = email.toLowerCase();
-        const cooldownKey = `otp:cooldown:${normalizedEmail}`;
-        const isCooldown = await redis.get(cooldownKey);
-
-        if (isCooldown) {
-            return NextResponse.json(
-                { ok: false, error: "Please wait before requesting again" },
-                { status: 429 }
-            );
-        }
-
-        const otp = generateOTP();
-
-        await redis.set(`otp:${normalizedEmail}`, otp, 300);
-
-        await redis.set(cooldownKey, "1", 30);
-
-        console.log("OTP:", otp);
-
-        return NextResponse.json({
-            ok: true,
-            msg: "OTP resent successfully",
-        });
-    } catch (e: any) {
-        return NextResponse.json(
-            { ok: false, error: e.message },
-            { status: 500 }
-        );
+    if (!parsed.success) {
+      return NextResponse.json(
+        { ok: false, error: parsed.error.flatten().fieldErrors.email?.[0] ?? "Invalid email" },
+        { status: 400 }
+      );
     }
+
+    const { email } = parsed.data;
+    const pendingRaw = await redis.get(`signup:pending:${email}`);
+
+    if (!pendingRaw || typeof pendingRaw !== "string") {
+      return NextResponse.json(
+        { ok: false, error: "Signup session expired. Start again." },
+        { status: 400 }
+      );
+    }
+
+    const allowed = await canResendOtp(email);
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Please wait before requesting another OTP." },
+        { status: 429 }
+      );
+    }
+
+    const pending = JSON.parse(pendingRaw) as PendingSignup;
+    const otp = generateOtp();
+
+    const nextPending: PendingSignup = {
+      ...pending,
+      email,
+      otpHash: await hashOtp(otp),
+      createdAt: Date.now(),
+    };
+
+    await redis.set(
+      `signup:pending:${email}`,
+      JSON.stringify(nextPending),
+      OTP_EXPIRE_SECONDS
+    );
+
+    const sent = await sendOtpEmail(email, otp);
+    if (!sent) {
+      return NextResponse.json(
+        { ok: false, error: "Failed to send OTP" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "OTP resent successfully",
+    });
+  } catch (error) {
+    console.error("auth/resend-otp error", error);
+    return NextResponse.json(
+      { ok: false, error: "Failed to resend OTP" },
+      { status: 500 }
+    );
+  }
 }

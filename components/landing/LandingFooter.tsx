@@ -31,7 +31,7 @@ const socialLinks: SocialLink[] = [
   },
   {
     label: "X",
-    href: "https://x.com/TakshilCodes",
+    href: "https://x.com/TakshilDev",
     icon: FaXTwitter,
   },
   {
@@ -41,7 +41,7 @@ const socialLinks: SocialLink[] = [
   },
   {
     label: "Instagram",
-    href: "https://www.instagram.com/takshilcodes",
+    href: "https://www.instagram.com/takshillpandya",
     icon: FaInstagram,
   },
 ];
@@ -84,7 +84,7 @@ export default function LandingFooter() {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={social.label}
-                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-white/72 transition hover:border-[#00B8DB]/40 hover:bg-[#00B8DB]/10 hover:text-white hover:shadow-[0_0_26px_rgba(0,184,219,0.14)]"
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/4 text-white/72 transition hover:border-[#00B8DB]/40 hover:bg-[#00B8DB]/10 hover:text-white hover:shadow-[0_0_26px_rgba(0,184,219,0.14)]"
                   >
                     <Icon className="h-4.5 w-4.5" />
                   </a>
@@ -120,7 +120,7 @@ export default function LandingFooter() {
               ) : isLoggedIn ? (
                 <Link
                   href="/dashboard"
-                  className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-white/82 transition hover:border-[#00B8DB]/35 hover:bg-[#00B8DB]/10 hover:text-white"
+                  className="inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/4 px-4 py-2 text-sm font-semibold text-white/82 transition hover:border-[#00B8DB]/35 hover:bg-[#00B8DB]/10 hover:text-white"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   Dashboard
@@ -128,7 +128,7 @@ export default function LandingFooter() {
               ) : (
                 <>
                   <Link
-                    href="/signin"
+                    href="/login"
                     className="w-fit text-sm font-medium text-white/58 transition hover:text-white"
                   >
                     Login

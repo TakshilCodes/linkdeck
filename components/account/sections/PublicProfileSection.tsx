@@ -2,21 +2,15 @@
 
 import { Copy, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { useState, useEffect } from "react";
+import { useIsClient } from "@/hooks/useIsClient";
 
 export default function PublicProfileSection({
   username,
 }: {
   username: string | null;
 }) {
-  const [origin, setOrigin] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setOrigin(window.location.origin);
-    }
-  }, []);
-
+  const isClient = useIsClient();
+  const origin = isClient ? window.location.origin : "";
   const profileUrl = username ? `${origin}/${username}` : null;
 
   const handleCopy = async () => {
@@ -24,7 +18,7 @@ export default function PublicProfileSection({
     try {
       await navigator.clipboard.writeText(profileUrl);
       toast.success("Profile link copied to clipboard!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to copy link");
     }
   };

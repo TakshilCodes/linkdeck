@@ -1,10 +1,12 @@
-import prisma from "@/lib/prisma";
 import DesignTabContent from "@/components/dashboard/design/DesignTabContent";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardDesignPage() {
   const session = await getServerSession(authOptions);
+  const { default: prisma } = await import("@/lib/prisma");
 
   const [themes, user] = await Promise.all([
     prisma.defaultTheme.findMany({
@@ -13,7 +15,7 @@ export default async function DashboardDesignPage() {
     session?.user?.email
       ? prisma.user.findUnique({
           where: { email: session.user.email },
-          select: { 
+          select: {
             defaultThemeId: true,
             username: true,
             displayName: true,
@@ -27,8 +29,8 @@ export default async function DashboardDesignPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <DesignTabContent 
-        themes={themes} 
+      <DesignTabContent
+        themes={themes}
         currentThemeId={user?.defaultThemeId}
         initialProfile={{
           username: user?.username,

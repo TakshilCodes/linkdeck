@@ -29,30 +29,6 @@ export function normalizeUrl(raw: string): NormalizeUrlResult {
   return { success: true, url: parsed.toString() };
 }
 
-export async function fetchPageTitle(url: string) {
-  try {
-    const res = await fetch(url, {
-      method: "GET",
-      headers: {
-        "User-Agent": "Mozilla/5.0 LinkDeckBot/1.0",
-      },
-      cache: "no-store",
-    });
-
-    if (!res.ok) return null;
-
-    const html = await res.text();
-
-    const match = html.match(/<title[^>]*>(.*?)<\/title>/i);
-    if (!match?.[1]) return null;
-
-    const title = match[1].trim().replace(/\s+/g, " ");
-    return title || null;
-  } catch {
-    return null;
-  }
-}
-
 export function fallbackTitleFromUrl(url: string) {
   return displayDomainFromUrl(url) || "Untitled Link";
 }

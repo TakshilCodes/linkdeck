@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useDndContext, useDroppable } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 import { updateCollectionAction, deleteCollectionAction } from "@/actions/dashboard/links";
 import type { CollectionItem } from "@/types/board-types";
 import SortableInnerLinkCard from "./SortableInnerLinkCard";
-import AddItemModal from "./AddItemModal";
+import AddItemModal from "@/components/dashboard/links/AddItemModal";
+import WarningModal from "@/components/ui/WarningModal";
 
 type Props = {
   sortableId: string;
@@ -44,9 +45,10 @@ export default function SortableCollectionCard({
   const [name, setName] = useState(collection.name);
   const [isEditing, setIsEditing] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [deleteWarningOpen, setDeleteWarningOpen] = useState(false);
 
   const router = useRouter();
-  const [, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
 
   const gapBeforeId = `collection-gap-before-${collection.id}`;
   const beforeZoneId = `collection-zone-before-${collection.id}`;
@@ -65,10 +67,6 @@ export default function SortableCollectionCard({
   const { setNodeRef: setBodyDropRef, isOver: isOverBodyDrop } = useDroppable({
     id: bodyDropId,
   });
-
-  useEffect(() => {
-    setName(collection.name);
-  }, [collection.name]);
 
   const innerIds = useMemo(
     () => collection.links.map((link) => `collection-link-${link.id}`),
@@ -105,15 +103,17 @@ export default function SortableCollectionCard({
   };
 
   const removeCollection = () => {
-    const ok = window.confirm("Delete this collection and all its links? This cannot be undone.");
-    if (!ok) return;
+    setDeleteWarningOpen(true);
+  };
 
+  const confirmRemoveCollection = () => {
     startTransition(async () => {
       const res = await deleteCollectionAction({ id: collection.id });
       if (!res.success) {
         toast.error(res.message || "Failed to delete collection");
         return;
       }
+      setDeleteWarningOpen(false);
       toast.success("Collection deleted");
       router.refresh();
     });
@@ -272,6 +272,17 @@ export default function SortableCollectionCard({
           </SortableContext>
         </div>
       </div>
+
+      <WarningModal
+        open={deleteWarningOpen}
+        title="Delete this collection?"
+        description="This collection and all links inside it will be permanently removed from your dashboard and public page. This cannot be undone."
+        confirmLabel="Delete collection"
+        variant="danger"
+        isLoading={isPending}
+        onClose={() => setDeleteWarningOpen(false)}
+        onConfirm={confirmRemoveCollection}
+      />
 
       <AddItemModal
         open={openModal}

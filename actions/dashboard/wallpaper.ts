@@ -4,17 +4,35 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import type {
+  BlurStrength,
+  GradientDirection,
+  PatternStyle,
+  WallpaperStyle,
+} from "@/app/generated/prisma/enums";
 
 type SaveWallpaperPayload = {
-  wallpaperStyle?: string;
-  backgroundColor?: string;
-  backgroundColor2?: string;
-  gradientDirection?: string;
-  patternStyle?: string;
-  blurStrength?: string;
-  patternColor?: string;
-  shadowColor?: string;
-  outlineColor?: string;
+  wallpaperStyle?: string | null;
+  backgroundColor?: string | null;
+  backgroundColor2?: string | null;
+  gradientDirection?: string | null;
+  patternStyle?: string | null;
+  blurStrength?: string | null;
+  patternColor?: string | null;
+  shadowColor?: string | null;
+  outlineColor?: string | null;
+};
+
+type WallpaperCustomizationData = {
+  wallpaperStyle?: WallpaperStyle | null;
+  backgroundColor?: string | null;
+  backgroundColor2?: string | null;
+  gradientDirection?: GradientDirection | null;
+  patternStyle?: PatternStyle | null;
+  blurStrength?: BlurStrength | null;
+  patternColor?: string | null;
+  shadowColor?: string | null;
+  outlineColor?: string | null;
 };
 
 export async function saveWallpaperDesignAction(payload: SaveWallpaperPayload) {
@@ -26,21 +44,20 @@ export async function saveWallpaperDesignAction(payload: SaveWallpaperPayload) {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true },
+    select: { id: true, username: true },
   });
 
   if (!user) {
     throw new Error("User not found");
   }
 
-  // Only update fields that are provided in the payload
-  const updateData: any = {};
-  if (payload.wallpaperStyle !== undefined) updateData.wallpaperStyle = payload.wallpaperStyle;
+  const updateData: WallpaperCustomizationData = {};
+  if (payload.wallpaperStyle !== undefined) updateData.wallpaperStyle = payload.wallpaperStyle as WallpaperStyle | null;
   if (payload.backgroundColor !== undefined) updateData.backgroundColor = payload.backgroundColor;
   if (payload.backgroundColor2 !== undefined) updateData.backgroundColor2 = payload.backgroundColor2;
-  if (payload.gradientDirection !== undefined) updateData.gradientDirection = payload.gradientDirection;
-  if (payload.patternStyle !== undefined) updateData.patternStyle = payload.patternStyle;
-  if (payload.blurStrength !== undefined) updateData.blurStrength = payload.blurStrength;
+  if (payload.gradientDirection !== undefined) updateData.gradientDirection = payload.gradientDirection as GradientDirection | null;
+  if (payload.patternStyle !== undefined) updateData.patternStyle = payload.patternStyle as PatternStyle | null;
+  if (payload.blurStrength !== undefined) updateData.blurStrength = payload.blurStrength as BlurStrength | null;
   if (payload.patternColor !== undefined) updateData.patternColor = payload.patternColor;
   if (payload.shadowColor !== undefined) updateData.shadowColor = payload.shadowColor;
   if (payload.outlineColor !== undefined) updateData.outlineColor = payload.outlineColor;
@@ -57,5 +74,7 @@ export async function saveWallpaperDesignAction(payload: SaveWallpaperPayload) {
   }
 
   revalidatePath("/dashboard");
-  revalidatePath("/[username]");
+  if (user.username) {
+    revalidatePath(`/${user.username}`);
+  }
 }

@@ -21,14 +21,6 @@ export default function Reveal({
     const element = ref.current;
     if (!element) return;
 
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    if (prefersReducedMotion) {
-      setIsVisible(true);
-      return;
-    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {

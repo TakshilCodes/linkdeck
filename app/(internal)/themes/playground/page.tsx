@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import Image from "next/image";
+import { useMemo, useState } from "react";
 import {
   Instagram,
   MessageCircle,
   MoreVertical,
-  Share2,
   Sparkles,
 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import profilePic from '@/public/preview/profile_picture.jpg'
-import Link from "next/link";
 
 const wallpaperStyles = ["FILL", "GRADIENT", "BLUR", "PATTERN"] as const;
 const gradientDirections = ["LINEAR_DOWN", "LINEAR_UP", "RADIAL"] as const;
@@ -553,9 +552,11 @@ export default function LinkDeckThemePlayground() {
               <div className="relative z-10 flex h-full flex-col px-6 pb-6 pt-8">
 
                 <div className="flex flex-col items-center text-center pt-10">
-                  <img
-                    src={profilePic.src}
+                  <Image
+                    src={profilePic}
                     alt="profile"
+                    width={96}
+                    height={96}
                     className="mb-4 h-24 w-24 rounded-full object-cover"
                   />
 

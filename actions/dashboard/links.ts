@@ -3,7 +3,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { fallbackTitleFromUrl, fetchPageTitle, normalizeUrl } from "@/lib/links";
+import { fallbackTitleFromUrl, normalizeUrl } from "@/lib/links";
+import { fetchPageTitle } from "@/lib/server/fetch-page-title";
 
 async function getUserId() {
   const session = await getServerSession(authOptions);
@@ -30,6 +31,22 @@ async function getNextCollectionLinkPosition(collectionId: string) {
   return last ? last.position + 1 : 0;
 }
 
+async function resolveNewLinkDetails(rawUrl: string) {
+  const normalized = normalizeUrl(rawUrl);
+
+  if (!normalized.success) {
+    return normalized;
+  }
+
+  const url = normalized.url;
+  const fetchedTitle = await fetchPageTitle(url);
+
+  return {
+    success: true as const,
+    url,
+    name: fetchedTitle || fallbackTitleFromUrl(url),
+  };
+}
 export async function saveTopLevelBoardOrderAction(items: {
   id: string;
   type: "LINK" | "COLLECTION";
@@ -164,18 +181,16 @@ export async function createRootLinkAction({
     }
 
     const userId = session.user.id;
-    const normalized = normalizeUrl(rawUrl);
+    const linkDetails = await resolveNewLinkDetails(rawUrl);
 
-    if (!normalized.success) {
+    if (!linkDetails.success) {
       return {
         success: false,
-        message: normalized.error,
+        message: linkDetails.error,
       };
     }
 
-    const url = normalized.url;
-    const fetchedTitle = await fetchPageTitle(url);
-    const name = fetchedTitle || fallbackTitleFromUrl(url);
+    const { name, url } = linkDetails;
 
     const lastBoardItem = await prisma.boardItem.findFirst({
       where: { userId },
@@ -245,14 +260,23 @@ export async function createLinkInCollectionAction({
       return { success: false, message: "Collection not found" };
     }
 
+    const linkDetails = await resolveNewLinkDetails(rawUrl);
+
+    if (!linkDetails.success) {
+      return {
+        success: false,
+        message: linkDetails.error,
+      };
+    }
+
     const nextPosition = await getNextCollectionLinkPosition(collectionId);
 
     await prisma.link.create({
       data: {
         userId,
         collectionId,
-        name: rawUrl,
-        url: rawUrl,
+        name: linkDetails.name,
+        url: linkDetails.url,
         isVisible: true,
         clickCount: 0,
         position: nextPosition,
@@ -306,11 +330,20 @@ export async function updateLinkAction({
       return { success: false, message: "Unauthorized" };
     }
 
+    const normalized = normalizeUrl(url);
+
+    if (!normalized.success) {
+      return {
+        success: false,
+        message: normalized.error,
+      };
+    }
+
     await prisma.link.updateMany({
       where: { id, userId },
       data: {
-        name: name.trim(),
-        url: url.trim(),
+        name: name.trim() || fallbackTitleFromUrl(normalized.url),
+        url: normalized.url,
       },
     });
 

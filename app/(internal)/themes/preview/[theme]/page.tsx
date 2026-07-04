@@ -1,6 +1,7 @@
-import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
+
+export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{
@@ -10,6 +11,7 @@ type PageProps = {
 
 export default async function PreviewPage({ params }: PageProps) {
   const { theme } = await params;
+  const { default: prisma } = await import("@/lib/prisma");
 
   const themeData = await prisma.defaultTheme.findUnique({
     where: { slug: theme },

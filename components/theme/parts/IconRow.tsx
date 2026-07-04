@@ -1,6 +1,6 @@
 import {
   Instagram,
-  MessageCircle,
+  Globe,
   Linkedin,
   Youtube,
   Github,
@@ -36,8 +36,10 @@ function getIcon(type: string, compact: boolean) {
       return <Twitch className={sz} />;
     case "TELEGRAM":
       return <Send className={sz} />;
+    case "PERSONAL_WEBSITE":
+      return <Globe className={sz} />;
     default:
-      return <MessageCircle className={sz} />;
+      return <Globe className={sz} />;
   }
 }
 

@@ -59,7 +59,7 @@ export default function SelectPlatformsStep({
 
         startTransition(async () => {
             try {
-                await savePlatformsAction(selectedPlatforms as any);
+                await savePlatformsAction(selectedPlatforms);
             } catch {
                 setError("Failed to save platforms.");
             }
@@ -84,7 +84,7 @@ export default function SelectPlatformsStep({
             platform.type === "PATREON" ||
             platform.type === "PERSONAL_WEBSITE"
         ) {
-            const meta = getIconByType(platform.type as any);
+            const meta = getIconByType(platform.type);
             if (meta) {
                 const Icon = meta.icon;
                 const iconClassName =

@@ -27,7 +27,6 @@ import {
   Globe,
   Twitch,
   Send,
-  Mail,
 } from "lucide-react";
 import { FaDiscord, FaPinterest, FaSnapchatGhost } from "react-icons/fa";
 import { FaXTwitter, FaPatreon } from "react-icons/fa6";
@@ -223,7 +222,7 @@ export function resolveSocialUrl(type: IconType, value: string) {
   return value.trim();
 }
 
-export function normalizeSocialValue(type: any, raw: string) {
+export function normalizeSocialValue(type: IconType, raw: string) {
   const meta = getIconByType(type);
   if (!meta) throw new Error("Invalid social platform");
 

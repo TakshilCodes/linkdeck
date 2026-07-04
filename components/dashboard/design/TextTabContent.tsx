@@ -1,348 +1,188 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState } from "react";
+
 import { mergeTheme } from "@/lib/themes/merge-theme";
 import { useDesignStore } from "@/store/design";
-import CustomColorPicker from "./CustomColorPicker";
-import type { DefaultTheme } from "@/types/theme";
+import type { CustomTheme, DefaultTheme } from "@/types/theme";
 
-// Font options constants
+import CustomColorPicker from "./CustomColorPicker";
+import { DesignSelect, ToggleSwitch } from "./DesignControls";
+
 const FONT_FAMILY_OPTIONS = [
   "INTER",
-  "POPPINS", 
+  "POPPINS",
   "MONTSERRAT",
   "ROBOTO",
   "PLAYFAIR",
   "OUTFIT",
-];
+] as const;
 
-const FONT_WEIGHT_OPTIONS = [
-  "NONE",
-  "SOFT",
-  "MEDIUM",
-  "STRONG",
-];
+const FONT_WEIGHT_OPTIONS = ["NONE", "SOFT", "MEDIUM", "STRONG"] as const;
+const FONT_SIZE_OPTIONS = ["SMALL", "MEDIUM", "LARGE"] as const;
 
-const FONT_SIZE_OPTIONS = [
-  "SMALL",
-  "MEDIUM",
-  "LARGE",
-];
-
-// Toggle Switch Component
-function ToggleSwitch({ 
-  label, 
-  subtitle, 
-  checked, 
-  onChange 
-}: { 
-  label: string; 
-  subtitle?: string;
-  checked: boolean; 
-  onChange: (checked: boolean) => void; 
-}) {
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div>
-          <label className="block text-sm font-medium text-white/80">{label}</label>
-          {subtitle && (
-            <p className="text-xs text-white/50">{subtitle}</p>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => onChange(!checked)}
-          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-            checked ? 'bg-cyan-400' : 'bg-white/20'
-          }`}
-        >
-          <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-              checked ? 'translate-x-6' : 'translate-x-1'
-            }`}
-          />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// Generic Custom Dropdown Component
-function CustomDropdown<T extends string>({ 
-  value, 
-  onChange, 
-  options,
-  label 
-}: { 
-  value: T; 
-  onChange: (value: T) => void; 
-  options: T[];
-  label?: string;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const displayText = value.charAt(0) + value.slice(1).toLowerCase();
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="h-12 w-full appearance-none rounded-2xl border border-white/10 bg-transparent px-4 text-left text-[15px] text-white outline-none transition focus:border-cyan-400 flex items-center justify-between"
-      >
-        <span>{displayText}</span>
-        <svg 
-          className={`h-4 w-4 text-white/60 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-xl overflow-hidden">
-          <div className="max-h-60 overflow-y-scroll scrollbar-hide">
-            {options.map((option) => {
-              const isSelected = option === value;
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => {
-                    onChange(option);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full px-4 py-3 text-left text-[15px] transition ${
-                    isSelected ? 'bg-cyan-400/20 text-cyan-300' : 'text-white hover:bg-[#2a2a2a]'
-                  }`}
-                >
-                  {option.charAt(0) + option.slice(1).toLowerCase()}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+type FontFamilyOption = (typeof FONT_FAMILY_OPTIONS)[number];
+type FontWeightOption = (typeof FONT_WEIGHT_OPTIONS)[number];
+type FontSizeOption = (typeof FONT_SIZE_OPTIONS)[number];
 
 type Props = {
-  initialCustomization?: any;
+  initialCustomization?: Partial<CustomTheme> | null;
   activeTheme: DefaultTheme;
 };
 
-export default function TextTabContent({ initialCustomization, activeTheme }: Props) {
-  const { previewCustomTheme, updatePreviewCustomTheme } = useDesignStore();
-  const resolvedTheme = mergeTheme(activeTheme, initialCustomization ?? null);
+function coerceOption<T extends string>(options: readonly T[], value: string | null | undefined, fallback: T) {
+  return options.includes(value as T) ? (value as T) : fallback;
+}
 
-  // Initialize state with initial customization values
-  const pageFontFamily = resolvedTheme.fontFamily ?? "INTER";
+export default function TextTabContent({ initialCustomization, activeTheme }: Props) {
+  const { updatePreviewCustomTheme } = useDesignStore();
+  const resolvedTheme = mergeTheme(activeTheme, initialCustomization ?? null);
+  const pageFontFamily = coerceOption(FONT_FAMILY_OPTIONS, resolvedTheme.fontFamily, "INTER");
+
   const [useAltFont, setUseAltFont] = useState(
     Boolean((initialCustomization?.titleFontFamily ?? resolvedTheme.titleFontFamily) != null)
   );
-  const [titleFontFamily, setTitleFontFamily] = useState(resolvedTheme.titleFontFamily ?? pageFontFamily);
-  const [titleFontWeight, setTitleFontWeight] = useState(resolvedTheme.titleFontWeight ?? "MEDIUM");
+  const [titleFontFamily, setTitleFontFamily] = useState<FontFamilyOption>(
+    coerceOption(FONT_FAMILY_OPTIONS, resolvedTheme.titleFontFamily, pageFontFamily)
+  );
+  const [titleFontWeight, setTitleFontWeight] = useState<FontWeightOption>(
+    coerceOption(FONT_WEIGHT_OPTIONS, resolvedTheme.titleFontWeight, "MEDIUM")
+  );
+  const [titleFontSize, setTitleFontSize] = useState<FontSizeOption>(
+    coerceOption(FONT_SIZE_OPTIONS, resolvedTheme.titleFontSize, "MEDIUM")
+  );
+  const [profileFontSize, setProfileFontSize] = useState<FontSizeOption>(
+    coerceOption(FONT_SIZE_OPTIONS, resolvedTheme.profileFontSize, "SMALL")
+  );
+  const [fontFamily, setFontFamily] = useState<FontFamilyOption>(pageFontFamily);
   const [titleColor, setTitleColor] = useState(resolvedTheme.titleColor ?? "#ffffff");
-  const [titleFontSize, setTitleFontSize] = useState(resolvedTheme.titleFontSize ?? "MEDIUM");
-  const [profileFontSize, setProfileFontSize] = useState(resolvedTheme.profileFontSize ?? "SMALL");
   const [profileColor, setProfileColor] = useState(resolvedTheme.profileColor ?? "#ffffff");
-  const [fontFamily, setFontFamily] = useState(resolvedTheme.fontFamily ?? "INTER");
 
-  // Update preview when values change
-  useEffect(() => {
-    const storeFontFamily = useAltFont ? titleFontFamily : null;
-    updatePreviewCustomTheme({
-      titleFontFamily: storeFontFamily,
-      titleFontWeight,
-      titleColor,
-      titleFontSize,
-      profileFontSize,
-      profileColor,
-      fontFamily
-    });
-  }, [useAltFont, titleFontFamily, titleFontWeight, titleColor, titleFontSize, profileFontSize, profileColor, fontFamily, updatePreviewCustomTheme]);
-
-  // Initialize preview with empty state to avoid false positives
-  useEffect(() => {
-    // Don't reset preview on mount - let it use store's initial null state
-    // updatePreviewCustomTheme({});
-  }, []);
-
-  const handleTitleFontFamilyChange = (value: string) => {
-    setTitleFontFamily(value);
+  const handleAltFontChange = (checked: boolean) => {
+    setUseAltFont(checked);
+    updatePreviewCustomTheme({ titleFontFamily: checked ? titleFontFamily : null });
   };
 
-  const handleTitleFontWeightChange = (value: string) => {
+  const handleTitleFontFamilyChange = (value: FontFamilyOption) => {
+    setTitleFontFamily(value);
+    setUseAltFont(true);
+    updatePreviewCustomTheme({ titleFontFamily: value });
+  };
+
+  const handleTitleFontWeightChange = (value: FontWeightOption) => {
     setTitleFontWeight(value);
+    updatePreviewCustomTheme({ titleFontWeight: value });
+  };
+
+  const handleTitleFontSizeChange = (value: FontSizeOption) => {
+    setTitleFontSize(value);
+    updatePreviewCustomTheme({ titleFontSize: value });
   };
 
   const handleTitleColorChange = (value: string) => {
     setTitleColor(value);
+    updatePreviewCustomTheme({ titleColor: value });
   };
 
-  const handleProfileFontSizeChange = (value: string) => {
+  const handleProfileFontSizeChange = (value: FontSizeOption) => {
     setProfileFontSize(value);
+    updatePreviewCustomTheme({ profileFontSize: value });
   };
 
   const handleProfileColorChange = (value: string) => {
     setProfileColor(value);
+    updatePreviewCustomTheme({ profileColor: value });
   };
 
-  const handleTitleFontSizeChange = (value: string) => {
-    setTitleFontSize(value);
-  };
-
-  const handlePageFontFamilyChange = (value: string) => {
+  const handlePageFontFamilyChange = (value: FontFamilyOption) => {
     setFontFamily(value);
+    updatePreviewCustomTheme({ fontFamily: value });
   };
-
-
-  // Inject custom styles
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      .slider-thumb::-webkit-slider-thumb {
-        appearance: none;
-        width: 0;
-        height: 0;
-        background: transparent;
-        cursor: pointer;
-      }
-      
-      .slider-thumb::-moz-range-thumb {
-        appearance: none;
-        width: 0;
-        height: 0;
-        background: transparent;
-        cursor: pointer;
-        border: none;
-      }
-      
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-      
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
   return (
     <div className="flex flex-col gap-8 pb-20">
-      {/* Title Text Styling Section */}
       <section className="space-y-6">
-        <h3 className="text-lg font-semibold text-white">Title Text</h3>
-        
+        <h3 className="text-lg font-semibold text-white">Title text</h3>
+
         <ToggleSwitch
           label="Alternative title font"
           subtitle="Matches page font by default"
           checked={useAltFont}
-          onChange={setUseAltFont}
+          onChange={handleAltFontChange}
         />
 
-        {useAltFont && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Font Family</label>
-              <CustomDropdown
-                value={titleFontFamily || "INTER"}
-                onChange={handleTitleFontFamilyChange}
-                options={FONT_FAMILY_OPTIONS}
-                label="Select font family"
-              />
-            </div>
-
+        {useAltFont ? (
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Font Weight</label>
-            <CustomDropdown
-              value={titleFontWeight || "MEDIUM"}
+            <label className="mb-2 block text-sm font-medium text-white/80">Font family</label>
+            <DesignSelect
+              value={titleFontFamily}
+              onChange={handleTitleFontFamilyChange}
+              options={FONT_FAMILY_OPTIONS}
+              ariaLabel="Select title font family"
+            />
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-medium text-white/80">Font weight</label>
+            <DesignSelect
+              value={titleFontWeight}
               onChange={handleTitleFontWeightChange}
               options={FONT_WEIGHT_OPTIONS}
-              label="Select font weight"
+              ariaLabel="Select title font weight"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Font Size</label>
-            <CustomDropdown
-              value={titleFontSize || "MEDIUM"}
+            <label className="mb-2 block text-sm font-medium text-white/80">Font size</label>
+            <DesignSelect
+              value={titleFontSize}
               onChange={handleTitleFontSizeChange}
               options={FONT_SIZE_OPTIONS}
-              label="Select font size"
+              ariaLabel="Select title font size"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Color</label>
-            <CustomColorPicker
-              value={titleColor || "#000000"}
-              onChange={handleTitleColorChange}
-            />
+            <label className="mb-2 block text-sm font-medium text-white/80">Color</label>
+            <CustomColorPicker value={titleColor} onChange={handleTitleColorChange} />
           </div>
         </div>
-        )}
       </section>
 
-      {/* Profile Text Styling Section */}
       <section className="space-y-6">
-        <h3 className="text-lg font-semibold text-white">Profile Text</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h3 className="text-lg font-semibold text-white">Profile text</h3>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Font Size</label>
-            <CustomDropdown
-              value={profileFontSize || "SMALL"}
+            <label className="mb-2 block text-sm font-medium text-white/80">Font size</label>
+            <DesignSelect
+              value={profileFontSize}
               onChange={handleProfileFontSizeChange}
               options={FONT_SIZE_OPTIONS}
-              label="Select font size"
+              ariaLabel="Select profile font size"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Color</label>
-            <CustomColorPicker
-              value={profileColor || "#666666"}
-              onChange={handleProfileColorChange}
-            />
+            <label className="mb-2 block text-sm font-medium text-white/80">Color</label>
+            <CustomColorPicker value={profileColor} onChange={handleProfileColorChange} />
           </div>
         </div>
       </section>
 
-      {/* Page Text Styling Section */}
       <section className="space-y-6">
-        <h3 className="text-lg font-semibold text-white">Page Text</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <h3 className="text-lg font-semibold text-white">Page text</h3>
+
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
-            <label className="block text-sm font-medium text-white/80 mb-2">Font Family</label>
-            <CustomDropdown
-              value={pageFontFamily || "INTER"}
+            <label className="mb-2 block text-sm font-medium text-white/80">Font family</label>
+            <DesignSelect
+              value={fontFamily}
               onChange={handlePageFontFamilyChange}
               options={FONT_FAMILY_OPTIONS}
-              label="Select font family"
+              ariaLabel="Select page font family"
             />
           </div>
         </div>

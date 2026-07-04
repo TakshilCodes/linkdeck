@@ -1,207 +1,215 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import { createPortal } from "react-dom";
 import { ArrowLeft, Folder, Link2, Plus, X } from "lucide-react";
-import { createCollectionAction, createLinkAction } from "@/actions/dashboard/addlinks";
+import {
+  createCollectionAction,
+  createRootLinkAction,
+  createLinkInCollectionAction,
+} from "@/actions/dashboard/links";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useIsClient } from "@/hooks/useIsClient";
 
 type Props = {
-    open: boolean;
-    onClose: () => void;
+  open: boolean;
+  onClose: () => void;
+  disableCollection?: boolean;
+  collectionId?: string | null;
 };
 
 type AddItemMode = "root" | "link";
 
-export default function AddItemModal({ open, onClose }: Props) {
-    const router = useRouter();
-    const [mounted, setMounted] = useState(false);
-    const [mode, setMode] = useState<AddItemMode>("root");
-    const [url, setUrl] = useState("");
-    const [error, setError] = useState("");
-    const [isPending, startTransition] = useTransition();
+export default function AddItemModal({
+  open,
+  onClose,
+  disableCollection = false,
+  collectionId = null,
+}: Props) {
+  const router = useRouter();
+  const isClient = useIsClient();
+  const [mode, setMode] = useState<AddItemMode>("root");
+  const [url, setUrl] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+  const resetForm = useCallback(() => {
+    setMode("root");
+    setUrl("");
+  }, []);
 
-    useEffect(() => {
-        if (!open) return;
+  const handleClose = useCallback(() => {
+    resetForm();
+    onClose();
+  }, [onClose, resetForm]);
 
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
+  useEffect(() => {
+    if (!open) return;
 
-        document.addEventListener("keydown", onKeyDown);
-        document.body.style.overflow = "hidden";
-
-        return () => {
-            document.removeEventListener("keydown", onKeyDown);
-            document.body.style.overflow = "";
-        };
-    }, [open, onClose]);
-
-    useEffect(() => {
-        if (open) {
-            setMode("root");
-            setUrl("");
-            setError("");
-        }
-    }, [open]);
-
-    const handleAddLink = () => {
-        setError("");
-
-        startTransition(async () => {
-            const res = await createLinkAction(url);
-
-            if (!res.success) {
-                toast.error(res.message || "Failed to add link");
-                return;
-            }
-
-            toast.success("Link added successfully");
-            router.refresh();
-            onClose();
-        });
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") handleClose();
     };
 
-    const handleCreateCollection = () => {
-        setError("");
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
 
-        startTransition(async () => {
-            const res = await createCollectionAction();
-
-            if (!res.success) {
-                toast.error(res.message || "Failed to create collection");
-                return;
-            }
-
-            toast.success("Collection created successfully");
-            router.refresh();
-            onClose();
-        });
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
     };
+  }, [open, handleClose]);
 
-    if (!mounted || !open) return null;
+  const handleAddLink = () => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
 
-    return createPortal(
-        <div className="fixed inset-0 z-[99999]">
-            <button
+    startTransition(async () => {
+      const result = collectionId
+        ? await createLinkInCollectionAction({
+            rawUrl: trimmed,
+            collectionId,
+          })
+        : await createRootLinkAction({
+            rawUrl: trimmed,
+          });
+
+      if (!result.success) {
+        toast.error(result.message || "Failed to add link");
+        return;
+      }
+
+      toast.success("Link added");
+      router.refresh();
+      handleClose();
+    });
+  };
+
+  const handleCreateCollection = () => {
+    startTransition(async () => {
+      const result = await createCollectionAction();
+
+      if (!result.success) {
+        toast.error(result.message || "Failed to create collection");
+        return;
+      }
+
+      toast.success("Collection created");
+      router.refresh();
+      handleClose();
+    });
+  };
+
+  if (!isClient || !open) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[99999]">
+      <button
+        type="button"
+        onClick={handleClose}
+        className="absolute inset-0 bg-[#020817]/70 backdrop-blur-md"
+      />
+
+      <div className="absolute inset-0 flex items-center justify-center p-4">
+        <div className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,32,55,0.96)_0%,rgba(8,20,39,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
+          <div className="relative border-b border-white/10 px-5 py-3.5">
+            {mode === "link" && (
+              <button
                 type="button"
-                onClick={onClose}
-                className="absolute inset-0 bg-[#020817]/70 backdrop-blur-md"
-            />
+                onClick={() => setMode("root")}
+                className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            )}
 
-            <div className="absolute inset-0 flex items-center justify-center p-4">
-                <div className="w-full max-w-180 overflow-hidden rounded-[30px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,32,55,0.96)_0%,rgba(8,20,39,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(34,211,238,0.06)]">
-                    <div className="relative border-b border-white/10 px-6 py-5">
-                        {mode === "link" && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setMode("root");
-                                    setError("");
-                                }}
-                                className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
-                            >
-                                <ArrowLeft className="h-5 w-5" />
-                            </button>
-                        )}
+            <h2 className="text-center text-[22px] font-semibold text-white">
+              Add
+            </h2>
 
-                        <h2 className="text-center text-[24px] font-semibold text-white">
-                            Add
-                        </h2>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-white/70 transition hover:bg-white/10 hover:text-white"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
-                    </div>
-
-                    <div className="px-6 py-6">
-                        <div className="rounded-[22px] border border-white/10 bg-white/5 px-5 py-4">
-                            <input
-                                type="text"
-                                value={url}
-                                onChange={(e) => setUrl(e.target.value)}
-                                placeholder="Paste or search a link"
-                                className="w-full bg-transparent text-[17px] text-white outline-none placeholder:text-white/35"
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        handleAddLink();
-                                    }
-                                }}
-                            />
-                        </div>
-
-                        {error && (
-                            <p className="mt-3 text-sm text-red-400">{error}</p>
-                        )}
-
-                        {mode === "root" ? (
-                            <>
-                                <div className="mt-6 grid grid-cols-2 gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setMode("link")}
-                                        className="rounded-3xl border border-white/10 bg-white/4 p-5 text-left transition hover:bg-white/[0.07]"
-                                    >
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300">
-                                            <Link2 className="h-6 w-6" />
-                                        </div>
-                                        <h3 className="mt-4 text-lg font-semibold text-white">Link</h3>
-                                        <p className="mt-1 text-sm text-white/55">
-                                            Add a normal link from any website.
-                                        </p>
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        onClick={handleCreateCollection}
-                                        disabled={isPending}
-                                        className="rounded-3xl border border-white/10 bg-white/4 p-5 text-left transition hover:bg-white/[0.07] disabled:opacity-60"
-                                    >
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-300">
-                                            <Folder className="h-6 w-6" />
-                                        </div>
-                                        <h3 className="mt-4 text-lg font-semibold text-white">Collection</h3>
-                                        <p className="mt-1 text-sm text-white/55">
-                                            Create a collection first and edit it later.
-                                        </p>
-                                    </button>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={handleAddLink}
-                                    disabled={!url.trim() || isPending}
-                                    className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[17px] font-semibold text-[#03111f] shadow-[0_10px_30px_rgba(6,182,212,0.35)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                    <Plus className="h-4 w-4" />
-                                    {isPending ? "Adding..." : "Add link"}
-                                </button>
-                            </>
-                        ) : (
-                            <button
-                                type="button"
-                                onClick={handleAddLink}
-                                disabled={!url.trim() || isPending}
-                                className="mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[17px] font-semibold text-[#03111f] shadow-[0_10px_30px_rgba(6,182,212,0.35)] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                                <Plus className="h-4 w-4" />
-                                {isPending ? "Adding..." : "Add link"}
-                            </button>
-                        )}
-                    </div>
-                </div>
+          <div className="px-5 py-5">
+            <div className="rounded-[20px] border border-white/10 bg-white/5 px-5 py-3.5">
+              <input
+                type="text"
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder="Paste or search a link"
+                className="w-full bg-transparent text-[16px] text-white outline-none placeholder:text-white/35"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    handleAddLink();
+                  }
+                }}
+              />
             </div>
-        </div>,
-        document.body
-    );
+
+            {mode === "root" ? (
+              <>
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setMode("link")}
+                    className="rounded-[26px] border border-white/10 bg-white/4 p-4 text-left transition hover:bg-white/[0.07]"
+                  >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300">
+                      <Link2 className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-3.5 text-[17px] font-semibold text-white">Link</h3>
+                    <p className="mt-1 text-sm leading-6 text-white/55">
+                      Add a normal link from any website.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCreateCollection}
+                    disabled={disableCollection || isPending}
+                    className="rounded-[26px] border border-white/10 bg-white/4 p-4 text-left transition hover:bg-white/[0.07] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-300">
+                      <Folder className="h-5 w-5" />
+                    </div>
+                    <h3 className="mt-3.5 text-[17px] font-semibold text-white">Collection</h3>
+                    <p className="mt-1 text-sm leading-6 text-white/55">
+                      Create a collection first and edit it later.
+                    </p>
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddLink}
+                  disabled={!url.trim() || isPending}
+                  className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[16px] font-semibold text-[#03111f] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Plus className="h-4 w-4" />
+                  {isPending ? "Adding..." : "Add link"}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAddLink}
+                disabled={!url.trim() || isPending}
+                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-cyan-500 text-[16px] font-semibold text-[#03111f] transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Plus className="h-4 w-4" />
+                {isPending ? "Adding..." : "Add link"}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
 }

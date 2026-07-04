@@ -19,6 +19,8 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import WarningModal from "@/components/ui/WarningModal";
+import { useIsClient } from "@/hooks/useIsClient";
 
 type SocialType =
   | "INSTAGRAM"
@@ -161,17 +163,14 @@ export default function ManageSocialIconsModal({
   onReorder,
   onDeleteIcon,
 }: Props) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isClient = useIsClient();
+  const [deleteIcon, setDeleteIcon] = useState<SocialIconItem | null>(null);
 
   useEffect(() => {
     if (!open) return;
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && deleteIcon === null) onClose();
     };
 
     document.addEventListener("keydown", onKeyDown);
@@ -181,11 +180,15 @@ export default function ManageSocialIconsModal({
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+  }, [open, onClose, deleteIcon]);
 
   const sortedIcons = useMemo(() => {
     return [...icons].sort((a, b) => a.position - b.position);
   }, [icons]);
+
+  const deleteIconLabel = deleteIcon
+    ? getIconByType(deleteIcon.type)?.label ?? "This social icon"
+    : "This social icon";
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -215,10 +218,11 @@ export default function ManageSocialIconsModal({
     onReorder?.(reordered);
   };
 
-  if (!mounted || !open) return null;
+  if (!isClient || !open) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-99999">
+    <>
+      <div className="fixed inset-0 z-99999">
       <button
         type="button"
         aria-label="Close modal backdrop"
@@ -269,7 +273,12 @@ export default function ManageSocialIconsModal({
                         item={item}
                         onEditIcon={onEditIcon}
                         onToggleIcon={onToggleIcon}
-                        onDeleteIcon={onDeleteIcon}
+                        onDeleteIcon={onDeleteIcon
+                          ? (id) => {
+                              const icon = sortedIcons.find((item) => item.id === id);
+                              if (icon) setDeleteIcon(icon);
+                            }
+                          : undefined}
                       />
                     ))}
                   </div>
@@ -288,7 +297,22 @@ export default function ManageSocialIconsModal({
           </div>
         </div>
       </div>
-    </div>,
+      </div>
+
+      <WarningModal
+        open={deleteIcon !== null}
+        title="Delete this social icon?"
+        description={`${deleteIconLabel} will be removed from your dashboard and public page.`}
+        confirmLabel="Delete icon"
+        variant="danger"
+        lockScroll={false}
+        onClose={() => setDeleteIcon(null)}
+        onConfirm={() => {
+          if (deleteIcon) onDeleteIcon?.(deleteIcon.id);
+          setDeleteIcon(null);
+        }}
+      />
+    </>,
     document.body
   );
 }

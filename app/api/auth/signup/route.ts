@@ -2,11 +2,10 @@ import prisma from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import { SignupEmailStepZod } from "@/lib/validators/auth";
-import bcrypt from "bcryptjs";
-import { randomInt } from "crypto";
-import emailjs from "@emailjs/nodejs";
+import { sendOtpEmail } from "@/lib/email/otp-email";
+import { checkFixedWindowRateLimit, isCooldownActive, setCooldown } from "@/lib/security/rate-limit";
+import { generateOtp, hashOtp, OTP_EXPIRE_SECONDS, OTP_RESEND_COOLDOWN_SECONDS } from "@/lib/security/otp";
 
-const OTP_EXPIRE_SECONDS = 10 * 60;
 const OTP_RATE_LIMIT_SECONDS = 10 * 60;
 const OTP_RATE_LIMIT_MAX = 3;
 
@@ -18,18 +17,22 @@ type PendingSignup = {
 };
 
 async function canSendOtp(email: string) {
-  const key = `ratelimit:otp:${email}`;
-
-  const raw = await redis.get(key);
-  if (!raw) {
-    await redis.set(key, "1", OTP_RATE_LIMIT_SECONDS);
-    return true;
+  const cooldownKey = `cooldown:otp:signup:${email}`;
+  if (await isCooldownActive(cooldownKey)) {
+    return false;
   }
 
-  const count = Number(raw) + 1;
-  await redis.set(key, String(count), OTP_RATE_LIMIT_SECONDS);
+  const { allowed } = await checkFixedWindowRateLimit({
+    key: `ratelimit:otp:signup:${email}`,
+    limit: OTP_RATE_LIMIT_MAX,
+    windowSeconds: OTP_RATE_LIMIT_SECONDS,
+  });
 
-  return count <= OTP_RATE_LIMIT_MAX;
+  if (allowed) {
+    await setCooldown(cooldownKey, OTP_RESEND_COOLDOWN_SECONDS);
+  }
+
+  return allowed;
 }
 
 export async function POST(req: NextRequest) {
@@ -69,8 +72,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const otp = randomInt(100000, 1000000).toString();
-    const otpHash = await bcrypt.hash(otp, 12);
+    const otp = generateOtp();
+    const otpHash = await hashOtp(otp);
 
     const pendingSignup: PendingSignup = {
       email,
@@ -85,26 +88,9 @@ export async function POST(req: NextRequest) {
       OTP_EXPIRE_SECONDS
     );
 
-    const serviceId = process.env.Emailjs_ServiceId;
-    const templateId = process.env.Emailjs_TemplateId;
-    const publicKey = process.env.Emailjs_PublicId;
-    const privateKey = process.env.Emailjs_PrivateId;
+    const sent = await sendOtpEmail(email, otp);
 
-    if (!serviceId || !templateId || !publicKey || !privateKey) {
-      return NextResponse.json(
-        { ok: false, error: "Email config missing" },
-        { status: 500 }
-      );
-    }
-
-    const emailRes = await emailjs.send(
-      serviceId,
-      templateId,
-      { email, otp },
-      { publicKey, privateKey }
-    );
-
-    if (emailRes.status !== 200) {
+    if (!sent) {
       return NextResponse.json(
         { ok: false, error: "Failed to send OTP" },
         { status: 500 }

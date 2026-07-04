@@ -3,8 +3,9 @@ import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
 import ProfileHeader from "./ProfileHeader";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
 import LinksBoard from "./LinkBoard";
+
+export const dynamic = "force-dynamic";
 
 export default async function DashboardLinksPage() {
   const session = await getServerSession(authOptions);
@@ -14,6 +15,7 @@ export default async function DashboardLinksPage() {
     redirect("/signup");
   }
 
+  const { default: prisma } = await import("@/lib/prisma");
   const data = await prisma.user.findUnique({
     where: {
       id: userId,

@@ -1,16 +1,18 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
-import AccountSettingsContainer, { AccountUserProps } from "@/components/account/AccountSettingsContainer";
+import AccountSettingsContainer, { type AccountUserProps } from "@/components/account/AccountSettingsContainer";
+
+export const dynamic = "force-dynamic";
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user?.id) {
-    redirect('/login');
+    redirect("/login");
   }
 
+  const { default: prisma } = await import("@/lib/prisma");
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: {
@@ -26,7 +28,7 @@ export default async function AccountPage() {
   });
 
   if (!user) {
-    redirect('/login');
+    redirect("/login");
   }
 
   const accountUser: AccountUserProps = {
@@ -37,7 +39,7 @@ export default async function AccountPage() {
     profileImgUrl: user.profileImgUrl,
     authProvider: user.authProvider,
     createdAt: user.createdAt,
-    hasPassword: !!user.hashedPassword,
+    hasPassword: Boolean(user.hashedPassword),
   };
 
   return <AccountSettingsContainer user={accountUser} />;

@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { redis } from "@/lib/redis";
 import { NextRequest, NextResponse } from "next/server";
 import { SignupVerifyOtpStepZod } from "@/lib/validators/auth";
-import bcrypt from "bcryptjs";
+import { verifyOtp } from "@/lib/security/otp";
 import { randomUUID } from "crypto";
 
 type PendingSignup = {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const isValidOtp = await bcrypt.compare(otp, pending.otpHash);
+    const isValidOtp = await verifyOtp(otp, pending.otpHash);
     if (!isValidOtp) {
       return NextResponse.json(
         { ok: false, error: "Invalid OTP" },

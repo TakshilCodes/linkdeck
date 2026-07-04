@@ -3,10 +3,11 @@
 import { mergeTheme } from "@/lib/themes/merge-theme";
 import { useDesignStore } from "@/store/design";
 import CustomColorPicker from "./CustomColorPicker";
-import type { DefaultTheme } from "@/types/theme";
+import type { CustomTheme, DefaultTheme } from "@/types/theme";
+import type { ButtonRadiusValue, ButtonShadowValue, ButtonStyleValue } from "@/lib/themes/theme-constants";
 
 type Props = {
-  initialCustomization?: any;
+  initialCustomization?: Partial<CustomTheme> | null;
   activeTheme: DefaultTheme;
 };
 
@@ -23,9 +24,9 @@ export default function ButtonTabContent({ initialCustomization, activeTheme }: 
   const shadowColor = previewCustomTheme?.shadowColor ?? resolvedTheme.shadowColor ?? "#000000";
 
   // Dispatch updates
-  const handleStyleChange = (style: string) => updatePreviewCustomTheme({ buttonStyle: style as any });
-  const handleRadiusChange = (radius: string) => updatePreviewCustomTheme({ buttonRadius: radius as any });
-  const handleShadowChange = (shadow: string) => updatePreviewCustomTheme({ buttonShadow: shadow as any });
+  const handleStyleChange = (style: ButtonStyleValue) => updatePreviewCustomTheme({ buttonStyle: style });
+  const handleRadiusChange = (radius: ButtonRadiusValue) => updatePreviewCustomTheme({ buttonRadius: radius });
+  const handleShadowChange = (shadow: ButtonShadowValue) => updatePreviewCustomTheme({ buttonShadow: shadow });
   const handleColorChange = (color: string) => updatePreviewCustomTheme({ buttonColor: color });
   const handleTextColorChange = (color: string) => updatePreviewCustomTheme({ buttonTextColor: color });
   const handleOutlineColorChange = (color: string) => updatePreviewCustomTheme({ outlineColor: color });
@@ -172,7 +173,7 @@ export default function ButtonTabContent({ initialCustomization, activeTheme }: 
         <section className="space-y-4">
           <h3 className="text-[15px] font-semibold text-white/90">Button shadow</h3>
           <div className="grid grid-cols-4 gap-2">
-            {["NONE", "SOFT", "STRONG", "HARD"].map((shadowOpt) => (
+            {(["NONE", "SOFT", "STRONG", "HARD"] as const).map((shadowOpt) => (
               <button
                 key={shadowOpt}
                 onClick={() => handleShadowChange(shadowOpt)}

@@ -25,7 +25,7 @@ export async function saveThemeAction(themeId: string) {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true },
+    select: { id: true, username: true },
   });
 
   if (!user) {
@@ -50,4 +50,7 @@ export async function saveThemeAction(themeId: string) {
   });
 
   revalidatePath("/dashboard");
+  if (user.username) {
+    revalidatePath(`/${user.username}`);
+  }
 }

@@ -1,7 +1,12 @@
+﻿"use client";
+
+import Image from "next/image";
+import { useState } from "react";
+
 type AvatarProps = {
   profileImgUrl?: string | null;
   displayName: string;
-  /** Dashboard phone preview — smaller, closer to real device proportions */
+  /** Dashboard phone preview - smaller, closer to real device proportions */
   compact?: boolean;
 };
 
@@ -10,28 +15,38 @@ export default function Avatar({
   displayName,
   compact = false,
 }: AvatarProps) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const imageUrl = profileImgUrl?.trim() || null;
+
   const shell =
-    "flex items-center justify-center rounded-full bg-white/90 shadow-md " +
+    "relative flex items-center justify-center overflow-hidden rounded-full bg-white/90 shadow-md " +
     (compact ? "mb-2.5 h-[72px] w-[72px]" : "mb-4 h-23 w-23");
 
-  if (profileImgUrl) {
+  if (imageUrl && failedImageUrl !== imageUrl) {
     return (
       <div className={shell}>
-        <img
-          src={profileImgUrl}
+        <Image
+          src={imageUrl}
           alt={displayName}
-          className="h-full w-full rounded-full object-cover"
+          fill
+          sizes={compact ? "72px" : "92px"}
+          referrerPolicy="no-referrer"
+          onError={() => setFailedImageUrl(imageUrl)}
+          className="rounded-full object-cover"
         />
       </div>
     );
   }
 
-  const initials = displayName
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const initials =
+    displayName
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
 
   return (
     <div className={shell}>

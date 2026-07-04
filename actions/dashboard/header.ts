@@ -4,19 +4,37 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import type {
+  FontFamily,
+  profileFontSize,
+  titleFontSize,
+  titleFontWeight,
+} from "@/app/generated/prisma/enums";
 
 type SaveHeaderPayload = {
   displayName?: string;
   bio?: string;
   titleFontFamily?: string | null;
-  titleFontWeight?: string;
-  titleFontSize?: string;
-  titleColor?: string;
-  profileFontSize?: string;
-  profileColor?: string;
-  bioColor?: string;
-  iconColor?: string;
-  fontFamily?: string;
+  titleFontWeight?: string | null;
+  titleFontSize?: string | null;
+  titleColor?: string | null;
+  profileFontSize?: string | null;
+  profileColor?: string | null;
+  bioColor?: string | null;
+  iconColor?: string | null;
+  fontFamily?: string | null;
+};
+
+type HeaderCustomizationData = {
+  titleFontFamily?: FontFamily | null;
+  titleFontWeight?: titleFontWeight | null;
+  titleFontSize?: titleFontSize | null;
+  titleColor?: string | null;
+  profileFontSize?: profileFontSize | null;
+  profileColor?: string | null;
+  bioColor?: string | null;
+  iconColor?: string | null;
+  fontFamily?: FontFamily | null;
 };
 
 export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
@@ -28,7 +46,7 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true },
+    select: { id: true, username: true },
   });
 
   if (!user) {
@@ -42,34 +60,44 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
         data: { displayName: payload.displayName },
       });
     }
+
     if (payload.bio !== undefined) {
-      // Validate bio length (max 200 characters)
       if (payload.bio.length > 200) {
         throw new Error("Bio cannot exceed 200 characters");
       }
-      
+
       await tx.user.update({
         where: { id: user.id },
         data: { bio: payload.bio },
       });
     }
 
-    if (payload.titleFontFamily !== undefined || payload.titleColor !== undefined || payload.titleFontWeight !== undefined || payload.titleFontSize !== undefined || payload.profileFontSize !== undefined || payload.profileColor !== undefined || payload.fontFamily !== undefined || payload.bioColor !== undefined || payload.iconColor !== undefined) {
-      const updateData: any = {};
+    if (
+      payload.titleFontFamily !== undefined ||
+      payload.titleColor !== undefined ||
+      payload.titleFontWeight !== undefined ||
+      payload.titleFontSize !== undefined ||
+      payload.profileFontSize !== undefined ||
+      payload.profileColor !== undefined ||
+      payload.fontFamily !== undefined ||
+      payload.bioColor !== undefined ||
+      payload.iconColor !== undefined
+    ) {
+      const updateData: HeaderCustomizationData = {};
       if (payload.titleFontFamily !== undefined) {
-        updateData.titleFontFamily = payload.titleFontFamily;
+        updateData.titleFontFamily = payload.titleFontFamily as FontFamily | null;
       }
       if (payload.titleFontWeight !== undefined) {
-        updateData.titleFontWeight = payload.titleFontWeight;
+        updateData.titleFontWeight = payload.titleFontWeight as titleFontWeight | null;
       }
       if (payload.titleFontSize !== undefined) {
-        updateData.titleFontSize = payload.titleFontSize;
+        updateData.titleFontSize = payload.titleFontSize as titleFontSize | null;
       }
       if (payload.titleColor !== undefined) {
         updateData.titleColor = payload.titleColor;
       }
       if (payload.profileFontSize !== undefined) {
-        updateData.profileFontSize = payload.profileFontSize;
+        updateData.profileFontSize = payload.profileFontSize as profileFontSize | null;
       }
       if (payload.profileColor !== undefined) {
         updateData.profileColor = payload.profileColor;
@@ -78,7 +106,7 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
         updateData.bioColor = payload.bioColor;
       }
       if (payload.fontFamily !== undefined) {
-        updateData.fontFamily = payload.fontFamily;
+        updateData.fontFamily = payload.fontFamily as FontFamily | null;
       }
       if (payload.iconColor !== undefined) {
         updateData.iconColor = payload.iconColor;
@@ -96,5 +124,7 @@ export async function saveHeaderDesignAction(payload: SaveHeaderPayload) {
   });
 
   revalidatePath("/dashboard");
-  revalidatePath("/[username]");
+  if (user.username) {
+    revalidatePath(`/${user.username}`);
+  }
 }
