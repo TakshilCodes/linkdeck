@@ -14,6 +14,7 @@ import type {
   ThemePreviewCollection,
   ThemePreviewIcon,
   ThemePreviewLink,
+  ThemePreviewSection,
 } from "@/utils/dashboard-theme-preview";
 
 /** Logical phone size (matches ThemeProfileRenderer embed). */
@@ -34,6 +35,7 @@ type Props = {
   icons: ThemePreviewIcon[];
   standaloneLinks: ThemePreviewLink[];
   collections: ThemePreviewCollection[];
+  sections: ThemePreviewSection[];
 };
 
 export default function DashboardLivePreview({
@@ -43,12 +45,13 @@ export default function DashboardLivePreview({
   icons,
   standaloneLinks,
   collections,
+  sections,
 }: Props) {
   const { previewTheme, previewProfile, previewCustomTheme } = useDesignStore();
   const activeTheme = previewTheme || theme;
-  
-  const mergedTheme = activeTheme 
-    ? { ...activeTheme, ...previewCustomTheme } as ResolvedTheme 
+
+  const mergedTheme = activeTheme
+    ? ({ ...activeTheme, ...previewCustomTheme } as ResolvedTheme)
     : null;
 
   const mergedProfile = { ...profile, ...previewProfile };
@@ -69,7 +72,7 @@ export default function DashboardLivePreview({
   };
 
   return (
-    <div className="flex h-full min-h-[min(760px,90vh)] flex-col rounded-[24px] border border-white/[0.08] bg-[#0a121c] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="flex h-full min-h-[min(760px,90vh)] flex-col rounded-[24px] border border-white/8 bg-[#0a121c] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex shrink-0 items-center">
         <div className="flex w-full min-w-0 items-center gap-2 rounded-full border border-white/10 bg-[#111b28] py-2 pl-4 pr-2 text-sm text-white/80 shadow-sm">
           <span className="min-w-0 flex-1 truncate font-medium text-white/90">{displayUrl}</span>
@@ -87,7 +90,7 @@ export default function DashboardLivePreview({
       <div className="mt-5 flex min-h-0 flex-1 items-center justify-center overflow-auto py-4">
         {activeTheme ? (
           <div
-            className="shrink-0 overflow-hidden rounded-[40px] shadow-[0_20px_56px_rgba(0,0,0,0.48)] ring-1 ring-white/[0.12]"
+            className="shrink-0 overflow-hidden rounded-[40px] shadow-[0_20px_56px_rgba(0,0,0,0.48)] ring-1 ring-white/12"
             style={{
               width: EMBED_W * PREVIEW_SCALE,
               height: EMBED_H * PREVIEW_SCALE,
@@ -108,11 +111,12 @@ export default function DashboardLivePreview({
                 icons={icons}
                 standaloneLinks={standaloneLinks}
                 collections={collections}
+                sections={sections}
               />
             </div>
           </div>
         ) : (
-          <div className="flex max-w-[240px] flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] px-5 py-12 text-center">
+          <div className="flex max-w-60 flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/2 px-5 py-12 text-center">
             <p className="text-sm font-medium text-white/75">No theme selected</p>
             <p className="mt-2 text-xs leading-relaxed text-white/40">
               Finish onboarding or pick a theme so your preview matches your public page.

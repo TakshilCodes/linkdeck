@@ -1,14 +1,38 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { fallbackTitleFromUrl, normalizeUrl } from "@/lib/links";
 import { fetchPageTitle } from "@/lib/server/fetch-page-title";
 
-async function getUserId() {
+type ActionUser = {
+  id: string;
+  username: string | null;
+};
+
+async function getActionUser(): Promise<ActionUser | null> {
   const session = await getServerSession(authOptions);
-  return session?.user?.id ?? null;
+  const userId = session?.user?.id;
+
+  if (!userId) {
+    return null;
+  }
+
+  return {
+    id: userId,
+    username: session.user.username ?? null,
+  };
+}
+
+function revalidateBoardViews(username: string | null) {
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/links");
+
+  if (username) {
+    revalidatePath(`/${username}`);
+  }
 }
 
 async function getNextBoardPosition(userId: string) {
@@ -47,14 +71,15 @@ async function resolveNewLinkDetails(rawUrl: string) {
     name: fetchedTitle || fallbackTitleFromUrl(url),
   };
 }
+
 export async function saveTopLevelBoardOrderAction(items: {
   id: string;
   type: "LINK" | "COLLECTION";
   position: number;
 }[]) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
@@ -62,7 +87,7 @@ export async function saveTopLevelBoardOrderAction(items: {
       items.map((item) =>
         prisma.boardItem.updateMany({
           where: {
-            userId,
+            userId: user.id,
             type: item.type,
             ...(item.type === "LINK"
               ? { linkId: item.id }
@@ -75,6 +100,7 @@ export async function saveTopLevelBoardOrderAction(items: {
       )
     );
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Board order saved" };
   } catch (error) {
     console.error(error);
@@ -87,15 +113,15 @@ export async function saveCollectionLinksOrderAction(payload: {
   links: { id: string; position: number }[];
 }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
     const collection = await prisma.collection.findFirst({
       where: {
         id: payload.collectionId,
-        userId,
+        userId: user.id,
       },
       select: { id: true },
     });
@@ -109,7 +135,7 @@ export async function saveCollectionLinksOrderAction(payload: {
         prisma.link.updateMany({
           where: {
             id: link.id,
-            userId,
+            userId: user.id,
             collectionId: payload.collectionId,
           },
           data: {
@@ -119,6 +145,7 @@ export async function saveCollectionLinksOrderAction(payload: {
       )
     );
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Collection order saved" };
   } catch (error) {
     console.error(error);
@@ -128,39 +155,44 @@ export async function saveCollectionLinksOrderAction(payload: {
 
 export async function createCollectionAction() {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
-    const count = await prisma.collection.count({
-      where: { userId },
+    await prisma.$transaction(async (tx) => {
+      const [collectionCount, lastBoardItem] = await Promise.all([
+        tx.collection.count({ where: { userId: user.id } }),
+        tx.boardItem.findFirst({
+          where: { userId: user.id },
+          orderBy: { position: "desc" },
+          select: { position: true },
+        }),
+      ]);
+
+      const collection = await tx.collection.create({
+        data: {
+          userId: user.id,
+          name: `Collection ${collectionCount + 1}`,
+          isVisible: true,
+          position: collectionCount,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await tx.boardItem.create({
+        data: {
+          userId: user.id,
+          type: "COLLECTION",
+          position: lastBoardItem ? lastBoardItem.position + 1 : 0,
+          collectionId: collection.id,
+        },
+      });
     });
 
-    const boardPosition = await getNextBoardPosition(userId);
-
-    const collection = await prisma.collection.create({
-      data: {
-        userId,
-        name: `Collection ${count + 1}`,
-        isVisible: true,
-        position: count,
-      },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
-    await prisma.boardItem.create({
-      data: {
-        userId,
-        type: "COLLECTION",
-        position: boardPosition,
-        collectionId: collection.id,
-      },
-    });
-
+    revalidateBoardViews(user.username);
     return { success: true, message: "Collection created" };
   } catch (error) {
     console.error(error);
@@ -174,13 +206,12 @@ export async function createRootLinkAction({
   rawUrl: string;
 }) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getActionUser();
 
-    if (!session?.user?.id) {
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
-    const userId = session.user.id;
     const linkDetails = await resolveNewLinkDetails(rawUrl);
 
     if (!linkDetails.success) {
@@ -191,31 +222,24 @@ export async function createRootLinkAction({
     }
 
     const { name, url } = linkDetails;
-
-    const lastBoardItem = await prisma.boardItem.findFirst({
-      where: { userId },
-      orderBy: { position: "desc" },
-      select: { position: true },
-    });
-
-    const nextBoardPosition = lastBoardItem ? lastBoardItem.position + 1 : 0;
+    const nextBoardPosition = await getNextBoardPosition(user.id);
 
     await prisma.$transaction(async (tx) => {
       const link = await tx.link.create({
         data: {
-          userId,
+          userId: user.id,
           name,
           url,
           isVisible: true,
           collectionId: null,
-          position: 0,
+          position: nextBoardPosition,
         },
         select: { id: true },
       });
 
       await tx.boardItem.create({
         data: {
-          userId,
+          userId: user.id,
           type: "LINK",
           position: nextBoardPosition,
           linkId: link.id,
@@ -223,6 +247,7 @@ export async function createRootLinkAction({
       });
     });
 
+    revalidateBoardViews(user.username);
     return {
       success: true,
       message: "Link added",
@@ -243,15 +268,15 @@ export async function createLinkInCollectionAction({
   collectionId: string;
 }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
     const collection = await prisma.collection.findFirst({
       where: {
         id: collectionId,
-        userId,
+        userId: user.id,
       },
       select: { id: true },
     });
@@ -273,7 +298,7 @@ export async function createLinkInCollectionAction({
 
     await prisma.link.create({
       data: {
-        userId,
+        userId: user.id,
         collectionId,
         name: linkDetails.name,
         url: linkDetails.url,
@@ -283,6 +308,7 @@ export async function createLinkInCollectionAction({
       },
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Link added" };
   } catch (error) {
     console.error(error);
@@ -298,16 +324,17 @@ export async function updateCollectionAction({
   name: string;
 }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
     await prisma.collection.updateMany({
-      where: { id, userId },
+      where: { id, userId: user.id },
       data: { name: name.trim() },
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Collection updated" };
   } catch (error) {
     console.error(error);
@@ -325,8 +352,8 @@ export async function updateLinkAction({
   url: string;
 }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
@@ -340,13 +367,14 @@ export async function updateLinkAction({
     }
 
     await prisma.link.updateMany({
-      where: { id, userId },
+      where: { id, userId: user.id },
       data: {
         name: name.trim() || fallbackTitleFromUrl(normalized.url),
         url: normalized.url,
       },
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Link updated" };
   } catch (error) {
     console.error(error);
@@ -362,16 +390,17 @@ export async function setLinkVisibilityAction({
   isVisible: boolean;
 }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
     await prisma.link.updateMany({
-      where: { id, userId },
+      where: { id, userId: user.id },
       data: { isVisible },
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Visibility updated" };
   } catch (error) {
     console.error(error);
@@ -381,15 +410,15 @@ export async function setLinkVisibilityAction({
 
 export async function deleteLinkAction({ id }: { id: string }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
     await prisma.$transaction(async (tx) => {
       await tx.boardItem.deleteMany({
         where: {
-          userId,
+          userId: user.id,
           linkId: id,
         },
       });
@@ -397,11 +426,12 @@ export async function deleteLinkAction({ id }: { id: string }) {
       await tx.link.deleteMany({
         where: {
           id,
-          userId,
+          userId: user.id,
         },
       });
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Link deleted" };
   } catch (error) {
     console.error(error);
@@ -424,19 +454,42 @@ export async function saveBoardStateAction(payload: {
   }[];
 }) {
   try {
-    const session = await getServerSession(authOptions);
+    const user = await getActionUser();
 
-    if (!session?.user?.id) {
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
-    const userId = session.user.id;
-
     await prisma.$transaction(async (tx) => {
+      const requestedCollectionIds = [
+        ...new Set(payload.collectionLinks.map((collection) => collection.collectionId)),
+      ];
+
+      if (requestedCollectionIds.length > 0) {
+        const ownedCollections = await tx.collection.findMany({
+          where: {
+            userId: user.id,
+            id: { in: requestedCollectionIds },
+          },
+          select: { id: true },
+        });
+        const ownedCollectionIds = new Set(
+          ownedCollections.map((collection) => collection.id)
+        );
+
+        if (
+          requestedCollectionIds.some(
+            (collectionId) => !ownedCollectionIds.has(collectionId)
+          )
+        ) {
+          throw new Error("Invalid collection in board payload");
+        }
+      }
+
       for (const item of payload.topLevel) {
         const updated = await tx.boardItem.updateMany({
           where: {
-            userId,
+            userId: user.id,
             ...(item.type === "LINK"
               ? { linkId: item.id }
               : { collectionId: item.id }),
@@ -450,20 +503,19 @@ export async function saveBoardStateAction(payload: {
           await tx.link.updateMany({
             where: {
               id: item.id,
-              userId,
+              userId: user.id,
             },
             data: {
               collectionId: null,
-              // Root ordering is BoardItem.position; keep Link.position aligned for Studio/queries.
               position: item.position,
             },
           });
 
-          // Nested links never had a BoardItem row — create one when moving out of a collection.
+          // Nested links have no BoardItem row until they move back to the root board.
           if (updated.count === 0) {
             await tx.boardItem.create({
               data: {
-                userId,
+                userId: user.id,
                 type: "LINK",
                 position: item.position,
                 linkId: item.id,
@@ -482,7 +534,7 @@ export async function saveBoardStateAction(payload: {
           await tx.link.updateMany({
             where: {
               id: link.id,
-              userId,
+              userId: user.id,
             },
             data: {
               collectionId: collection.collectionId,
@@ -492,7 +544,7 @@ export async function saveBoardStateAction(payload: {
 
           await tx.boardItem.deleteMany({
             where: {
-              userId,
+              userId: user.id,
               linkId: link.id,
               NOT: {
                 linkId: {
@@ -505,6 +557,7 @@ export async function saveBoardStateAction(payload: {
       }
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Board saved" };
   } catch (error) {
     console.error(error);
@@ -514,8 +567,8 @@ export async function saveBoardStateAction(payload: {
 
 export async function deleteCollectionAction({ id }: { id: string }) {
   try {
-    const userId = await getUserId();
-    if (!userId) {
+    const user = await getActionUser();
+    if (!user) {
       return { success: false, message: "Unauthorized" };
     }
 
@@ -523,18 +576,19 @@ export async function deleteCollectionAction({ id }: { id: string }) {
       await tx.link.deleteMany({
         where: {
           collectionId: id,
-          userId,
+          userId: user.id,
         },
       });
 
       await tx.collection.deleteMany({
         where: {
           id,
-          userId,
+          userId: user.id,
         },
       });
     });
 
+    revalidateBoardViews(user.username);
     return { success: true, message: "Collection and its links deleted" };
   } catch (error) {
     console.error(error);

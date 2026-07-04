@@ -39,6 +39,7 @@ export default async function DashboardLayout({
               icons={preview.icons}
               standaloneLinks={preview.standaloneLinks}
               collections={preview.collections}
+              sections={preview.sections}
             />
           </aside>
         </div>

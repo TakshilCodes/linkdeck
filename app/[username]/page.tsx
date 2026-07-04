@@ -4,7 +4,11 @@ import type { CustomTheme, DefaultTheme } from "@/types/theme";
 import { CUSTOM_BASE_THEME } from "@/types/theme";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
 import { trackProfileView } from "@/actions/analytics/track-profile-view";
-import { resolveSocialUrl } from "@/lib/social-icons";
+import type { BoardItem } from "@/types/board-types";
+import {
+  buildBoardPreviewPayload,
+  mapIconsForThemePreview,
+} from "@/utils/dashboard-theme-preview";
 
 export const dynamic = "force-dynamic";
 
@@ -18,29 +22,64 @@ export default async function PublicProfilePage({
 
   const user = await prisma.user.findUnique({
     where: { username },
-    include: {
+    select: {
+      id: true,
+      username: true,
+      displayName: true,
+      profileImgUrl: true,
+      bio: true,
       defaultTheme: true,
       customization: true,
       icons: {
         where: { isVisible: true },
         orderBy: { position: "asc" },
+        select: {
+          id: true,
+          type: true,
+          value: true,
+          label: true,
+          isVisible: true,
+          position: true,
+        },
       },
-      collections: {
-        where: { isVisible: true },
+      boardItems: {
         orderBy: { position: "asc" },
-        include: {
-          links: {
-            where: { isVisible: true },
-            orderBy: { position: "asc" },
+        select: {
+          id: true,
+          type: true,
+          position: true,
+          link: {
+            select: {
+              id: true,
+              name: true,
+              url: true,
+              isVisible: true,
+              clickCount: true,
+              position: true,
+              collectionId: true,
+            },
+          },
+          collection: {
+            select: {
+              id: true,
+              name: true,
+              isVisible: true,
+              position: true,
+              links: {
+                orderBy: { position: "asc" },
+                select: {
+                  id: true,
+                  name: true,
+                  url: true,
+                  isVisible: true,
+                  clickCount: true,
+                  position: true,
+                  collectionId: true,
+                },
+              },
+            },
           },
         },
-      },
-      links: {
-        where: {
-          isVisible: true,
-          collectionId: null,
-        },
-        orderBy: { position: "asc" },
       },
     },
   });
@@ -56,6 +95,7 @@ export default async function PublicProfilePage({
     baseTheme as DefaultTheme,
     user.customization as CustomTheme | null
   );
+  const boardPayload = buildBoardPreviewPayload(user.boardItems as BoardItem[]);
 
   return (
     <ThemeProfileRenderer
@@ -66,12 +106,10 @@ export default async function PublicProfilePage({
         profileImgUrl: user.profileImgUrl,
         bio: user.bio,
       }}
-      icons={user.icons.map((icon) => ({
-        ...icon,
-        url: resolveSocialUrl(icon.type, icon.value),
-      }))}
-      standaloneLinks={user.links}
-      collections={user.collections}
+      icons={mapIconsForThemePreview(user.icons)}
+      standaloneLinks={boardPayload.standaloneLinks}
+      collections={boardPayload.collections}
+      sections={boardPayload.sections}
     />
   );
 }

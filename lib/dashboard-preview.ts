@@ -70,6 +70,7 @@ export type DashboardPreviewPayload = {
   icons: ReturnType<typeof mapIconsForThemePreview>;
   standaloneLinks: ReturnType<typeof buildBoardPreviewPayload>["standaloneLinks"];
   collections: ReturnType<typeof buildBoardPreviewPayload>["collections"];
+  sections: ReturnType<typeof buildBoardPreviewPayload>["sections"];
 };
 
 export async function getDashboardPreviewPayload(
@@ -94,7 +95,7 @@ export async function getDashboardPreviewPayload(
     : null;
 
   const boardItems = (data.boardItems ?? []) as BoardItem[];
-  const { standaloneLinks, collections } = buildBoardPreviewPayload(boardItems);
+  const { standaloneLinks, collections, sections } = buildBoardPreviewPayload(boardItems);
   const previewIcons = mapIconsForThemePreview(data.icons);
 
   return {
@@ -109,5 +110,6 @@ export async function getDashboardPreviewPayload(
     icons: previewIcons,
     standaloneLinks,
     collections,
+    sections,
   };
 }

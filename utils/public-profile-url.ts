@@ -1,7 +1,3 @@
-/**
- * Public profile URL for the pill + clipboard in the dashboard preview.
- * Set `NEXT_PUBLIC_APP_ENV` to `prod` or `dev` in `.env` / deployment env.
- */
 function appEnv(): string {
   return (process.env.NEXT_PUBLIC_APP_ENV ?? "dev").toLowerCase().trim();
 }
