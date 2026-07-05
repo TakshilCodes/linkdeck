@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./provider";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
+import { absoluteUrl, seoConfig } from "@/lib/seo";
 
 const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-jakarta-sans",
@@ -17,25 +18,61 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://linkdeck.in"),
+  metadataBase: new URL(seoConfig.siteUrl),
   title: {
-    default: "LinkDeck.in",
-    template: "%s | LinkDeck.in",
+    default: seoConfig.defaultTitle,
+    template: seoConfig.titleTemplate,
   },
-  description:
-    "Create one polished public page for all your links, socials, projects, content, and resources.",
+  description: seoConfig.defaultDescription,
+  keywords: [...seoConfig.defaultKeywords],
+  authors: [...seoConfig.authors],
+  creator: seoConfig.creator,
+  publisher: seoConfig.siteName,
+  applicationName: seoConfig.siteName,
+  category: "creator tools",
+  alternates: {
+    canonical: absoluteUrl("/"),
+  },
   openGraph: {
-    title: "LinkDeck.in",
-    description:
-      "A clean creator home for links, socials, projects, content, and resources.",
-    url: "/",
-    siteName: "LinkDeck.in",
+    title: seoConfig.defaultTitle,
+    description: seoConfig.defaultDescription,
+    url: absoluteUrl("/"),
+    siteName: seoConfig.siteName,
+    images: [
+      {
+        url: absoluteUrl(seoConfig.defaultOgImage),
+        width: 1200,
+        height: 630,
+        alt: "LinkDeck.in social preview",
+      },
+    ],
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "LinkDeck.in",
-    description: "Create one polished public page for everything worth sharing.",
+    title: seoConfig.defaultTitle,
+    description: seoConfig.defaultDescription,
+    images: [absoluteUrl(seoConfig.defaultOgImage)],
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/logo/icon.png", type: "image/png" },
+    ],
+    apple: [{ url: "/logo/icon.png", type: "image/png" }],
+  },
+  manifest: "/site.webmanifest",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
 };
 

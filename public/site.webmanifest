@@ -1,0 +1,24 @@
+{
+  "name": "LinkDeck.in",
+  "short_name": "LinkDeck",
+  "description": "Create a beautiful, customizable link-in-bio page, organize your links, track clicks, and share your online presence with LinkDeck.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#02070d",
+  "theme_color": "#00B8DB",
+  "icons": [
+    {
+      "src": "/logo/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

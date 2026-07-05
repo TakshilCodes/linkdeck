@@ -1,7 +1,20 @@
+import type { Metadata } from "next";
 import Sidebar from "@/components/dashboard/Sidebar";
 import MobileDashboardHeader from "@/components/dashboard/mobile/MobileDashboardHeader";
 import MobileBottomNav from "@/components/dashboard/mobile/MobileBottomNav";
 import DashboardMainContent from "@/components/dashboard/mobile/DashboardMainContent";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
+};
 
 export default function MainLayout({
   children,
