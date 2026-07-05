@@ -12,6 +12,9 @@ type DesignStore = {
   previewCustomTheme: Partial<CustomTheme> | null;
   setPreviewCustomTheme: (custom: Partial<CustomTheme> | null) => void;
   updatePreviewCustomTheme: (updates: Partial<CustomTheme>) => void;
+
+  mobileDesignPanelOpen: boolean;
+  setMobileDesignPanelOpen: (open: boolean) => void;
 };
 
 export const useDesignStore = create<DesignStore>((set) => ({
@@ -31,4 +34,7 @@ export const useDesignStore = create<DesignStore>((set) => ({
     set((state) => ({
       previewCustomTheme: { ...state.previewCustomTheme, ...updates },
     })),
+
+  mobileDesignPanelOpen: false,
+  setMobileDesignPanelOpen: (open) => set({ mobileDesignPanelOpen: open }),
 }));

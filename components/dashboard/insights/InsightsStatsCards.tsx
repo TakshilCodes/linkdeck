@@ -1,65 +1,69 @@
-'use client';
+"use client";
 
-import { AnalyticsStats } from '@/lib/analytics';
-import { Eye, MousePointer, Target, Link } from 'lucide-react';
+import type { AnalyticsStats } from "@/lib/analytics";
+import { Eye, Link, MousePointer, Target } from "lucide-react";
 
-interface InsightsStatsCardsProps {
+type InsightsStatsCardsProps = {
   stats: AnalyticsStats;
-}
+};
 
 export default function InsightsStatsCards({ stats }: InsightsStatsCardsProps) {
   const cards = [
     {
-      title: 'Total Views',
+      title: "Profile views",
+      shortTitle: "Views",
       value: stats.totalViews.toLocaleString(),
       icon: Eye,
-      color: 'from-blue-500 to-cyan-500',
-      description: 'Profile visits'
+      color: "from-sky-500 to-cyan-400",
     },
     {
-      title: 'Total Clicks',
+      title: "Link clicks",
+      shortTitle: "Clicks",
       value: stats.totalClicks.toLocaleString(),
       icon: MousePointer,
-      color: 'from-violet-500 to-purple-500',
-      description: 'Link interactions'
+      color: "from-violet-500 to-fuchsia-500",
     },
     {
-      title: 'CTR',
+      title: "Click-through rate",
+      shortTitle: "CTR",
       value: `${stats.ctr}%`,
       icon: Target,
-      color: 'from-green-500 to-emerald-500',
-      description: 'Click-through rate'
+      color: "from-emerald-500 to-green-400",
     },
     {
-      title: 'Active Links',
+      title: "Visible links",
+      shortTitle: "Links",
       value: stats.activeLinks.toLocaleString(),
       icon: Link,
-      color: 'from-orange-500 to-red-500',
-      description: 'Visible links'
-    }
+      color: "from-orange-500 to-rose-500",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {cards.map((card) => {
         const Icon = card.icon;
+
         return (
           <div
             key={card.title}
-            className="bg-white/5 rounded-2xl border border-white/10 p-6 backdrop-blur-sm hover:bg-white/10 transition-colors duration-200"
+            className="min-w-0 rounded-[22px] border border-white/10 bg-[#101a27] p-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-colors duration-200 hover:border-white/15 hover:bg-[#121f2f] sm:p-5"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center`}>
-                <Icon className="w-6 h-6 text-white" />
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br ${card.color} shadow-[0_12px_28px_rgba(0,0,0,0.22)] sm:h-12 sm:w-12`}>
+                <Icon className="h-5 w-5 text-white sm:h-6 sm:w-6" />
               </div>
-              <div className="text-right">
-                <p className="text-xs text-white/60">{card.description}</p>
-              </div>
+              <p className="min-w-0 text-right text-[11px] font-medium leading-tight text-white/50 sm:text-xs">
+                {card.shortTitle}
+              </p>
             </div>
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-1">{card.value}</h3>
-              <p className="text-sm text-white/60">{card.title}</p>
-            </div>
+
+            <p className="truncate text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              {card.value}
+            </p>
+            <p className="mt-1 truncate text-xs font-medium text-white/55 sm:text-sm">
+              {card.title}
+            </p>
           </div>
         );
       })}

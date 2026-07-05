@@ -109,8 +109,8 @@ export default function AddItemModal({
         className="absolute inset-0 bg-[#020817]/70 backdrop-blur-md"
       />
 
-      <div className="absolute inset-0 flex items-center justify-center p-4">
-        <div className="w-full max-w-[560px] overflow-hidden rounded-[28px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,32,55,0.96)_0%,rgba(8,20,39,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.5)]">
+      <div className="absolute inset-0 flex items-end justify-center p-0 sm:items-center sm:p-4">
+        <div className="max-h-[90dvh] w-full overflow-hidden rounded-t-[28px] border border-cyan-400/15 bg-[linear-gradient(180deg,rgba(15,32,55,0.96)_0%,rgba(8,20,39,0.98)_100%)] shadow-[0_30px_100px_rgba(0,0,0,0.5)] sm:max-w-[560px] sm:rounded-[28px]">
           <div className="relative border-b border-white/10 px-5 py-3.5">
             {mode === "link" && (
               <button
@@ -135,7 +135,7 @@ export default function AddItemModal({
             </button>
           </div>
 
-          <div className="px-5 py-5">
+          <div className="max-h-[calc(90dvh-68px)] overflow-y-auto px-5 py-5">
             <div className="rounded-[20px] border border-white/10 bg-white/5 px-5 py-3.5">
               <input
                 type="text"

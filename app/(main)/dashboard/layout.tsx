@@ -1,7 +1,8 @@
 import { authOptions } from "@/lib/auth";
 import { getDashboardPreviewPayload } from "@/lib/dashboard-preview";
 import { getOnboardingRedirectPath } from "@/lib/onboarding";
-import DashboardLivePreview from "@/components/dashboard/DashboardLivePreview";
+import DashboardMobilePreview from "@/components/dashboard/mobile/DashboardMobilePreview";
+import DashboardPreviewAside from "@/components/dashboard/DashboardPreviewAside";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
@@ -27,21 +28,20 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[#07101C]">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+    <div className="min-h-screen bg-[#07101C] md:bg-[#07101C]">
+      <DashboardMobilePreview
+        theme={preview.themeForClient}
+        profile={preview.profile}
+        icons={preview.icons}
+        standaloneLinks={preview.standaloneLinks}
+        collections={preview.collections}
+        sections={preview.sections}
+      />
+
+      <div className="mx-auto w-full max-w-[1600px] px-0 py-0 md:px-6 md:py-6 lg:px-8">
+        <div className="flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1">{children}</div>
-          <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-[min(100%,404px)] xl:w-[min(100%,428px)]">
-            <DashboardLivePreview
-              username={preview.username}
-              theme={preview.themeForClient}
-              profile={preview.profile}
-              icons={preview.icons}
-              standaloneLinks={preview.standaloneLinks}
-              collections={preview.collections}
-              sections={preview.sections}
-            />
-          </aside>
+          <DashboardPreviewAside {...preview} />
         </div>
       </div>
     </div>

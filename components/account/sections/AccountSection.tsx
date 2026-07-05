@@ -22,7 +22,7 @@ export default function AccountSection({
       </div>
 
       <div className="md:w-2/3 flex flex-col gap-5">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border border-white/10 bg-white/10">
             {profileImgUrl ? (
               <Image
@@ -37,11 +37,11 @@ export default function AccountSection({
               </div>
             )}
           </div>
-          <div className="flex flex-col">
-            <span className="text-base font-medium text-white">
+          <div className="min-w-0 flex flex-col">
+            <span className="truncate text-base font-medium text-white">
               {username ? `@${username}` : "No username set"}
             </span>
-            <span className="text-sm text-white/50">{email}</span>
+            <span className="truncate text-sm text-white/50">{email}</span>
           </div>
         </div>
 

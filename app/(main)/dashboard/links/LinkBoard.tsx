@@ -130,7 +130,7 @@ export default function LinksBoard({ boardItems }: Props) {
     return () => window.removeEventListener("pointermove", onMove);
   }, [activeId]);
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   const topLevelIds = useMemo(() => cards.map((item) => item.sortableId), [cards]);
 

@@ -1,20 +1,20 @@
 "use client";
 
-import { ChartDataPoint } from "@/lib/analytics";
+import type { ChartDataPoint } from "@/lib/analytics";
 import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
   Area,
   AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import type { ValueType } from "recharts/types/component/DefaultTooltipContent";
 
-interface ActivityChartProps {
+type ActivityChartProps = {
   data: ChartDataPoint[];
-}
+};
 
 function formatDate(dateStr: string) {
   const date = new Date(dateStr);
@@ -33,20 +33,16 @@ function ActivityTooltip({ active, payload, label }: ActivityTooltipProps) {
   }
 
   return (
-    <div className="bg-[#1a1a1a] border border-white/20 rounded-lg p-3 backdrop-blur-sm">
-      <p className="text-white text-sm font-medium mb-2">{formatDate(String(label))}</p>
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-blue-500" />
-          <p className="text-white/80 text-sm">
-            Views: <span className="text-white font-medium">{payload[0]?.value ?? 0}</span>
-          </p>
+    <div className="rounded-2xl border border-white/15 bg-[#101a27]/95 p-3 shadow-2xl backdrop-blur-xl">
+      <p className="mb-2 text-sm font-semibold text-white">{formatDate(String(label))}</p>
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2 text-xs text-white/75">
+          <span className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+          Views <span className="font-semibold text-white">{payload[0]?.value ?? 0}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-violet-500" />
-          <p className="text-white/80 text-sm">
-            Clicks: <span className="text-white font-medium">{payload[1]?.value ?? 0}</span>
-          </p>
+        <div className="flex items-center gap-2 text-xs text-white/75">
+          <span className="h-2.5 w-2.5 rounded-full bg-violet-500" />
+          Clicks <span className="font-semibold text-white">{payload[1]?.value ?? 0}</span>
         </div>
       </div>
     </div>
@@ -55,50 +51,53 @@ function ActivityTooltip({ active, payload, label }: ActivityTooltipProps) {
 
 export default function ActivityChart({ data }: ActivityChartProps) {
   return (
-    <div className="h-64 w-full">
+    <div className="h-[210px] w-full sm:h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+        <AreaChart data={data} margin={{ top: 8, right: 6, left: -18, bottom: 0 }}>
           <defs>
             <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.9} />
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.08} />
             </linearGradient>
             <linearGradient id="clicksGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#a855f7" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#a855f7" stopOpacity={0.1} />
+              <stop offset="5%" stopColor="#a855f7" stopOpacity={0.9} />
+              <stop offset="95%" stopColor="#a855f7" stopOpacity={0.08} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
           <XAxis
             dataKey="date"
             tickFormatter={formatDate}
-            stroke="#ffffff40"
-            fontSize={12}
+            stroke="#ffffff35"
+            fontSize={10}
             tickLine={false}
             axisLine={false}
+            minTickGap={12}
+            dy={8}
           />
           <YAxis
-            stroke="#ffffff40"
-            fontSize={12}
+            stroke="#ffffff30"
+            fontSize={10}
             tickLine={false}
             axisLine={false}
+            width={34}
           />
-          <Tooltip content={<ActivityTooltip />} />
+          <Tooltip content={<ActivityTooltip />} cursor={{ stroke: "#ffffff22" }} />
           <Area
             type="monotone"
             dataKey="views"
             stroke="#3b82f6"
-            strokeWidth={2}
+            strokeWidth={2.25}
             fill="url(#viewsGradient)"
-            fillOpacity={0.6}
+            fillOpacity={0.7}
           />
           <Area
             type="monotone"
             dataKey="clicks"
             stroke="#a855f7"
-            strokeWidth={2}
+            strokeWidth={2.25}
             fill="url(#clicksGradient)"
-            fillOpacity={0.6}
+            fillOpacity={0.65}
           />
         </AreaChart>
       </ResponsiveContainer>

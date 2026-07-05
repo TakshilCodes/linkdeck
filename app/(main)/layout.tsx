@@ -1,4 +1,7 @@
 import Sidebar from "@/components/dashboard/Sidebar";
+import MobileDashboardHeader from "@/components/dashboard/mobile/MobileDashboardHeader";
+import MobileBottomNav from "@/components/dashboard/mobile/MobileBottomNav";
+import DashboardMainContent from "@/components/dashboard/mobile/DashboardMainContent";
 
 export default function MainLayout({
   children,
@@ -6,9 +9,15 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-      <div className="min-h-screen md:flex">
+    <div className="min-h-screen overflow-x-hidden bg-[#07101C] text-white md:flex">
+      <div className="hidden md:block">
         <Sidebar />
-        <main className="min-w-0 flex-1">{children}</main>
       </div>
+      <div className="min-w-0 flex-1">
+        <MobileDashboardHeader />
+        <DashboardMainContent>{children}</DashboardMainContent>
+      </div>
+      <MobileBottomNav />
+    </div>
   );
 }
