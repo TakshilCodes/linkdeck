@@ -116,7 +116,7 @@ export default function Sidebar() {
 
             {/* Sidebar */}
             <aside
-                className={`fixed left-0 top-0 z-50 flex h-screen w-72.5 flex-col border-r border-cyan-400/10 bg-[#07111d]/95 shadow-[0_0_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-transform duration-300 md:sticky md:z-30 md:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed left-0 top-0 z-50 flex h-screen w-[18.125rem] flex-col border-r border-cyan-400/10 bg-[#07111d]/95 shadow-[0_0_40px_rgba(0,0,0,0.35)] backdrop-blur-2xl transition-transform duration-300 md:sticky md:z-30 md:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
                     }`}
             >
                 {/* top */}

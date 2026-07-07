@@ -37,7 +37,10 @@ export default function AccountSettingsContainer({ user }: { user: AccountUserPr
         
         <PublicProfileSection username={user.username} />
         
-        <SecuritySection hasPassword={user.hasPassword} />
+        <SecuritySection
+          hasPassword={user.hasPassword}
+          authProvider={user.authProvider}
+        />
         
         <AccountInfoSection
           createdAt={user.createdAt}

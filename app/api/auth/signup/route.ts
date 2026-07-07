@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
     const sent = await sendOtpEmail(email, otp);
 
     if (!sent) {
+      await redis.del(`signup:pending:${email}`);
+
       return NextResponse.json(
         { ok: false, error: "Failed to send OTP" },
         { status: 500 }
@@ -99,7 +101,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      message: "OTP sent",
+      message: "OTP sent. Check your Inbox, Spam, or Promotions folder.",
       email,
     });
   } catch (error) {

@@ -22,9 +22,11 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen overflow-x-hidden bg-[#07101C] text-white md:flex">
-      <div className="hidden md:block">
-        <Sidebar />
+    <div className="min-h-screen overflow-x-hidden bg-[#07101C] text-white md:flex md:overflow-x-visible">
+      <div className="hidden md:block md:w-[18.125rem] md:shrink-0">
+        <div className="fixed inset-y-0 left-0 z-40 w-[18.125rem]">
+          <Sidebar />
+        </div>
       </div>
       <div className="min-w-0 flex-1">
         <MobileDashboardHeader />

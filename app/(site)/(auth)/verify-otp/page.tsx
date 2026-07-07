@@ -97,6 +97,9 @@ export default function VerifyOtpCard() {
             {email || "your email"}
           </span>
         </p>
+        <p className="mt-2 text-sm leading-6 text-white/45">
+          If it does not appear in your inbox, check your Spam or Promotions folder.
+        </p>
 
         {error ? (
           <p className="mt-4 text-sm font-medium text-red-500">{error}</p>

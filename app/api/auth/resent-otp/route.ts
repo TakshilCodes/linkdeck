@@ -82,6 +82,12 @@ export async function POST(req: NextRequest) {
 
     const sent = await sendOtpEmail(email, otp);
     if (!sent) {
+      await redis.set(
+        `signup:pending:${email}`,
+        pendingRaw,
+        OTP_EXPIRE_SECONDS
+      );
+
       return NextResponse.json(
         { ok: false, error: "Failed to send OTP" },
         { status: 500 }
@@ -90,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      message: "OTP resent successfully",
+      message: "OTP resent successfully. Check your Inbox, Spam, or Promotions folder.",
     });
   } catch (error) {
     console.error("auth/resend-otp error", error);
