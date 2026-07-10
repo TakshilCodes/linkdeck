@@ -24,14 +24,14 @@ export default function TopLinksTable({ links }: TopLinksTableProps) {
   const maxClicks = Math.max(...links.map((link) => link.clickCount));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3.5">
       {links.map((link, index) => {
         const domain = displayDomainFromUrl(link.url) || "Unknown";
         const progressPercentage = maxClicks > 0 ? (link.clickCount / maxClicks) * 100 : 0;
 
         return (
-          <div key={link.id} className="rounded-2xl border border-white/8 bg-white/[0.03] p-3.5 sm:border-0 sm:bg-transparent sm:p-0">
-            <div className="flex min-w-0 items-start gap-3">
+          <div key={link.id} className="rounded-xl border border-white/8 bg-white/[0.03] p-3.5 sm:border-0 sm:bg-transparent sm:p-0">
+            <div className="flex min-w-0 items-start gap-3.5">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/20 text-xs font-bold text-violet-300">
                 {index + 1}
               </div>

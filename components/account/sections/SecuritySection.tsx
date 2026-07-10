@@ -222,17 +222,22 @@ export default function SecuritySection({
   };
 
   return (
-    <div className="flex flex-col gap-6 py-6 md:flex-row md:items-start md:justify-between">
-      <div className="md:w-1/3">
-        <h2 className="text-lg font-semibold text-white">Security</h2>
-        <p className="mt-1 text-sm text-white/50">
-          Manage your password and secure your account.
-        </p>
-      </div>
+    <section className="py-6 sm:py-7" aria-labelledby="security-heading">
+      <div className="grid gap-6 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)] lg:gap-10">
+        <div>
+          <div className="mb-2 flex items-center gap-2 text-cyan-300">
+            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+            <span className="text-xs font-semibold uppercase tracking-[0.14em]">Security</span>
+          </div>
+          <h2 id="security-heading" className="text-lg font-semibold text-white">Password and access</h2>
+          <p className="mt-1.5 max-w-xs text-sm leading-6 text-white/50">
+            Manage your password and keep your account secure.
+          </p>
+        </div>
 
-      <div className="md:w-2/3">
+        <div className="min-w-0">
         {!passwordEnabled ? (
-          <div className="rounded-xl border border-white/10 bg-white/5 p-6">
+          <div className="rounded-2xl border border-white/10 bg-black/15 p-4 sm:p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/20 text-cyan-300">
                 <KeyRound className="h-5 w-5" />
@@ -260,7 +265,7 @@ export default function SecuritySection({
                       type="button"
                       onClick={handleSendCreateOtp}
                       disabled={isSendingCreateOtp}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-cyan-500 px-4 text-sm font-medium text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex h-11 items-center gap-2 rounded-lg bg-cyan-500 px-4 text-sm font-medium text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isSendingCreateOtp ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
                       {isSendingCreateOtp ? "Sending OTP..." : "Create Password"}
@@ -278,7 +283,7 @@ export default function SecuritySection({
                           value={createOtpCode}
                           onChange={(e) => setCreateOtpCode(e.target.value)}
                           required
-                          className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                           placeholder="123456"
                         />
                       </div>
@@ -293,7 +298,7 @@ export default function SecuritySection({
                           onChange={(e) => setCreateNewPassword(e.target.value)}
                           required
                           minLength={8}
-                          className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                         />
                       </div>
                       <div>
@@ -307,7 +312,7 @@ export default function SecuritySection({
                           onChange={(e) => setCreateConfirmPassword(e.target.value)}
                           required
                           minLength={8}
-                          className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                         />
                       </div>
                       <div className="flex flex-col gap-3 pt-1 sm:flex-row sm:justify-end">
@@ -317,7 +322,7 @@ export default function SecuritySection({
                             clearCreateForm();
                             setInlineError(null);
                           }}
-                          className="h-10 rounded-lg px-4 text-sm font-medium text-white/60 transition hover:bg-white/5 hover:text-white"
+                          className="h-11 rounded-lg px-4 text-sm font-medium text-white/60 transition hover:bg-white/5 hover:text-white"
                         >
                           Cancel
                         </button>
@@ -325,14 +330,14 @@ export default function SecuritySection({
                           type="button"
                           onClick={handleSendCreateOtp}
                           disabled={isSendingCreateOtp || isCreatingPassword}
-                          className="h-10 rounded-lg px-4 text-sm font-medium text-cyan-300 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="h-11 rounded-lg px-4 text-sm font-medium text-cyan-300 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isSendingCreateOtp ? "Sending..." : "Resend OTP"}
                         </button>
                         <button
                           type="submit"
                           disabled={isCreatingPassword}
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 text-sm font-medium text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 text-sm font-medium text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isCreatingPassword && <Loader2 className="h-4 w-4 animate-spin" />}
                           {isCreatingPassword ? "Creating..." : "Set Password"}
@@ -345,7 +350,7 @@ export default function SecuritySection({
             </div>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/15">
             <div className="flex border-b border-white/10">
               <button
                 type="button"
@@ -378,7 +383,7 @@ export default function SecuritySection({
               </button>
             </div>
 
-            <div className="space-y-4 p-6">
+            <div className="space-y-4 p-4 sm:p-5">
               <InlineError message={inlineError} />
 
               {method === "current" && (
@@ -393,7 +398,7 @@ export default function SecuritySection({
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       required
-                      className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                      className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                     />
                   </div>
                   <div>
@@ -407,7 +412,7 @@ export default function SecuritySection({
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                      className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                     />
                   </div>
                   <div>
@@ -421,14 +426,14 @@ export default function SecuritySection({
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={8}
-                      className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                      className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                     />
                   </div>
                   <div className="flex justify-end pt-2">
                     <button
                       type="submit"
                       disabled={isChanging}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-white px-4 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="inline-flex h-11 items-center gap-2 rounded-lg bg-white px-4 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       {isChanging ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
                       {isChanging ? "Updating..." : "Update Password"}
@@ -441,7 +446,7 @@ export default function SecuritySection({
                 <div className="flex flex-col gap-4">
                   {!resetOtpSent ? (
                     <div className="flex flex-col items-center justify-center py-6 text-center">
-                      <Mail className="mb-4 h-10 w-10 text-white/30" />
+                      <Mail className="mb-4 h-11 w-10 text-white/30" />
                       <p className="mb-6 max-w-sm text-sm text-white/80">
                         We will send a 6-digit one-time passcode to your email address to verify your identity.
                       </p>
@@ -449,7 +454,7 @@ export default function SecuritySection({
                         type="button"
                         onClick={handleSendResetOtp}
                         disabled={isSendingResetOtp}
-                        className="inline-flex h-10 items-center gap-2 rounded-lg bg-cyan-500/10 px-6 text-sm font-medium text-cyan-400 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="inline-flex h-11 items-center gap-2 rounded-lg bg-cyan-500/10 px-6 text-sm font-medium text-cyan-400 transition hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {isSendingResetOtp && <Loader2 className="h-4 w-4 animate-spin" />}
                         {isSendingResetOtp ? "Sending OTP..." : "Send OTP Code"}
@@ -468,7 +473,7 @@ export default function SecuritySection({
                           value={resetOtpCode}
                           onChange={(e) => setResetOtpCode(e.target.value)}
                           required
-                          className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white placeholder-white/30 outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                           placeholder="123456"
                         />
                       </div>
@@ -483,7 +488,7 @@ export default function SecuritySection({
                           onChange={(e) => setResetNewPassword(e.target.value)}
                           required
                           minLength={8}
-                          className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                         />
                       </div>
                       <div>
@@ -497,7 +502,7 @@ export default function SecuritySection({
                           onChange={(e) => setResetConfirmPassword(e.target.value)}
                           required
                           minLength={8}
-                          className="h-10 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                          className="h-11 w-full rounded-lg border border-white/10 bg-black/20 px-3 text-sm text-white outline-none transition focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
                         />
                       </div>
                       <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:justify-end">
@@ -507,7 +512,7 @@ export default function SecuritySection({
                             clearResetForm();
                             setInlineError(null);
                           }}
-                          className="h-10 rounded-lg px-4 text-sm font-medium text-white/60 transition hover:bg-white/5 hover:text-white"
+                          className="h-11 rounded-lg px-4 text-sm font-medium text-white/60 transition hover:bg-white/5 hover:text-white"
                         >
                           Back
                         </button>
@@ -515,14 +520,14 @@ export default function SecuritySection({
                           type="button"
                           onClick={handleSendResetOtp}
                           disabled={isSendingResetOtp || isResetting}
-                          className="h-10 rounded-lg px-4 text-sm font-medium text-cyan-300 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="h-11 rounded-lg px-4 text-sm font-medium text-cyan-300 transition hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isSendingResetOtp ? "Sending..." : "Resend OTP"}
                         </button>
                         <button
                           type="submit"
                           disabled={isResetting}
-                          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 text-sm font-medium text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 text-sm font-medium text-black transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {isResetting && <Loader2 className="h-4 w-4 animate-spin" />}
                           {isResetting ? "Resetting..." : "Reset Password"}
@@ -537,5 +542,6 @@ export default function SecuritySection({
         )}
       </div>
     </div>
+    </section>
   );
 }

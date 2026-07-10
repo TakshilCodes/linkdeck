@@ -21,7 +21,7 @@ import type {
 const EMBED_W = 390;
 const EMBED_H = 844;
 /** Slightly smaller mockup in the pane, like Linktree preview (~82%). */
-const PREVIEW_SCALE = 0.82;
+const PREVIEW_SCALE = 0.75;
 
 type Props = {
   username: string;
@@ -72,7 +72,7 @@ export default function DashboardLivePreview({
   };
 
   return (
-    <div className="flex h-full min-h-[min(760px,90vh)] flex-col rounded-[24px] border border-white/8 bg-[#0a121c] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+    <div className="flex h-full min-h-[min(680px,86vh)] flex-col rounded-[24px] border border-white/8 bg-[#0a121c] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex shrink-0 items-center">
         <div className="flex w-full min-w-0 items-center gap-2 rounded-full border border-white/10 bg-[#111b28] py-2 pl-4 pr-2 text-sm text-white/80 shadow-sm">
           <span className="min-w-0 flex-1 truncate font-medium text-white/90">{displayUrl}</span>

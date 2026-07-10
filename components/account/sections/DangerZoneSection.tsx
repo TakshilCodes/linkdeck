@@ -1,44 +1,46 @@
-"use client";
+'use client';
 
 import { useState } from "react";
+import { AlertTriangle, ChevronRight } from "lucide-react";
 import WarningModal from "@/components/ui/WarningModal";
 
-export default function DangerZoneSection() {
+export default function DangerZoneSection({ username }: { username: string | null }) {
   const [warningOpen, setWarningOpen] = useState(false);
 
   return (
     <>
-      <div className="flex flex-col gap-6 py-6 md:flex-row md:items-start md:justify-between">
-        <div className="md:w-1/3">
-          <h2 className="text-lg font-semibold text-red-500">Danger Zone</h2>
-          <p className="mt-1 text-sm text-white/50">
-            Irreversible actions related to your account.
-          </p>
-        </div>
+      <section className="py-6 sm:py-7" aria-labelledby="danger-zone-heading">
+        <div className="grid gap-6 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)] lg:gap-10">
+          <div>
+            <div className="mb-2 flex items-center gap-2 text-red-300">
+              <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+              <span className="text-xs font-semibold uppercase tracking-[0.14em]">Caution</span>
+            </div>
+            <h2 id="danger-zone-heading" className="text-lg font-semibold text-white">Danger zone</h2>
+            <p className="mt-1.5 max-w-xs text-sm leading-6 text-white/50">Irreversible actions related to your account.</p>
+          </div>
 
-        <div className="md:w-2/3">
-          <div className="flex flex-col justify-between gap-4 rounded-xl border border-red-500/20 bg-red-500/5 p-6 sm:flex-row sm:items-center">
+          <div className="flex flex-col gap-4 rounded-2xl border border-red-400/20 bg-red-500/[0.045] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
             <div>
-              <h3 className="text-sm font-medium text-white/90">Delete Account</h3>
-              <p className="mt-1 text-sm text-white/50">
-                Permanently delete your account and all associated data.
-              </p>
+              <h3 className="text-sm font-semibold text-white">Delete account</h3>
+              <p className="mt-1 text-sm leading-6 text-white/55">Permanently remove your profile and associated data.</p>
             </div>
             <button
               type="button"
-              className="shrink-0 rounded-lg bg-red-500/10 px-4 py-2 text-sm font-medium text-red-500 transition hover:bg-red-500/20"
               onClick={() => setWarningOpen(true)}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-red-400/20 bg-red-500/10 px-3.5 text-sm font-medium text-red-200 transition hover:bg-red-500/20"
             >
-              Delete Account
+              Delete account
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
       <WarningModal
         open={warningOpen}
-        title="Delete account is not available yet"
-        description="Account deletion is not implemented in this build. No account data was changed."
+        title="Account deletion is not available yet"
+        description={`Account deletion for ${username ? `@${username}` : "this account"} is not available in this version. No account data has been changed.`}
         confirmLabel="Got it"
         hideCancel
         onClose={() => setWarningOpen(false)}

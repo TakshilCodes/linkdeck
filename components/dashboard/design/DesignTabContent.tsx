@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
-import { Check, ChevronLeft, LayoutTemplate, Image as ImageIcon, Type, Square, Palette, MousePointerClick } from "lucide-react";
+import { Check, ChevronLeft, LayoutTemplate, Image as ImageIcon, Type, Square, Palette, MousePointerClick, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import HeaderTabContent from "./HeaderTabContent";
 import TextTabContent from "./TextTabContent";
@@ -87,6 +87,7 @@ const SIDEBAR_ITEMS = [
 export default function DesignTabContent({ themes, currentThemeId, initialProfile, initialCustomization }: Props) {
   const [activeSidebarItem, setActiveSidebarItem] = useState("theme");
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false);
+  const [resetVersion, setResetVersion] = useState(0);
   const router = useRouter();
 
   const [isPending, startTransition] = useTransition();
@@ -333,6 +334,16 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
       )}
     </>
   );
+  const handleReset = () => {
+    if (isPending || !shouldEnableSave) return;
+
+    setPreviewTheme(null);
+    setPreviewProfile(null);
+    setPreviewCustomTheme(null);
+    setResetVersion((version) => version + 1);
+    toast.success("Restored your last saved design.");
+  };
+
   const handleSave = async () => {
     startTransition(async () => {
       try {
@@ -446,15 +457,49 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
 
   return (
     <div className="flex h-full flex-col">
+      <header className="fixed inset-x-0 top-0 z-[60] flex h-[calc(4rem+env(safe-area-inset-top))] items-end justify-between border-b border-white/10 bg-[#07101C]/95 px-4 pb-3 pt-[env(safe-area-inset-top)] shadow-[0_8px_24px_rgba(0,0,0,0.18)] backdrop-blur-xl md:hidden">
+        <h1 className="text-xl font-semibold tracking-tight text-white">Design</h1>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleReset}
+            disabled={isPending || !shouldEnableSave}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Reset to last saved design"
+            title="Reset to last saved design"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isPending || !shouldEnableSave}
+            className="inline-flex h-9 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isPending ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </header>
       {/* Top Header */}
       <div className="-mx-4 mb-6 hidden items-center justify-between border-b border-[#202833] bg-[#07101C] px-5 py-4 sm:-mx-6 md:flex lg:-mx-8">
         <h1 className="text-2xl font-semibold text-white">Design</h1>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2">
           <button
+            type="button"
+            onClick={handleReset}
+            disabled={isPending || !shouldEnableSave}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white/70 transition hover:border-cyan-400/40 hover:bg-cyan-400/10 hover:text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
+            aria-label="Reset to last saved design"
+            title="Reset to last saved design"
+          >
+            <RotateCcw className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
             onClick={handleSave}
             disabled={isPending || !shouldEnableSave}
-            className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? "Saving..." : "Save"}
           </button>
@@ -488,7 +533,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
         </div>
 
         {/* Content Area */}
-        <div className="flex-1">
+        <div key={resetVersion} className="flex-1">
           {activeSidebarItem === "theme" && (
             <div className="grid grid-cols-2 gap-4 pb-10 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5">
               {/* Custom Card */}
@@ -674,7 +719,7 @@ export default function DesignTabContent({ themes, currentThemeId, initialProfil
           contentMaxHeightClassName="max-h-[calc(48dvh-82px)]"
           backdropClassName="bg-black/25"
         >
-          {renderActiveContent(true)}
+          <div key={resetVersion}>{renderActiveContent(true)}</div>
         </BottomSheet>
       </div>
     </div>

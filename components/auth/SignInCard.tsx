@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Github, Loader2 } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Link from "next/link";
+import { FcGoogle } from "react-icons/fc";
 
 
 export default function SignInCard() {
@@ -113,13 +114,7 @@ export default function SignInCard() {
             disabled={loading !== ""}
             className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/8 disabled:opacity-50"
           >
-            <Image
-              src="https://www.svgrepo.com/show/475656/google-color.svg"
-              alt="Google"
-              width={18}
-              height={18}
-              className="h-4.5 w-4.5"
-            />
+            <FcGoogle className="h-5 w-5 shrink-0" aria-hidden="true" />
 
             {loading === "google" ? "Continuing..." : "Continue with Google"}
           </button>
@@ -131,17 +126,18 @@ export default function SignInCard() {
             disabled={loading !== ""}
             className="inline-flex h-12 w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 text-sm font-semibold text-white transition hover:bg-white/8 disabled:opacity-50"
           >
-            <Image
-              src="https://www.svgrepo.com/show/512317/github-142.svg"
-              alt="GitHub"
-              width={18}
-              height={18}
-              className="h-4.5 w-4.5 invert"
-            />
+            <Github className="h-5 w-5 shrink-0" aria-hidden="true" />
 
             {loading === "github" ? "Continuing..." : "Continue with GitHub"}
           </button>
         </div>
+        <p className="mt-6 text-center text-sm text-white/55">
+          New to LinkDeck?{" "}
+          <Link href="/signup" className="font-semibold text-cyan-300 transition hover:text-cyan-200 hover:underline">
+            Create an account
+          </Link>
+        </p>
+
       </div>
     </section>
   );

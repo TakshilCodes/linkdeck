@@ -71,6 +71,10 @@ type ThemeProfileRendererProps = {
 const embedFrameClasses =
   "relative mx-auto h-[min(844px,85dvh)] w-full max-w-[390px] shrink-0 overflow-hidden rounded-[44px] sm:h-[844px] sm:w-[390px]";
 
+function getSectionTitle(title: string | null) {
+  return title?.trim().toLowerCase() === "websites" ? null : title;
+}
+
 export default function ThemeProfileRenderer({
   theme,
   profile,
@@ -141,7 +145,7 @@ export default function ThemeProfileRenderer({
           orderedSections.map((section, index) => (
             <LinkSection
               key={section.id}
-              title={section.title}
+              title={getSectionTitle(section.title)}
               links={section.links}
               theme={theme}
               titleColor={profileColor}
@@ -153,7 +157,7 @@ export default function ThemeProfileRenderer({
           <>
             {standaloneLinks.length > 0 && (
               <LinkSection
-                title={collections.some((collection) => collection.links.length > 0) ? "Websites" : null}
+                title={null}
                 links={standaloneLinks}
                 theme={theme}
                 titleColor={profileColor}
@@ -164,7 +168,7 @@ export default function ThemeProfileRenderer({
               collection.links.length > 0 ? (
                 <LinkSection
                   key={collection.id}
-                  title={collection.name}
+                  title={getSectionTitle(collection.name)}
                   links={collection.links}
                   theme={theme}
                   titleColor={profileColor}

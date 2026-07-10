@@ -109,7 +109,7 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
       <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-[26px] border border-white/8 bg-[#111827] px-4 py-4 shadow-[0_10px_28px_rgba(0,0,0,0.18)] transition-all duration-200 ${
+      className={`rounded-2xl border border-white/8 bg-[#111827] px-4 py-3.5 shadow-[0_10px_28px_rgba(0,0,0,0.18)] hover:border-cyan-400/25 transition-all duration-200 ${
         isDragging ? "opacity-0" : ""
       }`}
     >
@@ -193,10 +193,11 @@ export default function SortableLinkCard({ sortableId, link }: Props) {
         <button
           type="button"
           onClick={remove}
-          className="flex items-center gap-2 text-red-300/75 transition hover:text-red-200"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-red-300/55 transition hover:bg-red-500/10 hover:text-red-200"
+          title="Delete link"
+          aria-label="Delete link"
         >
           <Trash2 className="h-4 w-4" />
-          Delete
         </button>
       </div>
       </div>

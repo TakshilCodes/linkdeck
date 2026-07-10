@@ -35,7 +35,7 @@ export default function RecentActivityComponent({ activities }: RecentActivityPr
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3.5">
       {activities.map((activity) => {
         const isProfileView = activity.type === "PROFILE_VIEW";
         const Icon = isProfileView ? Eye : MousePointer;
@@ -47,7 +47,7 @@ export default function RecentActivityComponent({ activities }: RecentActivityPr
         return (
           <div
             key={activity.id}
-            className="flex min-w-0 items-start gap-3 rounded-2xl border border-white/8 bg-white/[0.03] p-3.5 sm:border-0 sm:bg-transparent sm:p-0"
+            className="flex min-w-0 items-start gap-3.5 rounded-xl border border-white/8 bg-white/[0.03] p-3.5 sm:border-0 sm:bg-transparent sm:p-0"
           >
             <div
               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${
@@ -58,7 +58,7 @@ export default function RecentActivityComponent({ activities }: RecentActivityPr
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="break-words text-sm font-semibold leading-snug text-white">
+              <p className="text-sm font-semibold leading-5 text-white">
                 {title}
               </p>
               <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-white/45">

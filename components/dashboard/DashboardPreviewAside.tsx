@@ -20,7 +20,7 @@ export default function DashboardPreviewAside({
   if (pathname === "/dashboard/preview") return null;
 
   return (
-    <aside className="hidden w-full shrink-0 lg:sticky lg:top-6 lg:block lg:w-[min(100%,404px)] xl:w-[min(100%,428px)]">
+    <aside className="hidden w-full shrink-0 lg:sticky lg:top-6 lg:block lg:w-[360px] xl:w-[380px]">
       <DashboardLivePreview
         username={username}
         theme={themeForClient}

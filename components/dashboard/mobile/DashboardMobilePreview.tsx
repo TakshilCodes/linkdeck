@@ -35,8 +35,8 @@ type ViewportSize = {
 const FRAME_W = 390;
 const MAX_FRAME_H = 844;
 const MOBILE_HORIZONTAL_PADDING = 16;
-const CLOSED_VERTICAL_RESERVED = 112;
-const PANEL_OPEN_VERTICAL_RESERVED = 72;
+const CLOSED_VERTICAL_RESERVED = 176;
+const PANEL_OPEN_VERTICAL_RESERVED = 128;
 const CLOSED_MAX_SCALE = 0.82;
 const PANEL_OPEN_MAX_SCALE = 0.38;
 
@@ -110,10 +110,10 @@ export default function DashboardMobilePreview({
       initial={{ opacity: 0, y: 12, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.28, ease: "easeOut" }}
-      className={`flex justify-center border-b border-white/10 bg-[#07101C] px-2 md:hidden ${
+      className={`flex justify-center border-b border-white/10 bg-[#07101C] px-2 pb-2 pt-[calc(4rem+env(safe-area-inset-top))] md:hidden ${
         mobileDesignPanelOpen
-          ? "h-[calc(52dvh-4rem)] items-center py-2"
-          : "h-[calc(100dvh-8rem)] items-center py-2"
+          ? "h-[calc(52dvh-4rem)] items-center"
+          : "h-[calc(100dvh-8rem)] items-center"
       }`}
     >
       <motion.div

@@ -133,7 +133,7 @@ export default function SortableCollectionCard({
         <div
           ref={setNodeRef}
           style={style}
-          className={`relative rounded-[28px] border bg-[#151d2e] p-3 shadow-[0_10px_28px_rgba(0,0,0,0.16)] transition-all duration-200 ${
+          className={`relative rounded-2xl border bg-[#151d2e] p-3 shadow-[0_10px_28px_rgba(0,0,0,0.16)] transition-all duration-200 ${
             isDragging ? "opacity-0" : ""
           } ${isOver ? "border-cyan-400/30" : "border-white/8"}`}
         >
@@ -153,7 +153,7 @@ export default function SortableCollectionCard({
             />
           </div>
 
-          <div className="mb-3 flex items-center justify-between gap-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
@@ -204,14 +204,14 @@ export default function SortableCollectionCard({
               <button
                 type="button"
                 onClick={() => setOpenModal(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10 hover:text-white"
               >
                 <Plus className="h-5 w-5" />
               </button>
               <button
                 type="button"
                 onClick={removeCollection}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-red-400/80 transition hover:bg-white/10 hover:text-red-400"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-red-400/80 transition hover:bg-white/10 hover:text-red-400"
                 title="Delete Collection"
               >
                 <Trash2 className="h-5 w-5" />
@@ -253,7 +253,7 @@ export default function SortableCollectionCard({
                     <button
                       type="button"
                       onClick={() => setOpenModal(true)}
-                      className="mt-4 inline-flex items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                      className="mt-4 inline-flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/10"
                     >
                       Add link
                     </button>

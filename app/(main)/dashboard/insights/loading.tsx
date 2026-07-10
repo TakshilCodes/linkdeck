@@ -32,7 +32,7 @@ export default function InsightsLoading() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] 2xl:gap-6">
         {Array.from({ length: 2 }).map((_, sectionIndex) => (
           <div key={sectionIndex} className="rounded-[24px] border border-white/10 bg-[#101a27] p-4 sm:p-6">
             <SkeletonBlock className="mb-4 h-6 w-44 rounded-lg" />

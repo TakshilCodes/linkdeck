@@ -64,7 +64,7 @@ export default async function InsightsPage() {
         <ActivityChart data={chartData} />
       </section>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] 2xl:gap-6">
         <section className="rounded-[24px] border border-white/10 bg-[#101a27] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-6">
           <h2 className="mb-4 text-lg font-semibold tracking-tight text-white sm:mb-6">Top Performing Links</h2>
           <TopLinksTable links={topLinks} />

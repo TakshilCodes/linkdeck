@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Instagram, Linkedin, Github, Plus, FolderClosed, Pencil } from "lucide-react";
+import { Instagram, Linkedin, Github, Plus, FolderClosed, Pencil, ExternalLink } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { getIconByType, resolveSocialUrl } from "@/lib/social-icons";
 import EditTitleBioModal from "./EditTitleBioModal";
@@ -242,146 +242,163 @@ export default function ProfileHeader({
                 onClose={() => setAddItemOpen(false)}
             />
 
-            <div className="mx-auto w-full max-w-140 py-10">
-                <div className="flex items-center gap-4">
-                    <div 
-                        onClick={() => setProfileModalOpen(true)}
-                        className="group relative h-16 w-16 cursor-pointer overflow-hidden rounded-full border border-white/20 bg-white/10"
-                    >
-                        {profileImgUrl ? (
-                            <Image
-                                src={profileImgUrl}
-                                alt={username}
-                                fill
-                                className="object-cover transition-all duration-300 group-hover:blur-sm"
-                            />
-                        ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xl text-white/60 transition-all duration-300 group-hover:blur-sm">
-                                {username?.charAt(0).toUpperCase()}
-                            </div>
-                        )}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                            <Pencil className="h-5 w-5 text-white" />
-                        </div>
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                        <h2
-                            onClick={() => setOpen(true)}
-                            className="cursor-pointer truncate text-[15px] font-semibold leading-none text-white hover:text-white/90 hover:underline"
-                            title={title && title.trim() !== "" ? title : `@${username}`}
-                        >
-                            {title && title.trim() !== "" ? title : `@${username}`}
-                        </h2>
-
-                        {newBio ? (
-                            <p
-                                onClick={() => setOpen(true)}
-                                className="my-1 cursor-pointer wrap-break-word text-sm leading-5 text-white/50 hover:text-white/70"
-                            >
-                                {newBio}
-                            </p>
-                        ) : (
+            <div className="mx-auto w-full max-w-4xl py-5 sm:py-6">
+                <div className="rounded-2xl border border-white/10 bg-[#0d1725]/80 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.16)] sm:p-5">
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex min-w-0 items-center gap-3.5">
                             <button
-                                onClick={() => setOpen(true)}
-                                className="mt-1 cursor-pointer text-sm text-white/50 transition hover:text-white hover:underline"
+                                type="button"
+                                onClick={() => setProfileModalOpen(true)}
+                                className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-full border border-white/20 bg-white/10 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                                aria-label="Edit profile picture"
                             >
-                                Add bio
+                                {profileImgUrl ? (
+                                    <Image
+                                        src={profileImgUrl}
+                                        alt={username}
+                                        fill
+                                        sizes="56px"
+                                        className="object-cover transition-all duration-300 group-hover:blur-sm"
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-lg text-white/60 transition-all duration-300 group-hover:blur-sm">
+                                        {username?.charAt(0).toUpperCase()}
+                                    </div>
+                                )}
+                                <span className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                                    <Pencil className="h-4 w-4 text-white" />
+                                </span>
                             </button>
-                        )}
 
-                        <div className="mt-1 flex items-center gap-2">
-                            {visibleIcons.length > 0 ? (
-                                <>
-                                    {visibleIcons.map((item) => {
-                                        const iconMeta = getIconByType(item.type);
-                                        if (!iconMeta) return null;
+                            <div className="min-w-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setOpen(true)}
+                                    className="flex max-w-full items-center gap-1.5 text-left text-base font-semibold text-white transition hover:text-cyan-100"
+                                    title={title && title.trim() !== "" ? title : `@${username}`}
+                                >
+                                    <span className="truncate">{title && title.trim() !== "" ? title : `@${username}`}</span>
+                                    <Pencil className="h-3.5 w-3.5 shrink-0 text-white/35" />
+                                </button>
 
-                                        const Icon = iconMeta.icon;
+                                {newBio ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpen(true)}
+                                        className="mt-0.5 block max-w-full truncate text-left text-sm text-white/50 transition hover:text-white/75"
+                                    >
+                                        {newBio}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setOpen(true)}
+                                        className="mt-0.5 text-sm text-white/45 transition hover:text-white/75"
+                                    >
+                                        Add a short bio
+                                    </button>
+                                )}
 
-                                        return (
-                                            <Link
-                                                key={item.id}
-                                                href={resolveSocialUrl(item.type, item.value)}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="flex h-6 w-6 items-center justify-center text-white/60 transition hover:text-white"
+                                <div className="mt-2 flex items-center gap-1.5">
+                                    {visibleIcons.length > 0 ? (
+                                        <>
+                                            {visibleIcons.map((item) => {
+                                                const iconMeta = getIconByType(item.type);
+                                                if (!iconMeta) return null;
+                                                const Icon = iconMeta.icon;
+
+                                                return (
+                                                    <Link
+                                                        key={item.id}
+                                                        href={resolveSocialUrl(item.type, item.value)}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="flex h-7 w-7 items-center justify-center rounded-lg text-white/55 transition hover:bg-white/[0.06] hover:text-white"
+                                                        aria-label={`Open ${item.label || item.type}`}
+                                                    >
+                                                        <Icon className="h-4 w-4" />
+                                                    </Link>
+                                                );
+                                            })}
+                                            <button
+                                                type="button"
+                                                onClick={openManageSocialIcons}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg text-white/45 transition hover:bg-white/[0.06] hover:text-white"
+                                                aria-label="Manage social links"
                                             >
-                                                <Icon className="h-4 w-4" />
-                                            </Link>
-                                        );
-                                    })}
+                                                <Pencil className="h-3.5 w-3.5" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {EMPTY_ICONS.map(({ Icon, key, type }) => (
+                                                <button
+                                                    key={key}
+                                                    type="button"
+                                                    onClick={() => openDirectSocialInput(type)}
+                                                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-white/10 text-white/45 transition hover:border-cyan-400/35 hover:text-cyan-200"
+                                                    aria-label={`Add ${key}`}
+                                                >
+                                                    <Icon className="h-3.5 w-3.5" />
+                                                </button>
+                                            ))}
+                                            <button
+                                                type="button"
+                                                onClick={openSocialPicker}
+                                                className="flex h-7 w-7 items-center justify-center rounded-lg text-white/55 transition hover:bg-white/[0.06] hover:text-white"
+                                                aria-label="Add social link"
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={openManageSocialIcons}
-                                        className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
-                                    >
-                                        <Pencil className="h-3 w-3" />
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    {EMPTY_ICONS.map(({ Icon, key, type }) => (
-                                        <button
-                                            key={key}
-                                            type="button"
-                                            onClick={() => openDirectSocialInput(type)}
-                                            className="relative h-8 w-8"
-                                        >
-                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white/70 transition hover:bg-white/15 hover:text-white">
-                                                <Icon className="h-4 w-4" />
-                                            </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setAddItemOpen(true)}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-cyan-400 px-4 text-sm font-semibold text-[#03111f] transition hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add link
+                            </button>
 
-                                            <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-black shadow">
-                                                <Plus className="h-3 w-3" strokeWidth={3} />
-                                            </div>
-                                        </button>
-                                    ))}
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    startTransition(async () => {
+                                        const res = await createCollectionAction();
+                                        if (!res.success) {
+                                            toast.error(res.message || "Failed to create collection");
+                                            return;
+                                        }
+                                        toast.success("Collection created successfully");
+                                        router.refresh();
+                                    });
+                                }}
+                                disabled={isPending}
+                                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3.5 text-sm font-medium text-white transition hover:border-cyan-400/30 hover:bg-cyan-400/10 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                <FolderClosed className="h-4 w-4" />
+                                {isPending ? "Creating..." : "Add collection"}
+                            </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={openSocialPicker}
-                                        className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition hover:bg-white/30"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                    </button>
-                                </>
-                            )}
+                            <Link
+                                href={`/${username}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 text-white/55 transition hover:border-cyan-400/30 hover:bg-cyan-400/10 hover:text-cyan-200"
+                                aria-label="Open public profile"
+                                title="Open public profile"
+                            >
+                                <ExternalLink className="h-4 w-4" />
+                            </Link>
                         </div>
                     </div>
                 </div>
-
-                <button
-                    type="button"
-                    onClick={() => setAddItemOpen(true)}
-                    className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-full bg-cyan-400 font-medium text-[#03111f] shadow-lg transition hover:bg-cyan-500"
-                >
-                    <Plus size={18} />
-                    Add
-                </button>
-
-                <button
-                    type="button"
-                    onClick={() => {
-                        startTransition(async () => {
-                            const res = await createCollectionAction();
-
-                            if (!res.success) {
-                                toast.error(res.message || "Failed to create collection");
-                                return;
-                            }
-
-                            toast.success("Collection created successfully");
-                            router.refresh();
-                        });
-                    }}
-                    disabled={isPending}
-                    className="mt-5 flex cursor-pointer items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                    <FolderClosed size={16} />
-                    {isPending ? "Creating..." : "Add collection"}
-                </button>
             </div>
         </>
     );

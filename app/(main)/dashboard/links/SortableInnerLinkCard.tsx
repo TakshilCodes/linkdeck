@@ -120,7 +120,7 @@ export default function SortableInnerLinkCard({ sortableId, link }: Props) {
       <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-[22px] border px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.14)] transition-all duration-200 ${
+      className={`rounded-xl border px-4 py-3 shadow-[0_8px_20px_rgba(0,0,0,0.14)] hover:border-cyan-400/20 transition-all duration-200 ${
         showRootLinkDropHighlight
           ? "border-cyan-400/45 bg-cyan-400/[0.08] ring-2 ring-cyan-400/25 ring-offset-2 ring-offset-[#151d2e]"
           : "border-white/8 bg-[#0f1726]"
@@ -206,10 +206,11 @@ export default function SortableInnerLinkCard({ sortableId, link }: Props) {
         <button
           type="button"
           onClick={remove}
-          className="flex items-center gap-2 text-red-300/75 transition hover:text-red-200"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-red-300/55 transition hover:bg-red-500/10 hover:text-red-200"
+          title="Delete link"
+          aria-label="Delete link"
         >
           <Trash2 className="h-4 w-4" />
-          Delete
         </button>
       </div>
       </div>

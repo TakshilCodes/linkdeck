@@ -39,15 +39,7 @@ export function buildBoardPreviewPayload(boardItems: BoardItem[]) {
   const sections: ThemePreviewSection[] = [];
   let pendingStandaloneLinks: ThemePreviewLink[] = [];
   let standaloneSectionIndex = 0;
-  let renderedStandaloneTitle = false;
 
-  const hasCollectionSection = sorted.some((item) => {
-    if (item.type !== "COLLECTION" || !item.collection?.isVisible) {
-      return false;
-    }
-
-    return item.collection.links.some((link) => link.isVisible);
-  });
 
   const flushStandaloneLinks = () => {
     if (pendingStandaloneLinks.length === 0) return;
@@ -55,13 +47,12 @@ export function buildBoardPreviewPayload(boardItems: BoardItem[]) {
     sections.push({
       id: `standalone-links-${standaloneSectionIndex}`,
       type: "LINKS",
-      title: hasCollectionSection && !renderedStandaloneTitle ? "Websites" : null,
+      title: null,
       links: pendingStandaloneLinks,
     });
 
     pendingStandaloneLinks = [];
     standaloneSectionIndex += 1;
-    renderedStandaloneTitle = true;
   };
 
   for (const item of sorted) {

@@ -751,7 +751,7 @@ export default function LinksBoard({ boardItems }: Props) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3">
         <DndContext
           sensors={sensors}
           collisionDetection={linkBoardCollisionDetection}
@@ -761,7 +761,7 @@ export default function LinksBoard({ boardItems }: Props) {
           onDragEnd={handleDragEnd}
         >
           {/* Match link-in-bio editor width: contained column, not full-bleed */}
-          <div className="mx-auto w-full max-w-160">
+          <div className="mx-auto w-full max-w-4xl">
             <BoardDropArea isDragging={!!activeId}>
               <SortableContext items={topLevelIds} strategy={verticalListSortingStrategy}>
               {cards.length === 0 ? (
@@ -773,9 +773,7 @@ export default function LinksBoard({ boardItems }: Props) {
                     No links or collections yet
                   </p>
                   <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-white/45">
-                    Use <span className="text-white/65">Add</span> or{" "}
-                    <span className="text-white/65">Add collection</span> in your profile
-                    section above to build your page.
+                    Use <span className="text-white/65">Add link</span> or{" "}`r`n                    <span className="text-white/65">Add collection</span> above to build your page.
                   </p>
                 </div>
               ) : (

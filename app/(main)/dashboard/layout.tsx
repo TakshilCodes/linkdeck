@@ -39,7 +39,7 @@ export default async function DashboardLayout({
       />
 
       <div className="mx-auto w-full max-w-[1600px] px-0 py-0 md:px-6 md:py-6 lg:px-8">
-        <div className="flex min-w-0 flex-col gap-8 lg:flex-row lg:items-start">
+        <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
           <div className="min-w-0 flex-1">{children}</div>
           <DashboardPreviewAside {...preview} />
         </div>
