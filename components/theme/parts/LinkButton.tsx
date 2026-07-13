@@ -1,7 +1,10 @@
 "use client";
 
-import { MoreVertical } from "lucide-react";
-import type { ResolvedTheme } from "@/types/theme"
+import { useEffect, useRef, useState } from "react";
+import { Copy, MoreVertical, Share2 } from "lucide-react";
+import { toast } from "sonner";
+import ProfileShareDialog from "@/components/shared/ProfileShareDialog";
+import type { ResolvedTheme } from "@/types/theme";
 import {
   getButtonMode,
   getShellStyle,
@@ -12,6 +15,7 @@ import {
 type LinkButtonProps = {
   label: string;
   href: string;
+  shareUrl?: string;
   theme: ResolvedTheme;
   /** Phone preview: shorter rows, smaller type (closer to Linktree-style density) */
   compact?: boolean;
@@ -20,6 +24,7 @@ type LinkButtonProps = {
 export default function LinkButton({
   label,
   href,
+  shareUrl = href,
   theme,
   compact = false,
 }: LinkButtonProps) {
@@ -51,7 +56,9 @@ export default function LinkButton({
 
       <div
         className={`relative ${radiusClass}`}
-        style={!isHard ? getShellStyle(theme.buttonShadow, shadowColor) : undefined}
+        style={
+          !isHard ? getShellStyle(theme.buttonShadow, shadowColor) : undefined
+        }
       >
         {isHard ? (
           <div
@@ -66,23 +73,9 @@ export default function LinkButton({
               style={{
                 background: buttonColor,
                 color: buttonTextColor,
-                boxShadow:
-                  "inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.08)",
+                boxShadow: "inset 0 -1px 0 rgba(0,0,0,0.08)",
               }}
             >
-              <div
-                className={`pointer-events-none absolute left-1.5 right-1.5 top-1 h-[42%] ${radiusClass}`}
-                style={{
-                  background:
-                    "linear-gradient(to bottom, rgba(255,255,255,0.22), rgba(255,255,255,0.08), rgba(255,255,255,0))",
-                }}
-              />
-
-              <div
-                className="pointer-events-none absolute left-3.5 right-3.5 top-1.75 h-px"
-                style={{ background: "rgba(255,255,255,0.30)" }}
-              />
-
               <div
                 className={`pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100 ${radiusClass}`}
                 style={{
@@ -93,7 +86,9 @@ export default function LinkButton({
 
               <span className={`relative z-10 ${sideGutter}`} aria-hidden />
               <span className="relative z-10 flex min-w-0 flex-1 items-center justify-center px-1">
-                <span className="truncate text-center font-semibold">{label}</span>
+                <span className="truncate text-center font-semibold">
+                  {label}
+                </span>
               </span>
               <span
                 className={`relative z-10 flex ${sideGutter} items-center justify-center`}
@@ -115,14 +110,14 @@ export default function LinkButton({
               background: isOutline
                 ? "transparent"
                 : isGlass
-                ? rgba(buttonColor, 0.18)
-                : buttonColor,
+                  ? rgba(buttonColor, 0.18)
+                  : buttonColor,
               color: buttonTextColor,
               border: isOutline
                 ? `2px solid ${outlineColor}`
                 : isGlass
-                ? `1px solid ${rgba("#ffffff", 0.22)}`
-                : "none",
+                  ? `1px solid ${rgba("#ffffff", 0.22)}`
+                  : "none",
               backdropFilter: isGlass ? "blur(10px)" : "none",
               WebkitBackdropFilter: isGlass ? "blur(10px)" : "none",
 
@@ -130,36 +125,36 @@ export default function LinkButton({
                 boxShadow: isNone
                   ? "none"
                   : isSoft
-                  ? `0 8px 18px ${rgba(shadowColor, 0.14)}`
-                  : isStrong
-                  ? `0 12px 26px ${rgba(shadowColor, 0.22)}`
-                  : undefined,
+                    ? `0 8px 18px ${rgba(shadowColor, 0.14)}`
+                    : isStrong
+                      ? `0 12px 26px ${rgba(shadowColor, 0.22)}`
+                      : undefined,
               }),
 
               ...(isGlass && {
                 boxShadow: isNone
                   ? `inset 0 1px 0 ${rgba("#ffffff", 0.16)}`
                   : isSoft
-                  ? `0 8px 18px ${rgba(
-                      shadowColor,
-                      0.12
-                    )}, inset 0 1px 0 ${rgba("#ffffff", 0.18)}`
-                  : isStrong
-                  ? `0 12px 28px ${rgba(
-                      shadowColor,
-                      0.18
-                    )}, inset 0 1px 0 ${rgba("#ffffff", 0.2)}`
-                  : undefined,
+                    ? `0 8px 18px ${rgba(
+                        shadowColor,
+                        0.12,
+                      )}, inset 0 1px 0 ${rgba("#ffffff", 0.18)}`
+                    : isStrong
+                      ? `0 12px 28px ${rgba(
+                          shadowColor,
+                          0.18,
+                        )}, inset 0 1px 0 ${rgba("#ffffff", 0.2)}`
+                      : undefined,
               }),
 
               ...(isOutline && {
                 boxShadow: isNone
                   ? "none"
                   : isSoft
-                  ? `0 6px 16px ${rgba(shadowColor, 0.1)}`
-                  : isStrong
-                  ? `0 10px 24px ${rgba(shadowColor, 0.16)}`
-                  : undefined,
+                    ? `0 6px 16px ${rgba(shadowColor, 0.1)}`
+                    : isStrong
+                      ? `0 10px 24px ${rgba(shadowColor, 0.16)}`
+                      : undefined,
               }),
             }}
           >
@@ -186,8 +181,8 @@ export default function LinkButton({
                 background: isGlass
                   ? "linear-gradient(to bottom, rgba(255,255,255,0.14), rgba(255,255,255,0.06), transparent 60%)"
                   : isOutline
-                  ? "linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.03), transparent 65%)"
-                  : "linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.04), transparent 60%)",
+                    ? "linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.03), transparent 65%)"
+                    : "linear-gradient(to bottom, rgba(255,255,255,0.12), rgba(255,255,255,0.04), transparent 60%)",
               }}
             />
 
@@ -197,14 +192,16 @@ export default function LinkButton({
                 boxShadow: isOutline
                   ? `inset 0 0 0 1px ${rgba("#ffffff", 0.1)}`
                   : isGlass
-                  ? `inset 0 0 0 1px ${rgba("#ffffff", 0.12)}`
-                  : `inset 0 0 0 1px ${rgba("#ffffff", 0.08)}`,
+                    ? `inset 0 0 0 1px ${rgba("#ffffff", 0.12)}`
+                    : `inset 0 0 0 1px ${rgba("#ffffff", 0.08)}`,
               }}
             />
 
             <span className={`relative z-10 ${sideGutter}`} aria-hidden />
             <span className="relative z-10 flex min-w-0 flex-1 items-center justify-center px-1">
-              <span className="truncate text-center font-semibold">{label}</span>
+              <span className="truncate text-center font-semibold">
+                {label}
+              </span>
             </span>
             <span
               className={`relative z-10 flex ${sideGutter} items-center justify-center`}
@@ -216,7 +213,105 @@ export default function LinkButton({
             </span>
           </a>
         )}
+        <LinkOverflowMenu href={shareUrl} label={label} compact={compact} />
       </div>
     </div>
+  );
+}
+type LinkOverflowMenuProps = {
+  href: string;
+  label: string;
+  compact: boolean;
+};
+
+function LinkOverflowMenu({ href, label, compact }: LinkOverflowMenuProps) {
+  const [open, setOpen] = useState(false);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(href);
+      toast.success("Link copied to clipboard");
+      setOpen(false);
+    } catch {
+      toast.error("Could not copy the link");
+    }
+  };
+
+  const iconClass = compact ? "h-3.5 w-3.5" : "h-4 w-4";
+
+  return (
+    <>
+      <div
+        ref={menuRef}
+        className="absolute right-2 top-1/2 z-20 -translate-y-1/2"
+      >
+        <button
+          type="button"
+          aria-label={`More options for ${label}`}
+          aria-expanded={open}
+          onClick={() => setOpen((value) => !value)}
+          className="flex h-8 w-8 items-center justify-center rounded-full text-current opacity-60 transition hover:bg-black/10 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <MoreVertical className={iconClass} />
+        </button>
+        {open ? (
+          <div
+            role="menu"
+            aria-label={`Actions for ${label}`}
+            className="absolute right-0 top-[calc(100%+0.5rem)] z-30 w-36 overflow-hidden rounded-xl border border-white/10 bg-[#101b29] p-1.5 text-sm text-white shadow-[0_14px_34px_rgba(0,0,0,0.32)]"
+          >
+            <button
+              type="button"
+              role="menuitem"
+              onClick={copyLink}
+              className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-white/80 transition hover:bg-white/10 hover:text-white"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              Copy URL
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                setShareDialogOpen(true);
+              }}
+              className="flex h-9 w-full items-center gap-2 rounded-lg px-2.5 text-left text-white/80 transition hover:bg-white/10 hover:text-white"
+            >
+              <Share2 className="h-3.5 w-3.5" />
+              Share
+            </button>
+          </div>
+        ) : null}
+      </div>
+      <ProfileShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        url={href}
+        title={label}
+        description={`Check out ${label}.`}
+        urlLabel="Link URL"
+      />
+    </>
   );
 }

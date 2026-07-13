@@ -49,7 +49,10 @@ export default function LinkSection({
   return (
     <div className={className}>
       {title ? (
-        <p className={`text-center ${titleClass}`} style={{ color: titleColor }}>
+        <p
+          className={`text-center ${titleClass}`}
+          style={{ color: titleColor }}
+        >
           {title}
         </p>
       ) : null}
@@ -59,6 +62,7 @@ export default function LinkSection({
             key={link.id}
             label={link.name}
             href={`/api/go/${link.id}`}
+            shareUrl={link.url}
             theme={theme}
             compact={compact}
           />

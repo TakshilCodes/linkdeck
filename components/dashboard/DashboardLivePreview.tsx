@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Copy } from "lucide-react";
+import { Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import ThemeProfileRenderer from "@/components/theme/ThemeProfileRenderer";
+import ProfileShareDialog from "@/components/shared/ProfileShareDialog";
 import { useDesignStore } from "@/store/design";
 import type { ResolvedTheme } from "@/types/theme";
 import {
@@ -56,6 +58,8 @@ export default function DashboardLivePreview({
 
   const mergedProfile = { ...profile, ...previewProfile };
   const displayUrl = getProfileUrlDisplay(username);
+  const profileUrl = getProfileUrlClipboard(username);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   const copyProfileUrl = async () => {
     try {
@@ -75,7 +79,9 @@ export default function DashboardLivePreview({
     <div className="flex h-full min-h-[min(680px,86vh)] flex-col rounded-[24px] border border-white/8 bg-[#0a121c] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div className="flex shrink-0 items-center">
         <div className="flex w-full min-w-0 items-center gap-2 rounded-full border border-white/10 bg-[#111b28] py-2 pl-4 pr-2 text-sm text-white/80 shadow-sm">
-          <span className="min-w-0 flex-1 truncate font-medium text-white/90">{displayUrl}</span>
+          <span className="min-w-0 flex-1 truncate font-medium text-white/90">
+            {displayUrl}
+          </span>
           <button
             type="button"
             onClick={copyProfileUrl}
@@ -83,6 +89,14 @@ export default function DashboardLivePreview({
             aria-label="Copy profile link"
           >
             <Copy className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsShareDialogOpen(true)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white/55 transition hover:bg-white/10 hover:text-white"
+            aria-label="Share profile link"
+          >
+            <Share2 className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -117,9 +131,12 @@ export default function DashboardLivePreview({
           </div>
         ) : (
           <div className="flex max-w-60 flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/2 px-5 py-12 text-center">
-            <p className="text-sm font-medium text-white/75">No theme selected</p>
+            <p className="text-sm font-medium text-white/75">
+              No theme selected
+            </p>
             <p className="mt-2 text-xs leading-relaxed text-white/40">
-              Finish onboarding or pick a theme so your preview matches your public page.
+              Finish onboarding or pick a theme so your preview matches your
+              public page.
             </p>
             <Link
               href="/onboarding"
@@ -130,6 +147,13 @@ export default function DashboardLivePreview({
           </div>
         )}
       </div>
+      <ProfileShareDialog
+        open={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        url={profileUrl}
+        title={`@${username} | LinkDeck`}
+        description={`Check out @${username}'s links on LinkDeck.`}
+      />
     </div>
   );
 }
